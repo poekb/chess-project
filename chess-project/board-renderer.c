@@ -28,7 +28,11 @@ void rederer_cleanUp() {
     SVGs_clear();
 }
 
-void render_board(SDL_Renderer* renderer, double table_size, Uint8 board[8][8]) {
+double table_size = 0;
+double cell_size;
+
+void render_board(SDL_Renderer* renderer, double table_size_new, Uint8 board[8][8]) {
+    table_size = table_size_new;
 
     if (static_img_buffer != NULL) {
         SDL_DestroyTexture(static_img_buffer);
@@ -43,7 +47,7 @@ void render_board(SDL_Renderer* renderer, double table_size, Uint8 board[8][8]) 
 
     SDL_SetRenderTarget(renderer, static_img_buffer);
 
-    double cell_size = table_size / 8;
+    cell_size = table_size / 8;
 
     set_drawColor(renderer, COLOR_BLACK);
     SDL_RenderClear(renderer);
@@ -89,10 +93,8 @@ void render_board(SDL_Renderer* renderer, double table_size, Uint8 board[8][8]) 
     SDL_RenderPresent(renderer);
 }
 
-void render_dynamic(SDL_Renderer* renderer, SDL_Event event) {
+void render_dynamic(SDL_Renderer* renderer) {
 
-    int x = event.motion.x;
-    int y = event.motion.y;
 
     SDL_SetRenderTarget(renderer, NULL);
 
@@ -100,11 +102,25 @@ void render_dynamic(SDL_Renderer* renderer, SDL_Event event) {
     SDL_RenderCopy(renderer, static_img_buffer, NULL, NULL);
 
     set_drawColor(renderer, COLOR_BLACK);
+}
 
-    SVG_renderPiece(renderer, 1, x-40, y-40, 80);
+void draw_thickrect(SDL_Renderer *renderer,int x, int y, int w, int h) {
+    const int THICKNESS = 10;
+
+    for (int i = 0; i < THICKNESS; ++i) {
+        SDL_Rect r = { x + i, y + i, w - 2 * i, h - 2 * i };
+        SDL_RenderDrawRect(renderer, &r);
+    }
 
 
-    SDL_RenderPresent(renderer);
+}
+
+void high_light_cell(SDL_Renderer* renderer, int row, int col) {
+
+    SDL_SetRenderDrawColor(renderer, 0x80, 0x80, 0x90, 0xa0);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    draw_thickrect(renderer, (int)((double)col* cell_size), (int)((double)row* cell_size), (int)cell_size, (int)cell_size);
 }
 
 void sdl_init(int szeles, int magas, SDL_Window** pwindow, SDL_Renderer** prenderer) {

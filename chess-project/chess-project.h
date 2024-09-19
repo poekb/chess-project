@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
 
-typedef enum Piece {
+typedef enum {
 	KING_D = 1,
 	QUEEN_D,
 	ROOK_D,
@@ -29,5 +29,10 @@ typedef struct Position {
 	Turn turn;
 	Uint8 board[8][8];
 } Position;
+
+typedef struct Pos {
+	Uint8 row;
+	Uint8 col;
+}Pos;
 
 SDL_Window* window;

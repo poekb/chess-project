@@ -30,6 +30,10 @@ int main(int argc, char* argv[]) {
 
     render_board(renderer, board_size, position.board);
 
+    Pos selected = { 9,9 };
+    Pos highlight = { -1,-1 };
+
+
     bool quit = false;
     SDL_Event event;
     while (!quit) {
@@ -38,15 +42,48 @@ int main(int argc, char* argv[]) {
 
         switch (event.type) {
         case SDL_MOUSEMOTION:
-            render_dynamic(renderer, event);
-            break;
 
+
+            render_dynamic(renderer);
+
+            highlight = (Pos){ event.motion.x * 8 / board_size, event.motion.y * 8 / board_size };
+
+            if (selected.row != 9) {
+                high_light_cell(renderer, selected.col, selected.row);
+            }
+            
+            high_light_cell(renderer, highlight.col, highlight.row);
+
+
+            SDL_RenderPresent(renderer);
+
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+
+            if (highlight.row >= 0 && highlight.col >= 0 && highlight.row < 8 && highlight.col < 8) {
+                if (selected.row != 9) {
+                    position.board[highlight.col][highlight.row] = position.board[selected.col][selected.row];
+                    position.board[selected.col][selected.row] = 0;
+                    render_board(renderer, board_size, position.board);
+                    render_dynamic(renderer);
+                    SDL_RenderPresent(renderer);
+                    selected = (Pos){ 9,9 };
+                    break;
+                }
+
+                selected = highlight;
+                render_dynamic(renderer);
+                high_light_cell(renderer, selected.col, selected.row);
+                SDL_RenderPresent(renderer);
+
+            }
+            break;
         case SDL_WINDOWEVENT:
             SDL_GetWindowSize(window, &w, &h);
             board_size = min(w, h);
 
             render_board(renderer, board_size, position.board);
-            render_dynamic(renderer, event);
+            render_dynamic(renderer);
 
             break;
 
