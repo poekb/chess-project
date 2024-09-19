@@ -1,8 +1,3 @@
-#include "chess-project.h"
-#include <SDL_ttf.h>
-
-
-
 #include "text-renderer.h"
 
 TTF_Font* Font;

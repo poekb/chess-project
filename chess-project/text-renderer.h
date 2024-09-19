@@ -1,3 +1,5 @@
+#include "global.h"
+#include <SDL_ttf.h>
 
 void textRend_init();
 void textRend_clean();

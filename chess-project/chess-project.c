@@ -1,10 +1,9 @@
 ﻿#include "chess-project.h"
+
 #include "board-renderer.h"
+#include "move-eval.h"
 
-#include <math.h>
-#include <SDL_ttf.h>
-
-Position position = {
+GamePosition gamePosition = {
     WHITE,
     {
         {ROOK_D,KNIGHT_D,BISHOP_D,QUEEN_D,KING_D,BISHOP_D,KNIGHT_D,ROOK_D},
@@ -15,23 +14,61 @@ Position position = {
         {0},
         {PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L},
         {ROOK_L,KNIGHT_L,BISHOP_L,QUEEN_L,KING_L,BISHOP_L,KNIGHT_L,ROOK_L}
-    }
+    },
+    8,//En Passant-ozható gyalog
+    0,
 };
 
 SDL_Renderer* renderer;
 
+Pos selectedPos = { 9,9 };
+Pos howerPos = { -1,-1 };
+PossibleMove* moves = NULL;
+
+void handleClick(double boardSize) {
+    if (!(howerPos.rank >= 0 && howerPos.file >= 0 && howerPos.rank < 8 && howerPos.file < 8)) return;
+
+    if (selectedPos.rank != 9) {
+        gamePosition.board[howerPos.rank][howerPos.file] = gamePosition.board[selectedPos.rank][selectedPos.file];
+        gamePosition.board[selectedPos.rank][selectedPos.file] = 0;
+        renderBoard(renderer, boardSize, gamePosition.board);
+        renderDynamic(renderer);
+        highlightCell(renderer, howerPos);
+
+        SDL_RenderPresent(renderer);
+        selectedPos = (Pos){ 9,9 };
+        clearMoves(moves);
+        moves = NULL;
+        return;
+    }
+
+    
+
+    // Render possible movess:
+    clearMoves(moves);
+    moves = getPossibleMoves(gamePosition, howerPos);
+
+    // Ha nem lehet mozgatni a kiválasztott figurát, akkor lépjünk ki a függvényből:
+    if (moves == NULL) return;
+
+    selectedPos = howerPos;
+    renderDynamic(renderer);
+    highlightCell(renderer, selectedPos);
+
+    displayEval(renderer, moves);
+
+    SDL_RenderPresent(renderer);
+}
+
 int main(int argc, char* argv[]) {
     enum { ABLAK = 720 };
 
-    sdl_init(ABLAK, ABLAK, &window, &renderer);
-    renderer_init(renderer);
+    sdlInit(ABLAK, ABLAK, &window, &renderer);
+    rendererInit(renderer);
 
-    double board_size = ABLAK;
+    double boardSize = ABLAK;
 
-    render_board(renderer, board_size, position.board);
-
-    Pos selected = { 9,9 };
-    Pos highlight = { -1,-1 };
+    renderBoard(renderer, boardSize, gamePosition.board);
 
 
     bool quit = false;
@@ -44,46 +81,32 @@ int main(int argc, char* argv[]) {
         case SDL_MOUSEMOTION:
 
 
-            render_dynamic(renderer);
+            renderDynamic(renderer);
 
-            highlight = (Pos){ event.motion.x * 8 / board_size, event.motion.y * 8 / board_size };
+            howerPos = (Pos){ (int)(event.motion.x * 8 / boardSize), (int)(event.motion.y * 8 / boardSize) };
 
-            if (selected.row != 9) {
-                high_light_cell(renderer, selected.col, selected.row);
+            if (selectedPos.rank != 9) {
+                highlightCell(renderer, selectedPos);
             }
             
-            high_light_cell(renderer, highlight.col, highlight.row);
+            if((howerPos.rank >= 0 && howerPos.file >= 0 && howerPos.rank < 8 && howerPos.file < 8))
+                highlightCell(renderer, howerPos);
 
+            displayEval(renderer, moves);
 
             SDL_RenderPresent(renderer);
 
             break;
         case SDL_MOUSEBUTTONDOWN:
-
-            if (highlight.row >= 0 && highlight.col >= 0 && highlight.row < 8 && highlight.col < 8) {
-                if (selected.row != 9) {
-                    position.board[highlight.col][highlight.row] = position.board[selected.col][selected.row];
-                    position.board[selected.col][selected.row] = 0;
-                    render_board(renderer, board_size, position.board);
-                    render_dynamic(renderer);
-                    SDL_RenderPresent(renderer);
-                    selected = (Pos){ 9,9 };
-                    break;
-                }
-
-                selected = highlight;
-                render_dynamic(renderer);
-                high_light_cell(renderer, selected.col, selected.row);
-                SDL_RenderPresent(renderer);
-
-            }
+            handleClick(boardSize);
+            
             break;
         case SDL_WINDOWEVENT:
             SDL_GetWindowSize(window, &w, &h);
-            board_size = min(w, h);
+            boardSize = min(w, h);
 
-            render_board(renderer, board_size, position.board);
-            render_dynamic(renderer);
+            renderBoard(renderer, boardSize, gamePosition.board);
+            renderDynamic(renderer);
 
             break;
 
@@ -92,6 +115,7 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
+    clearMoves(moves);
 
     rederer_cleanUp();
 
