@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (chess-project WIN32 "chess-project.c" "chess-project.h" "board-renderer.c" "board-renderer.h" "svg-loader.c" "svg-loader.h" "text-renderer.c" "text-renderer.h" "move-eval.c" "move-eval.h" "global.h" )
+add_executable (chess-project WIN32 "chess-project.c" "chess-project.h" "logic/move-eval.c" "logic/move-eval.h" "global.h"  "graphics/board-renderer.c" "graphics/board-renderer.h" "graphics/svg-loader.c" "graphics/svg-loader.h" "graphics/text-renderer.c" "graphics/text-renderer.h")
 
 find_package(SDL2)
 find_package(SDL2_image)

@@ -1,4 +1,4 @@
-#include "global.h"
+#include "../global.h"
 
 PossibleMove* getPossibleMoves(GamePosition gamePosition, Pos selectedPos);
 

@@ -1,7 +1,7 @@
 ﻿#include "chess-project.h"
 
-#include "board-renderer.h"
-#include "move-eval.h"
+#include "graphics/board-renderer.h"
+#include "logic/move-eval.h"
 
 GamePosition gamePosition = {
     WHITE,

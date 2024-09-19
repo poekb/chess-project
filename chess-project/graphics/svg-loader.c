@@ -1,4 +1,4 @@
-#include "chess-project.h"
+#include "../chess-project.h"
 #include "svg-loader.h"
 
 
