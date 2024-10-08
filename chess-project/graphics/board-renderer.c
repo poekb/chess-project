@@ -112,7 +112,7 @@ void drawThickrect(SDL_Renderer* renderer,int x, int y, int w, int h) {
     }
 }
 
-void displayEval(SDL_Renderer* renderer, PossibleMove* move) {
+void displayEval(SDL_Renderer* renderer, Move* move) {
     setDrawColor(renderer, COLOR_HIGH);
 
     while (move != NULL) {

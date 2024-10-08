@@ -21,8 +21,8 @@ typedef enum Piece {
 } Piece;
 
 typedef enum Color {
-	WHITE,
-	BLACK
+	WHITE = true,
+	BLACK = false
 } Color;
 
 typedef enum Castle {
@@ -35,7 +35,7 @@ typedef enum Castle {
 
 typedef struct GamePosition {
 	Uint8 board[8][8];
-	Color turn;
+	bool turn;
 	Uint8 castleConditions; // A 'Castle' enum-mal kap értelmet
 	Uint8 enPassant; // Ha nagyobb mint 7, akkor az előző lépésben nem lépett duplát gyalog
 	int halfmoveClock;
@@ -49,16 +49,18 @@ typedef struct Pos {
 
 SDL_Window* window;
 
-typedef struct PossibleMove {
+typedef struct Move {
 	Pos pos;
-	struct PossibleMove* next;
-}PossibleMove;
+	Uint8 enPassant;
+	bool takesEnPassant;
+	struct Move* next;
+}Move;
 
-typedef struct SessionData {
-	//TODO: Add the ability to revoke turns
-	GamePosition currentPosition;
+typedef struct Game {
+	GamePosition position;
 
-
-};
+	struct Game* prev;
+	struct Game* next;
+} Game;
 
 #endif

@@ -1,7 +1,8 @@
 #include "../global.h"
 
-PossibleMove* getPossibleMoves(GamePosition* gamePosition, Pos selectedPos);
+Move* getPossibleMoves(GamePosition* gamePosition, Pos selectedPos);
 
+bool isCheck(GamePosition* position);
 
-bool containsMove(PossibleMove* moves, Pos move);
-void clearMoves(PossibleMove* moves);
+Move* containsMove(Move* moves, Pos move);
+void freeMoves(Move* moves);

@@ -2,30 +2,13 @@
 
 #include "graphics/board-renderer.h"
 #include "logic/move-eval.h"
-
-GamePosition gamePosition = { 
-    {
-        {ROOK_D,KNIGHT_D,BISHOP_D,QUEEN_D,KING_D,BISHOP_D,KNIGHT_D,ROOK_D},
-        {PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D},
-        {0},
-        {0},
-        {0},
-        {0},
-        {PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L},
-        {ROOK_L,KNIGHT_L,BISHOP_L,QUEEN_L,KING_L,BISHOP_L,KNIGHT_L,ROOK_L}
-    },
-    WHITE,
-    WHITE_KINGSIDE | WHITE_QUEENSIDE | BLACK_KINGSIDE | BLACK_QUEENSIDE,
-    8,//En Passant-ozható gyalog
-    0,
-    1
-};
+#include "logic/game-handler.h"
 
 SDL_Renderer* renderer;
 
 Pos selectedPos = { 9,9 };
 Pos howerPos = { -1,-1 };
-PossibleMove* moves = NULL;
+Move* moves = NULL;
 
 void handleClick(double boardSize) {
     if (!(howerPos.rank >= 0 && howerPos.file >= 0 && howerPos.rank < 8 && howerPos.file < 8)) return;
@@ -33,25 +16,24 @@ void handleClick(double boardSize) {
     if (selectedPos.rank != 9) {
 
         
-        if (containsMove(moves, howerPos)) {
-            gamePosition.board[howerPos.rank][howerPos.file] = gamePosition.board[selectedPos.rank][selectedPos.file];
-            gamePosition.board[selectedPos.rank][selectedPos.file] = 0;
+        if (containsMove(moves, howerPos) != NULL) {
+            movePieceFromTo(selectedPos, howerPos);
         }
 
-        renderBoard(renderer, boardSize, gamePosition.board);
+        renderBoard(renderer, boardSize, getGame()->position.board);
         renderDynamic(renderer);
         highlightCell(renderer, howerPos);
 
         SDL_RenderPresent(renderer);
         selectedPos = (Pos){ 9,9 };
-        clearMoves(moves);
+        freeMoves(moves);
         moves = NULL;
         return;
     }
 
     // Render possible movess:
-    clearMoves(moves);
-    moves = getPossibleMoves(gamePosition, howerPos);
+    freeMoves(moves);
+    moves = getPossibleMoves(&getGame()->position, howerPos);
 
     // Ha nem lehet mozgatni a kiválasztott figurát, akkor lépjünk ki a függvényből:
     if (moves == NULL) return;
@@ -73,7 +55,9 @@ int main(int argc, char* argv[]) {
 
     double boardSize = ABLAK;
 
-    renderBoard(renderer, boardSize, gamePosition.board);
+    initGame();
+
+    renderBoard(renderer, boardSize, getGame()->position.board);
 
 
     bool quit = false;
@@ -110,7 +94,7 @@ int main(int argc, char* argv[]) {
             SDL_GetWindowSize(window, &w, &h);
             boardSize = min(w, h);
 
-            renderBoard(renderer, boardSize, gamePosition.board);
+            renderBoard(renderer, boardSize, getGame()->position.board);
             renderDynamic(renderer);
 
             break;
@@ -120,9 +104,11 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
-    clearMoves(moves);
 
+    // Cleanups
+    freeMoves(moves);
     rederer_cleanUp();
+    cleanUpGameHandler();
 
     SDL_Quit();
 
