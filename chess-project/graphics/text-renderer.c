@@ -4,7 +4,6 @@ TTF_Font* Font;
 
 void textRend_init() {
     TTF_Init();
-    // Az svg-k átméretezéséhez használt "scale quality" növelése
     Font = TTF_OpenFont("C:/Windows/Fonts/ARLRDBD.TTF", 30);
 }
 

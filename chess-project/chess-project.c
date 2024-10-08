@@ -3,8 +3,7 @@
 #include "graphics/board-renderer.h"
 #include "logic/move-eval.h"
 
-GamePosition gamePosition = {
-    WHITE,
+GamePosition gamePosition = { 
     {
         {ROOK_D,KNIGHT_D,BISHOP_D,QUEEN_D,KING_D,BISHOP_D,KNIGHT_D,ROOK_D},
         {PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D,PAWN_D},
@@ -15,8 +14,11 @@ GamePosition gamePosition = {
         {PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L,PAWN_L},
         {ROOK_L,KNIGHT_L,BISHOP_L,QUEEN_L,KING_L,BISHOP_L,KNIGHT_L,ROOK_L}
     },
+    WHITE,
+    WHITE_KINGSIDE | WHITE_QUEENSIDE | BLACK_KINGSIDE | BLACK_QUEENSIDE,
     8,//En Passant-ozható gyalog
     0,
+    1
 };
 
 SDL_Renderer* renderer;
@@ -29,8 +31,13 @@ void handleClick(double boardSize) {
     if (!(howerPos.rank >= 0 && howerPos.file >= 0 && howerPos.rank < 8 && howerPos.file < 8)) return;
 
     if (selectedPos.rank != 9) {
-        gamePosition.board[howerPos.rank][howerPos.file] = gamePosition.board[selectedPos.rank][selectedPos.file];
-        gamePosition.board[selectedPos.rank][selectedPos.file] = 0;
+
+        
+        if (containsMove(moves, howerPos)) {
+            gamePosition.board[howerPos.rank][howerPos.file] = gamePosition.board[selectedPos.rank][selectedPos.file];
+            gamePosition.board[selectedPos.rank][selectedPos.file] = 0;
+        }
+
         renderBoard(renderer, boardSize, gamePosition.board);
         renderDynamic(renderer);
         highlightCell(renderer, howerPos);
@@ -41,8 +48,6 @@ void handleClick(double boardSize) {
         moves = NULL;
         return;
     }
-
-    
 
     // Render possible movess:
     clearMoves(moves);

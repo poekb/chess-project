@@ -20,27 +20,26 @@ typedef enum Piece {
 	PAWN_L
 } Piece;
 
-typedef enum Turn {
+typedef enum Color {
 	WHITE,
 	BLACK
-} Turn;
+} Color;
 
 typedef enum Castle {
-	WHITE_KING_MOVED = 1,
-	WHITE_ROOKL_MOVED = 2,
-	WHITE_ROOKR_MOVED = 4,
-	
-	BLACK_KING_MOVED = 8,
-	BLACK_ROOKL_MOVED = 16,
-	BLACK_ROOKR_MOVED = 32
+	WHITE_KINGSIDE = 1,
+	WHITE_QUEENSIDE = 2,
+	BLACK_KINGSIDE = 4,
+	BLACK_QUEENSIDE = 8,
 
 } Castle;
 
 typedef struct GamePosition {
-	Turn turn;
 	Uint8 board[8][8];
+	Color turn;
+	Uint8 castleConditions; // A 'Castle' enum-mal kap értelmet
 	Uint8 enPassant; // Ha nagyobb mint 7, akkor az előző lépésben nem lépett duplát gyalog
-	Uint8 castleConditions; // A 'Castle' enum-mal ad értelmet
+	int halfmoveClock;
+	int fullmove;
 } GamePosition;
 
 typedef struct Pos {
@@ -54,5 +53,12 @@ typedef struct PossibleMove {
 	Pos pos;
 	struct PossibleMove* next;
 }PossibleMove;
+
+typedef struct SessionData {
+	//TODO: Add the ability to revoke turns
+	GamePosition currentPosition;
+
+
+};
 
 #endif
