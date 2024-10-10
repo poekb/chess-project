@@ -1,6 +1,6 @@
 #include "game-handler.h"
 
-#include "move-eval.h"
+#include "rules.h"
 #include "../graphics/board-renderer.h"
 
 Game* game;
@@ -67,6 +67,32 @@ bool movePieceFromTo(Pos from, Pos to) {
 
     nextMove->position.board[from.rank][from.file] = 0;
 
+    // Castle rules
+
+    if (move->castle == WHITE_KINGSIDE) {
+        nextMove->position.board[from.rank][from.file + 1] = (game->position.turn ? ROOK_L : ROOK_D);
+        nextMove->position.board[from.rank][7] = 0;
+    }
+    if (move->castle == WHITE_QUEENSIDE) {
+        nextMove->position.board[from.rank][from.file - 1] = (game->position.turn ? ROOK_L : ROOK_D);
+        nextMove->position.board[from.rank][0] = 0;
+    }
+
+    // Disable castle conditions
+
+    if (from.rank == 7 && from.file == 0)
+        nextMove->position.castleConditions &= ~(Uint8)WHITE_QUEENSIDE;
+    if (from.rank == 7 && from.file == 7)
+        nextMove->position.castleConditions &= ~(Uint8)WHITE_KINGSIDE;
+    if (from.rank == 0 && from.file == 0)
+        nextMove->position.castleConditions &= ~(Uint8)BLACK_QUEENSIDE;
+    if (from.rank == 0 && from.file == 7)
+        nextMove->position.castleConditions &= ~(Uint8)BLACK_KINGSIDE;
+
+    if(game->position.board[from.rank][from.file] == KING_L)
+        nextMove->position.castleConditions &= ~(Uint8)(WHITE_QUEENSIDE | WHITE_KINGSIDE);
+    if (game->position.board[from.rank][from.file] == KING_D)
+        nextMove->position.castleConditions &= ~(Uint8)(BLACK_QUEENSIDE | BLACK_KINGSIDE);
 
     // En passant
     nextMove->position.enPassant = move->enPassant;
@@ -74,7 +100,7 @@ bool movePieceFromTo(Pos from, Pos to) {
         nextMove->position.board[from.rank][to.file] = 0;
     }
 
-    if (isCheck(nextMove)) {
+    if (isCheck(&(nextMove->position))) {
         free(nextMove);
         return false;
     }

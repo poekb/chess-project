@@ -53,8 +53,19 @@ typedef struct Move {
 	Pos pos;
 	Uint8 enPassant;
 	bool takesEnPassant;
+	Uint8 castle;
 	struct Move* next;
 }Move;
+
+
+typedef struct Possibility {
+	Pos target;
+	GamePosition rersultPosition;
+} Possibility;
+
+
+
+
 
 typedef struct Game {
 	GamePosition position;

@@ -1,6 +1,6 @@
 #include "../chess-project.h"
 
-#include "move-eval.h"
+#include "rules.h"
 
 #include <stdio.h>
 
@@ -40,12 +40,12 @@ bool isInBound(Pos pos) {
 }
 
 
-Color getColor(Piece piece);
-bool addMove(GamePosition* currentGamePos, Move** moves, Pos move, Color color, Uint8 enpassant/* -1 if not */, bool takesEnpassant);
-addMovesByRule(GamePosition* currentGamePos, Move** moves, Pos rule[], int ruleCount, Pos position, Color color, bool repeat);
+bool getColor(Piece piece);
+bool addMove(GamePosition* currentGamePos, Move** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle);
+addMovesByRule(GamePosition* currentGamePos, Move** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat);
 
 
-Color getColor(Piece piece) {
+bool getColor(Piece piece) {
 	return piece < KING_L ? BLACK : WHITE;
 }
 
@@ -60,7 +60,7 @@ Move* containsMove(Move* moves, Pos move) {
 	return NULL;
 }
 
-bool addMove(GamePosition* currentGamePos,Move** moves, Pos move, Color color, Uint8 enpassant/* -1 if not */, bool takesEnpassant) {
+bool addMove(GamePosition* currentGamePos,Move** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle) {
 
 	if (move.file < 0 || move.file > 7 || move.rank < 0 || move.rank > 7)
 		return false;
@@ -71,25 +71,25 @@ bool addMove(GamePosition* currentGamePos,Move** moves, Pos move, Color color, U
 		return false;
 
 
-	Move possibleMove = (Move){ (Pos) { move.file,move.rank },enpassant, false, NULL };
+	Move possibleMove = (Move){ (Pos) { move.file,move.rank },enpassant, takesEnpassant,castle, NULL };
 	Move* newMove = malloc(sizeof(possibleMove));
 	if (newMove == NULL) return false;
 	*newMove = possibleMove;
 	newMove->next = *moves;
-	newMove->enPassant = enpassant;
-	newMove->takesEnPassant = takesEnpassant;
+	//newMove->enPassant = enpassant;
+	//newMove->takesEnPassant = takesEnpassant;
 	*moves = newMove;
 
 	// return true if the target is empty
 	return currentGamePos->board[move.rank][move.file] == 0;
 }
 
-addMovesByRule(GamePosition* currentGamePos,Move** moves, Pos rule[], int ruleCount, Pos position, Color color, bool repeat) {
+addMovesByRule(GamePosition* currentGamePos,Move** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat) {
 	for (int i = 0; i < ruleCount; i++) {
 		Pos current = position;
 		while (true) {
 			current = AddPos(current, rule[i]);
-			if (!addMove(currentGamePos,moves,current,color,-1,false) || !repeat)
+			if (!addMove(currentGamePos,moves,current,color,-1,false,0) || !repeat)
 				break;
 		}
 	}
@@ -103,7 +103,7 @@ Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 
 	if (piece == 0) return move;
 
-	Color color = getColor(piece);
+	bool color = getColor(piece);
 
 	if (currentGamePos->turn != color) return move;
 
@@ -113,48 +113,48 @@ Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 	case PAWN_L:
 		// Just moving
 		if (currentGamePos->board[selectedPos.rank - 1][selectedPos.file] == 0) {
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 1 }, color, -1,false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 1 }, color, -1,false,0);
 			if (selectedPos.rank == 6 && currentGamePos->board[4][selectedPos.file] == 0) // Pawn a start pozícióban
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 2 }, color, selectedPos.file, false);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 2 }, color, selectedPos.file, false, 0);
 		}
 
 		// Takeing a piece
 		if (currentGamePos->board[selectedPos.rank - 1][ selectedPos.file - 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, false, 0);
 		if (currentGamePos->board[selectedPos.rank - 1][ selectedPos.file + 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, false, 0);
 
 
 		
 		// En Passante
 		if (selectedPos.rank == 3) {
 			if (currentGamePos->enPassant == selectedPos.file + 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, true);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, true, 0);
 			if (currentGamePos->enPassant == selectedPos.file - 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, true);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, true, 0);
 		}
 
 		break;
 	case PAWN_D:
 		// Just moving
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file] == 0) {
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 1 }, color, -1, false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 1 }, color, -1, false, 0);
 			if (selectedPos.rank == 1 && currentGamePos->board[3][selectedPos.file] == 0) // Pawn a start pozícióban
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 2 }, color, selectedPos.file, false);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 2 }, color, selectedPos.file, false, 0);
 		}
 
 		// Takeing a piece
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file - 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, false, 0);
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file + 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, false);
+			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, false, 0);
 
 		// En Passante
 		if (selectedPos.rank == 4) {
 			if (currentGamePos->enPassant == selectedPos.file + 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, true);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, true, 0);
 			if (currentGamePos->enPassant == selectedPos.file - 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, true);
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, true, 0);
 		}
 
 		break;
@@ -183,6 +183,24 @@ Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 	case KING_L:
 		addMovesByRule(currentGamePos, &move, RULE_ROOK, 4, (Pos) { selectedPos.file, selectedPos.rank }, color, false);
 		addMovesByRule(currentGamePos, &move, RULE_BISHOP, 4, (Pos) { selectedPos.file, selectedPos.rank }, color, false);
+
+		// Castle
+
+		if (!isCheck(currentGamePos)) {
+			bool right = (currentGamePos->castleConditions & (color ? WHITE_KINGSIDE : BLACK_KINGSIDE)) != 0;
+			bool left = (currentGamePos->castleConditions & (color ? WHITE_QUEENSIDE : BLACK_QUEENSIDE)) != 0;
+
+			
+			
+			if(right && (currentGamePos->board[selectedPos.file + 1][selectedPos.rank] == 0) 
+				&& !isAttacked(currentGamePos, (Pos) { selectedPos.file + 1, selectedPos.rank }, color))
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_KINGSIDE);
+			if (left && (currentGamePos->board[selectedPos.file - 1][selectedPos.rank] == 0) 
+				&& !isAttacked(currentGamePos, (Pos) { selectedPos.file - 1, selectedPos.rank }, color))
+				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_QUEENSIDE);
+
+		}
+
 		break;
 
 	default:
@@ -211,33 +229,37 @@ bool isCheck(GamePosition* position) {
 		}
 	}
 
-	int dir = position->turn ? -1 : 1;
-	Uint8 pawn = (position->turn) ? PAWN_D : PAWN_L;
+	return isAttacked(position, king, position->turn);
+}
 
-	if (isInBound(AddPos(king, (Pos) { 1, dir })))
-		if ((position->board[king.rank + dir][king.file + 1] == pawn))
-			return true;
-	if (isInBound(AddPos(king, (Pos) { -1, dir })))
-		if ((position->board[king.rank + dir][king.file - 1] == pawn))
-			return true;
-	
+bool isAttacked(GamePosition* position, Pos coords, bool turn) {
+	int dir = turn ? -1 : 1;
+	Uint8 pawn = turn ? PAWN_D : PAWN_L;
 
-	if (scanPiece(position, RULE_KNIGHT, 8, king, false, position->turn ? KNIGHT_D : KNIGHT_L, -1))
+	if (isInBound(AddPos(coords, (Pos) { 1, dir })))
+		if ((position->board[coords.rank + dir][coords.file + 1] == pawn))
+			return true;
+	if (isInBound(AddPos(coords, (Pos) { -1, dir })))
+		if ((position->board[coords.rank + dir][coords.file - 1] == pawn))
+			return true;
+
+
+	if (scanPiece(position, RULE_KNIGHT, 8, coords, false, position->turn ? KNIGHT_D : KNIGHT_L, -1))
 		return true; // Attacked by knight
 
-	if (scanPiece(position, RULE_BISHOP, 4, king, true, position->turn ? BISHOP_D : BISHOP_L, position->turn ? QUEEN_D : QUEEN_L))
+	if (scanPiece(position, RULE_BISHOP, 4, coords, true, position->turn ? BISHOP_D : BISHOP_L, position->turn ? QUEEN_D : QUEEN_L))
 		return true; // Attacked by bishop or queen
 
-	if (scanPiece(position, RULE_ROOK, 4, king, true, position->turn ? ROOK_D : ROOK_L, position->turn ? QUEEN_D : QUEEN_L))
+	if (scanPiece(position, RULE_ROOK, 4, coords, true, position->turn ? ROOK_D : ROOK_L, position->turn ? QUEEN_D : QUEEN_L))
 		return true; // Attacked by rook or queen
 
 	// Test for king (this is necessary for testing possible moves)
-	if (scanPiece(position, RULE_BISHOP, 4, king, false, position->turn ? KING_D : KING_L, -1))
+	if (scanPiece(position, RULE_BISHOP, 4, coords, false, position->turn ? KING_D : KING_L, -1))
 		return true; // Attacked by king
 
-	if (scanPiece(position, RULE_ROOK, 4, king, false, position->turn ? KING_D : KING_L, -1))
+	if (scanPiece(position, RULE_ROOK, 4, coords, false, position->turn ? KING_D : KING_L, -1))
 		return true; // Attacked by king
-	
+
 
 	return false;
 }

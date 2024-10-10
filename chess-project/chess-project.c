@@ -1,7 +1,7 @@
 ﻿#include "chess-project.h"
 
 #include "graphics/board-renderer.h"
-#include "logic/move-eval.h"
+#include "logic/rules.h"
 #include "logic/game-handler.h"
 
 SDL_Renderer* renderer;
