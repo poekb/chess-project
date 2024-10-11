@@ -2,6 +2,7 @@
 
 #include "rules.h"
 #include "../graphics/board-renderer.h"
+#include "evaluator.h"
 
 Game* game;
 
@@ -115,6 +116,8 @@ bool movePieceFromTo(Pos from, Pos to) {
     game = nextMove;
 
     freeMoves(possibleMoves);
+
+    printf("%d\n", evalBoard(game->position.board));
 
     return true;
 }

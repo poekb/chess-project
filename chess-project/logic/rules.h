@@ -7,3 +7,5 @@ bool isAttacked(GamePosition* position, Pos coords, bool turn);
 
 Move* containsMove(Move* moves, Pos move);
 void freeMoves(Move* moves);
+
+bool getColor(Uint8 piece);

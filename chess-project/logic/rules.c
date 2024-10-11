@@ -40,12 +40,11 @@ bool isInBound(Pos pos) {
 }
 
 
-bool getColor(Piece piece);
 bool addMove(GamePosition* currentGamePos, Move** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle);
 addMovesByRule(GamePosition* currentGamePos, Move** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat);
 
 
-bool getColor(Piece piece) {
+bool getColor(Uint8 piece) {
 	return piece < KING_L ? BLACK : WHITE;
 }
 
