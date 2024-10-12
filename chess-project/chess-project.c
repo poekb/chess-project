@@ -28,6 +28,15 @@ void handleClick(double boardSize) {
         selectedPos = (Pos){ 9,9 };
         freeMoves(moves);
         moves = NULL;
+        if (!getGame()->position.turn) {
+            CalcBestMove(getGame());
+            renderBoard(renderer, boardSize, getGame()->position.board);
+            renderDynamic(renderer);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(0);
+        }
+
+
         return;
     }
 
@@ -65,7 +74,7 @@ int main(int argc, char* argv[]) {
     while (!quit) {
         SDL_WaitEvent(&event);
         int w, h;
-
+        
         switch (event.type) {
         case SDL_MOUSEMOTION:
 
@@ -103,8 +112,16 @@ int main(int argc, char* argv[]) {
             quit = true;
             break;
         }
-    }
+        /*
+        CalcBestMove(getGame());
+        renderBoard(renderer, boardSize, getGame()->position.board);
+        renderDynamic(renderer);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(0);
+        */
 
+    }
+    
     // Cleanups
     freeMoves(moves);
     rederer_cleanUp();

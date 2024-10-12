@@ -59,12 +59,16 @@ typedef struct Move {
 
 
 typedef struct Possibility {
+	Pos source;
 	Pos target;
 	GamePosition rersultPosition;
 } Possibility;
 
 
-
+typedef struct Possibilities {
+	Possibility possibility;
+	struct Possibilities* next;
+} Possibilities;
 
 
 typedef struct Game {

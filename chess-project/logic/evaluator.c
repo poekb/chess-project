@@ -51,7 +51,5 @@ int evalBoard(Uint8 board[8][8]) {
 			}
 		}
 	}
-	printf("%d\n", valueWhite);
-	printf("%d\n", valueBlack);
 	return valueWhite - valueBlack + posValueEarlyWhite - posValueEarlyBlack;
 }
