@@ -2,9 +2,12 @@
 #include "../logic/game-handler.h"
 #include "../logic/evaluator.h"
 
-void CalcBestMove(Game* game) {
-	EvalCase bestMove = miniMax(4, game->position,!game->position.turn);
+int moveCount;
 
+void CalcBestMove(Game* game) {
+	moveCount = 0;
+	EvalCase bestMove = miniMax(5, game->position,!game->position.turn);
+	printf("Moves tested: %d\n", moveCount);
 	//printf("%d - %d, %d - %d\n", bestMove.from.rank, bestMove.from.file, bestMove.to.rank, bestMove.to.file);
 
 
@@ -15,6 +18,7 @@ void CalcBestMove(Game* game) {
 EvalCase miniMax(int depth, GamePosition position, bool inv) {
 
 	if (depth == 0) {
+		moveCount++;
 		return (EvalCase) { inv ? -evalBoard(position.board) : evalBoard(position.board) };
 	}
 

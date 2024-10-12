@@ -44,9 +44,11 @@ void initGame() {
 
     fillPossibilityMatrix();
 }
+int n = 0;
 
 bool movePieceFromTo(Pos from, Pos to) {
-    
+    printf("Mem: %d\n", n);
+
     Possibilities* possibilities = containsPossibility(possibilityMatrix[from.rank][from.file], to);
     if (possibilities == NULL)
         return false;
@@ -83,8 +85,10 @@ void fillPossibilityMatrix() {
     }
 }
 
+
 void generatePossibleMoves(GamePosition position, Pos from, Possibilities** end) {
-    Move* moves = getPossibleMoves(&(position), from);
+    Move* movesDef = getPossibleMoves(&(position), from);
+    Move* moves = movesDef;
     while (moves != NULL) {
         Possibilities* newPossibility = malloc(sizeof(Possibilities));
         if (newPossibility == NULL) {
@@ -150,12 +154,14 @@ void generatePossibleMoves(GamePosition position, Pos from, Possibilities** end)
 
             newPossibility->next = *end;
             *end = newPossibility;
+
+            n++;
         }
 
         moves = moves->next;
     }
 
-    freeMoves(moves);
+    freeMoves(movesDef);
 }
 
 void cleanUpGameHandler() {
@@ -186,6 +192,7 @@ void freePossibilities(Possibilities* possibilities) {
     if (possibilities != NULL) {
         freePossibilities(possibilities->next);
         free(possibilities);
+        n--;
     }
 }
 
