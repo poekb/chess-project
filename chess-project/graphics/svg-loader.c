@@ -1,14 +1,15 @@
 #include "../chess-project.h"
 #include "svg-loader.h"
+#include "../core/piece.h"
 
 
 const char PIECE_FILES[6] = {
-	'k', // king
-	'q', // queen
-	'r', // rook
-	'b', // bishop
-	'n', // knight
-	'p'  // pawn
+	'p',
+	'n',
+	'b',
+	'r',
+	'q',
+	'k'
 };
 
 typedef struct PieceTex {
@@ -27,7 +28,7 @@ void SVG_init(SDL_Renderer *renderer) {
 		char fileString[] = "assets/00.svg";
 		
 		fileString[7] = PIECE_FILES[i % 6];
-		fileString[8] = i < 6 ? 'd' : 'l';
+		fileString[8] = i < 6 ? 'l' : 'd';
 
 		SDL_RWops* rw = SDL_RWFromFile(fileString, "r");
 		SDL_Surface* surface = IMG_Load_RW(rw, true);
@@ -40,6 +41,7 @@ void SVG_init(SDL_Renderer *renderer) {
 
 void SVG_renderPiece(SDL_Renderer* renderer, Uint8 piece, int pos_x, int pos_y, double cellSize) {
 	if (piece == 0) return;
+	if (!isWhite(piece)) piece -= 2;
 	SDL_Rect texture_rect;
 	SDL_Surface* surface = piece_tex_data[piece-1].surface;
 	SDL_Texture* texture = piece_tex_data[piece-1].texture;

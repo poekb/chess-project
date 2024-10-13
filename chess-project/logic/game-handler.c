@@ -68,7 +68,7 @@ bool movePieceFromTo(Pos from, Pos to) {
     game = newGame;
 
     fillPossibilityMatrix();
-    printf("%d\n", evalBoard(game->position.board));
+    printf("%d\n", evalBoard2(game->position.board));
 
     
 
@@ -87,8 +87,8 @@ void fillPossibilityMatrix() {
 
 
 void generatePossibleMoves(GamePosition position, Pos from, Possibilities** end) {
-    Move* movesDef = getPossibleMoves(&(position), from);
-    Move* moves = movesDef;
+    Move2* movesDef = getPossibleMoves(&(position), from);
+    Move2* moves = movesDef;
     while (moves != NULL) {
         Possibilities* newPossibility = malloc(sizeof(Possibilities));
         if (newPossibility == NULL) {
@@ -100,7 +100,7 @@ void generatePossibleMoves(GamePosition position, Pos from, Possibilities** end)
         memcpy(&(newPossibility->possibility.rersultPosition), &(position), sizeof(GamePosition));
 
 
-        // Move piece
+        // Move2 piece
         if (moves->pos.rank == 0 && position.board[from.rank][from.file] == PAWN_L)
             newPossibility->possibility.rersultPosition.board[moves->pos.rank][moves->pos.file] = QUEEN_L;
         else if (moves->pos.rank == 7 && position.board[from.rank][from.file] == PAWN_D)
@@ -124,18 +124,18 @@ void generatePossibleMoves(GamePosition position, Pos from, Possibilities** end)
         // Disable castle conditions
 
         if (from.rank == 7 && from.file == 0)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)WHITE_QUEENSIDE;
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)WHITE_QUEENSIDE;
         if (from.rank == 7 && from.file == 7)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)WHITE_KINGSIDE;
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)WHITE_KINGSIDE;
         if (from.rank == 0 && from.file == 0)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)BLACK_QUEENSIDE;
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)BLACK_QUEENSIDE;
         if (from.rank == 0 && from.file == 7)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)BLACK_KINGSIDE;
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)BLACK_KINGSIDE;
 
         if (position.board[from.rank][from.file] == KING_L)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)(WHITE_QUEENSIDE | WHITE_KINGSIDE);
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)(WHITE_QUEENSIDE | WHITE_KINGSIDE);
         if (position.board[from.rank][from.file] == KING_D)
-            newPossibility->possibility.rersultPosition.castleConditions &= ~(Uint8)(BLACK_QUEENSIDE | BLACK_KINGSIDE);
+            newPossibility->possibility.rersultPosition.castleRights &= ~(Uint8)(BLACK_QUEENSIDE | BLACK_KINGSIDE);
 
         // En passant
         newPossibility->possibility.rersultPosition.enPassant = moves->enPassant;

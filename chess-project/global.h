@@ -5,7 +5,7 @@
 #ifndef GLOBAL
 #define GLOBAL
 
-typedef enum Piece {
+typedef enum Piece2 {
 	KING_D = 1,
 	QUEEN_D,
 	ROOK_D,
@@ -18,7 +18,7 @@ typedef enum Piece {
 	BISHOP_L,
 	KNIGHT_L,
 	PAWN_L
-} Piece;
+} Piece2;
 
 typedef enum Color {
 	WHITE = true,
@@ -33,14 +33,18 @@ typedef enum Castle {
 
 } Castle;
 
+
 typedef struct GamePosition {
 	Uint8 board[8][8];
 	bool turn;
-	Uint8 castleConditions; // A 'Castle' enum-mal kap értelmet
+	Uint8 castleRights; // A 'Castle' enum-mal kap értelmet
 	Uint8 enPassant; // Ha nagyobb mint 7, akkor az előző lépésben nem lépett duplát gyalog
 	int halfmoveClock;
 	int fullmove;
+
 } GamePosition;
+
+
 
 typedef struct Pos {
 	Uint8 file;
@@ -49,13 +53,13 @@ typedef struct Pos {
 
 SDL_Window* window;
 
-typedef struct Move {
+typedef struct Move2 {
 	Pos pos;
 	Uint8 enPassant;
 	bool takesEnPassant;
 	Uint8 castle;
-	struct Move* next;
-}Move;
+	struct Move2* next;
+}Move2;
 
 
 typedef struct Possibility {

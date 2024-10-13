@@ -1,4 +1,9 @@
 #include "../global.h"
+#include "../core/move.h"
+#include "../logic/game-handler.h"
+#include "../logic/evaluator.h"
+#include "../core/board.h"
+#include "../moveGeneration/moveGenerator.h"
 
 typedef struct EvalCase {
 	int value;
@@ -6,5 +11,4 @@ typedef struct EvalCase {
 	Pos to;
 }EvalCase;
 
-EvalCase miniMax(int depth, GamePosition position, bool inv);
-void CalcBestMove(Game* game);
+void CalcBestMove(Board* board);

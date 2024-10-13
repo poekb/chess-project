@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (chess-project "chess-project.c" "chess-project.h" "logic/rules.c" "logic/rules.h" "global.h"  "graphics/board-renderer.c" "graphics/board-renderer.h" "graphics/svg-loader.c" "graphics/svg-loader.h" "graphics/text-renderer.c" "graphics/text-renderer.h" "logic/game-handler.c" "logic/game-handler.h"   "logic/evaluator.c" "logic/evaluator.h" "logic/piece-maps.h" "logic/piece-maps.c" "ai/chess-bot.c" "ai/chess-bot.h")
+add_executable (chess-project "chess-project.c" "chess-project.h" "logic/rules.c" "logic/rules.h" "global.h"  "graphics/board-renderer.c" "graphics/board-renderer.h" "graphics/svg-loader.c" "graphics/svg-loader.h" "graphics/text-renderer.c" "graphics/text-renderer.h" "logic/game-handler.c" "logic/game-handler.h"   "logic/evaluator.c" "logic/evaluator.h" "logic/piece-maps.h" "logic/piece-maps.c" "ai/chess-bot.c" "ai/chess-bot.h" "core/board.h" "core/board.c" "core/piece.c" "core/piece.h" "core/pieceList.c" "core/pieceList.h" "core/gameState.h" "core/gameState.c" "core/move.c" "core/move.h" "moveGeneration/precompution.c" "moveGeneration/precompution.h" "moveGeneration/moveGenerator.c" "moveGeneration/moveGenerator.h" "ai/moveOrdering.c" "ai/moveOrdering.h")
 
 find_package(SDL2)
 find_package(SDL2_image)

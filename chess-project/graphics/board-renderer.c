@@ -6,7 +6,7 @@
 
 const SDL_Color COLOR_BLACK = { 0x5a, 0x40, 0x30, 0xFF };
 const SDL_Color COLOR_WHITE = { 0xFF, 0xF0, 0xD0, 0xFF };
-const SDL_Color COLOR_HIGH = { 0x80, 0x80, 0x90, 0xa0 };
+const SDL_Color COLOR_HIGH = { 0x70, 0x70, 0xf0, 0xa0 };
 
 
 SDL_Texture* staticImgBuffer;
@@ -30,7 +30,7 @@ void rederer_cleanUp() {
 double tableSize = 0;
 double cellSize;
 
-void renderBoard(SDL_Renderer* renderer, double tableSizeNew, Uint8 board[8][8]) {
+void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
     tableSize = tableSizeNew;
 
     if (staticImgBuffer != NULL) {
@@ -61,7 +61,6 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew, Uint8 board[8][8])
 
             SDL_RenderFillRect(renderer, &rect);
 
-            SVG_renderPiece(renderer, board[j][i], (int)((double)i * cellSize), (int)((double)j * cellSize), cellSize);
 
         }
     }
@@ -92,6 +91,17 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew, Uint8 board[8][8])
     SDL_RenderPresent(renderer);
 }
 
+void renderPieces(SDL_Renderer* renderer, Uint8 board[64]) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++)
+        {
+            SVG_renderPiece(renderer, board[j * 8 + i], (int)((double)i * cellSize), (int)((double)j * cellSize), cellSize);
+        }
+    }
+}
+
+
+
 void renderDynamic(SDL_Renderer* renderer) {
 
 
@@ -104,15 +114,20 @@ void renderDynamic(SDL_Renderer* renderer) {
 }
 
 void drawThickrect(SDL_Renderer* renderer,int x, int y, int w, int h) {
+    SDL_Rect rect = { x , y , w, h }; 
+    SDL_RenderFillRect(renderer, &rect);
+    return;
+
     const int THICKNESS = 10;
 
     for (int i = 0; i < THICKNESS; ++i) {
         SDL_Rect r = { x + i, y + i, w - 2 * i, h - 2 * i };
         SDL_RenderDrawRect(renderer, &r);
     }
+    
 }
 
-void displayEval(SDL_Renderer* renderer, Move* move) {
+void displayEval(SDL_Renderer* renderer, Move2* move) {
     setDrawColor(renderer, COLOR_HIGH);
 
     while (move != NULL) {
@@ -123,11 +138,32 @@ void displayEval(SDL_Renderer* renderer, Move* move) {
     }
 }
 
-void highlightCell(SDL_Renderer* renderer,Pos pos) {
+void highlightCell(SDL_Renderer* renderer,Pos pos, SDL_Color color) {
 
-    setDrawColor(renderer, COLOR_HIGH);
+    setDrawColor(renderer, color);
 
     drawThickrect(renderer, (int)((double)pos.file* cellSize), (int)((double)pos.rank* cellSize), (int)cellSize, (int)cellSize);
+}
+
+void highlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color) {
+    for (int i = 0; i < count; i++) {
+        Uint8 pos = positions[i];
+        Uint8 rank = pos / 8;
+        Uint8 file = pos % 8;
+        setDrawColor(renderer, color);
+        highlightCell(renderer, (Pos) { file, rank },color);
+    }
+}
+
+void displayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color) {
+    for (int x = 0; x < 8; x++) {
+        for (int y = 0; y < 8; y++) {
+            int index = x + 8 * y;
+
+            if ((bitboard & ((Uint64)1 << index)) != 0)
+                highlightCell(renderer, (Pos) { x, y }, color);
+        }
+    }
 }
 
 void sdlInit(int szeles, int magas, SDL_Window** pwindow, SDL_Renderer** prenderer) {

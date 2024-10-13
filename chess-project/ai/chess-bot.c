@@ -1,59 +1,121 @@
 #include "chess-bot.h"
-#include "../logic/game-handler.h"
 #include "../logic/evaluator.h"
 
-int moveCount;
+#include <time.h>
+#include <stdlib.h>
 
-void CalcBestMove(Game* game) {
-	moveCount = 0;
-	EvalCase bestMove = miniMax(5, game->position,!game->position.turn);
-	printf("Moves tested: %d\n", moveCount);
-	//printf("%d - %d, %d - %d\n", bestMove.from.rank, bestMove.from.file, bestMove.to.rank, bestMove.to.file);
+Board* board;
 
+int searchAttacks() {
+	
+	Move* attackMoves = malloc(sizeof(Move) * 100);
+	if (attackMoves == NULL) return 0;
+	int moveCount = generateMoves(board, attackMoves, true);
 
-	movePieceFromTo(bestMove.from, bestMove.to);
+	if (moveCount == 0) {
+		// TODO: Test for checkmate
+		Uint64 attackMap = generateUnderAttackBitmap(board);
+		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? BlackIndex : WhiteIndex]) & attackMap) != 0)
+		{
+			free(attackMoves);
+			return -1234567;
+		}
+
+		free(attackMoves);
+		return evalBoard(board);
+	}
+
+	//printf("%d\n", moveCount);
+
+	//if (depth < 0) return evalBoard(board);
+
+	int maxValue = -1234567;
+
+	for (int i = 0; i <moveCount; i++) {
+
+		MakeMove(board, attackMoves[i]);
+
+		maxValue = max(maxValue, -evalBoard(board));
+
+		RevokeMove(board, attackMoves[i]);
+	}
+	free(attackMoves);
+
+	return maxValue;
 }
 
-
-EvalCase miniMax(int depth, GamePosition position, bool inv) {
+int search(int depth, int alpha, int beta) {
 
 	if (depth == 0) {
-		moveCount++;
-		return (EvalCase) { inv ? -evalBoard(position.board) : evalBoard(position.board) };
+		return searchAttacks();
 	}
+	Move* moves = malloc(sizeof(Move) * 100);
+	if (moves == NULL) return 0;
+	int moveCount = generateMoves(board, moves, false);
 
-	// generate possible positions
-	Possibilities* possibilities = NULL;
-	for (int rank = 0; rank < 8; rank++) {
-		for (int file = 0; file < 8; file++) {
-			generatePossibleMoves(position, (Pos) { rank, file }, &possibilities);
-		}
-	}
-
-	EvalCase result = {
-		-1234567
-	};
-	Possibilities* currentPoss = possibilities;
-
-	while (currentPoss != NULL) {
-		EvalCase evalCase = miniMax(depth - 1, currentPoss->possibility.rersultPosition, inv);
-		
-		if (position.turn)  // When is it min and when is it max ???????
-			evalCase.value *= -1;
-
-		if (evalCase.value > result.value) {
-			
-
-			result.value = evalCase.value;
-			result.from = currentPoss->possibility.source;
-			result.to = currentPoss->possibility.target;
-
+	if (moveCount == 0) {
+		// TODO: Test for checkmate
+		Uint64 attackMap = generateUnderAttackBitmap(board);
+		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? BlackIndex : WhiteIndex]) & attackMap) != 0)
+		{
+			free(moves);
+			return -1234567;
 		}
 
-		currentPoss = currentPoss->next;
+		free(moves);
+
+		return 0;
 	}
 
-	freePossibilities(possibilities);
+	int maxValue = -1234567;
 
-	return result;
+	for (int i = 0; i < moveCount; i++) {
+		MakeMove(board, moves[i]);
+
+		int eval = -search(depth - 1, -beta, -alpha);
+
+		RevokeMove(board, moves[i]);
+		if (eval >= beta) {
+			free(moves);
+			return beta;
+		}
+		alpha = max(alpha, eval);
+	}
+	free(moves);
+
+	return alpha;
 }
+
+void CalcBestMove(Board* boardIn) {
+
+	board = boardIn;
+
+	Move* moves = malloc(sizeof(Move) * 100);
+	if (moves == NULL) return 0;
+	int moveCount = generateMoves(board, moves, false);
+
+	if (moveCount == 0)
+		return;
+
+	int maxValue = INT_MIN;
+	int maxIndex = 0;
+
+	for (int i = 0; i < moveCount; i++) {
+		MakeMove(board, moves[i]);
+
+		int eval = -search(3, -1234567, 1234567);
+		if (eval > maxValue) {
+			maxValue = eval;
+			maxIndex = i;
+		}
+
+		RevokeMove(board, moves[i]);
+	}
+
+	MakeMove(board, moves[maxIndex]);
+
+
+	printf("Eval: %5d\n", maxValue);
+}
+
+

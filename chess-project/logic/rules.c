@@ -40,15 +40,15 @@ bool isInBound(Pos pos) {
 }
 
 
-bool addMove(GamePosition* currentGamePos, Move** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle);
-addMovesByRule(GamePosition* currentGamePos, Move** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat);
+bool addMove2(GamePosition* currentGamePos, Move2** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle);
+addMovesByRule(GamePosition* currentGamePos, Move2** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat);
 
 
 bool getColor(Uint8 piece) {
 	return piece < KING_L ? BLACK : WHITE;
 }
 
-Move* containsMove(Move* moves, Pos move) {
+Move2* containsMove(Move2* moves, Pos move) {
 	
 	while (moves != NULL) {
 		if (moves->pos.file == move.file && moves->pos.rank == move.rank) 
@@ -59,19 +59,19 @@ Move* containsMove(Move* moves, Pos move) {
 	return NULL;
 }
 
-bool addMove(GamePosition* currentGamePos,Move** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle) {
+bool addMove2(GamePosition* currentGamePos,Move2** moves, Pos move, bool color, Uint8 enpassant/* -1 if not */, bool takesEnpassant, Uint8 castle) {
 
 	if (move.file < 0 || move.file > 7 || move.rank < 0 || move.rank > 7)
 		return false;
 
-	Piece target = currentGamePos->board[move.rank][move.file];
+	Piece2 target = currentGamePos->board[move.rank][move.file];
 
 	if(!(target == 0) && (getColor(target) == color) )
 		return false;
 
 
-	Move possibleMove = (Move){ (Pos) { move.file,move.rank },enpassant, takesEnpassant,castle, NULL };
-	Move* newMove = malloc(sizeof(possibleMove));
+	Move2 possibleMove = (Move2){ (Pos) { move.file,move.rank },enpassant, takesEnpassant,castle, NULL };
+	Move2* newMove = malloc(sizeof(possibleMove));
 	if (newMove == NULL) return false;
 	*newMove = possibleMove;
 	newMove->next = *moves;
@@ -83,20 +83,20 @@ bool addMove(GamePosition* currentGamePos,Move** moves, Pos move, bool color, Ui
 	return currentGamePos->board[move.rank][move.file] == 0;
 }
 
-addMovesByRule(GamePosition* currentGamePos,Move** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat) {
+addMovesByRule(GamePosition* currentGamePos,Move2** moves, Pos rule[], int ruleCount, Pos position, bool color, bool repeat) {
 	for (int i = 0; i < ruleCount; i++) {
 		Pos current = position;
 		while (true) {
 			current = AddPos(current, rule[i]);
-			if (!addMove(currentGamePos,moves,current,color,-1,false,0) || !repeat)
+			if (!addMove2(currentGamePos,moves,current,color,-1,false,0) || !repeat)
 				break;
 		}
 	}
 }
 
-Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
+Move2* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 
-	Move* move = NULL;
+	Move2* move = NULL;
 
 	Uint8 piece = currentGamePos->board[selectedPos.rank][selectedPos.file];
 
@@ -112,48 +112,48 @@ Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 	case PAWN_L:
 		// Just moving
 		if (currentGamePos->board[selectedPos.rank - 1][selectedPos.file] == 0) {
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 1 }, color, -1,false,0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 1 }, color, -1,false,0);
 			if (selectedPos.rank == 6 && currentGamePos->board[4][selectedPos.file] == 0) // Pawn a start pozícióban
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 2 }, color, selectedPos.file, false, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank - 2 }, color, selectedPos.file, false, 0);
 		}
 
 		// Takeing a piece
 		if (currentGamePos->board[selectedPos.rank - 1][ selectedPos.file - 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, false, 0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, false, 0);
 		if (currentGamePos->board[selectedPos.rank - 1][ selectedPos.file + 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, false, 0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, false, 0);
 
 
 		
 		// En Passante
 		if (selectedPos.rank == 3) {
 			if (currentGamePos->enPassant == selectedPos.file + 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, true, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank - 1 }, color, -1, true, 0);
 			if (currentGamePos->enPassant == selectedPos.file - 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, true, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank - 1 }, color, -1, true, 0);
 		}
 
 		break;
 	case PAWN_D:
 		// Just moving
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file] == 0) {
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 1 }, color, -1, false, 0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 1 }, color, -1, false, 0);
 			if (selectedPos.rank == 1 && currentGamePos->board[3][selectedPos.file] == 0) // Pawn a start pozícióban
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 2 }, color, selectedPos.file, false, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file, selectedPos.rank + 2 }, color, selectedPos.file, false, 0);
 		}
 
 		// Takeing a piece
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file - 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, false, 0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, false, 0);
 		if (currentGamePos->board[selectedPos.rank + 1][selectedPos.file + 1] != 0)
-			addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, false, 0);
+			addMove2(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, false, 0);
 
 		// En Passante
 		if (selectedPos.rank == 4) {
 			if (currentGamePos->enPassant == selectedPos.file + 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, true, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file + 1, selectedPos.rank + 1 }, color, -1, true, 0);
 			if (currentGamePos->enPassant == selectedPos.file - 1)
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, true, 0);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file - 1, selectedPos.rank + 1 }, color, -1, true, 0);
 		}
 
 		break;
@@ -186,17 +186,17 @@ Move* getPossibleMoves(GamePosition* currentGamePos, Pos selectedPos) {
 		// Castle
 
 		if (!isCheck(currentGamePos)) {
-			bool right = (currentGamePos->castleConditions & (color ? WHITE_KINGSIDE : BLACK_KINGSIDE)) != 0;
-			bool left = (currentGamePos->castleConditions & (color ? WHITE_QUEENSIDE : BLACK_QUEENSIDE)) != 0;
+			bool right = (currentGamePos->castleRights & (color ? WHITE_KINGSIDE : BLACK_KINGSIDE)) != 0;
+			bool left = (currentGamePos->castleRights & (color ? WHITE_QUEENSIDE : BLACK_QUEENSIDE)) != 0;
 
 			
 			
 			if(right && (currentGamePos->board[selectedPos.file + 1][selectedPos.rank] == 0) 
 				&& !isAttacked(currentGamePos, (Pos) { selectedPos.file + 1, selectedPos.rank }, color))
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file + 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_KINGSIDE);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file + 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_KINGSIDE);
 			if (left && (currentGamePos->board[selectedPos.file - 1][selectedPos.rank] == 0) 
 				&& !isAttacked(currentGamePos, (Pos) { selectedPos.file - 1, selectedPos.rank }, color))
-				addMove(currentGamePos, &move, (Pos) { selectedPos.file - 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_QUEENSIDE);
+				addMove2(currentGamePos, &move, (Pos) { selectedPos.file - 2, selectedPos.rank }, color, selectedPos.file, false, WHITE_QUEENSIDE);
 
 		}
 
@@ -281,7 +281,7 @@ bool scanPiece(GamePosition* currentGamePos, Pos rule[], int ruleCount, Pos king
 	return false;
 }
 
-void freeMoves(Move * moves) {
+void freeMoves(Move2 * moves) {
 	if (moves == NULL) return;
 	freeMoves(moves->next);
 	free(moves);
