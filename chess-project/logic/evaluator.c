@@ -2,6 +2,9 @@
 #include "piece-maps.h"
 #include "rules.h"
 
+int getMaterial(Board* board, int index);
+Uint8 flip(Uint8 pos, bool isWhite);
+
 int getMaterial(Board* board, int index) {
 	int material = 0;
 	material += board->Pawns[index].count * PAWN_VALUE;
@@ -9,6 +12,7 @@ int getMaterial(Board* board, int index) {
 	material += board->Bishops[index].count * BISHOP_VALUE;
 	material += board->Rooks[index].count * ROOK_VALUE;
 	material += board->Queens[index].count * QUEEN_VALUE;
+	return material;
 }
 
 Uint8 flip(Uint8 pos, bool isWhite) {
@@ -40,7 +44,6 @@ int getPositionScore(Board* board, bool isWhite) {
 
 int evalBoard(Board* board) {
 
-
 	int whiteValue = getMaterial(board, WhiteIndex);
 	int blackValue = getMaterial(board, BlackIndex);
 
@@ -56,11 +59,8 @@ int evalBoard(Board* board) {
 		blackValue += KING_MAP_LATE[flip(board->kingSquare[BlackIndex], isWhite)];
 	}
 
-
 	whiteValue += getPositionScore(board, true);
 	blackValue += getPositionScore(board, false);
-
-
 
 
 	int value = whiteValue - blackValue;

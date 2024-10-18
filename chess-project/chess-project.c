@@ -9,6 +9,7 @@
 #include "moveGeneration/precompution.h"
 #include "moveGeneration/moveGenerator.h"
 #include "ai/chess-bot.h"
+#include "logic/evaluator.h"
 
 SDL_Renderer* renderer;
 
@@ -22,54 +23,6 @@ int moveCount = 0;
 
 
 void Update(Board* board);
-
-/*
-void handleClick(double boardSize) {
-    if (!(howerPos.rank >= 0 && howerPos.file >= 0 && howerPos.rank < 8 && howerPos.file < 8)) return;
-
-    if (selectedPos.rank != 9) {
-
-        
-        if (containsMove(moves, howerPos) != NULL) {
-            movePieceFromTo(selectedPos, howerPos);
-        }
-
-        renderBoard(renderer, boardSize, getGame()->position.board);
-        renderDynamic(renderer);
-        highlightCell(renderer, howerPos);
-
-        SDL_RenderPresent(renderer);
-        selectedPos = (Pos){ 9,9 };
-        freeMoves(moves);
-        moves = NULL;
-        if (!getGame()->position.turn) {
-            CalcBestMove(getGame());
-            renderBoard(renderer, boardSize, getGame()->position.board);
-            renderDynamic(renderer);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(0);
-        }
-
-
-        return;
-    }
-
-    // Render possible movess:
-    freeMoves(moves);
-    moves = getPossibleMoves(&getGame()->position, howerPos);
-
-    // Ha nem lehet mozgatni a kiválasztott figurát, akkor lépjünk ki a függvényből:
-    if (moves == NULL) return;
-
-    selectedPos = howerPos;
-    renderDynamic(renderer);
-    highlightCell(renderer, selectedPos);
-
-    displayEval(renderer, moves);
-
-    SDL_RenderPresent(renderer);
-}
-*/
 
 
 int hasMove(Pos start, Pos target) {
@@ -89,7 +42,7 @@ int hasMove(Pos start, Pos target) {
 int countMoves(Board* board, int depth) {
     if (depth == 0) return 1;
 
-    int sum = 0;
+    int sum = 0; // temp 1
     Move* moves = malloc(sizeof(Move) * 100);
     if (moves == NULL) return 1;
     int moveCount = generateMoves(board, moves, false);
@@ -103,6 +56,7 @@ int countMoves(Board* board, int depth) {
     return max(sum,0);
 }
 
+bool bot = false;
 
 int main(int argc, char* argv[]) {
     enum { ABLAK = 720 };
@@ -121,8 +75,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     preCompute();
-    //LoadBoardFromFEN(board, "rnbq1bnr/pppppppp/8/8/2kpPR2/8/PPPP1PPP/RNBQK1NR b KQ e4 0 1");
-    LoadBoardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    //LoadBoardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
+    *board = (Board){ 0 };
+    LoadBoardFromFEN(board, "3k4/2n2B2/1KP5/2B2p2/5b1p/7P/8/8 b - - 0 0");
+    
     //LoadBoardFromFEN(board, "5k2/1B1r3p/3N4/p3P3/2b2P2/P3P3/n2K4/2R5 b - - 0 1");
     //LoadBoardFromFEN(board, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ");
 
@@ -133,16 +90,12 @@ int main(int argc, char* argv[]) {
         printf("Num of possiblemoves (%d): %10d\n", 3, countMoves(board, 3));
         printf("Num of possiblemoves (%d): %10d\n", 4, countMoves(board, 4));
         printf("Num of possiblemoves (%d): %10d\n", 5, countMoves(board, 5));
-        printf("Num of possiblemoves (%d): %10d\n", 6, countMoves(board, 6));
+        //printf("Num of possiblemoves (%d): %10d\n", 6, countMoves(board, 6));
     }
-    
 
-    //LoadBoardFromFEN(board, "rnbqkbnr/ppppqppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1");
+    //mesureBot(board, 1);
 
-    //MakeMove(board, 0b0000110111101111);
-
-
-    initGame();
+    printf("Eval: %d\n", evalBoard(board));
 
     renderBoard(renderer, boardSize);
 
@@ -163,8 +116,13 @@ int main(int argc, char* argv[]) {
         
         switch (event.type) {
         case SDL_KEYDOWN:
+            //
+            //RevokeMove(board, move);
+            
+            bot = !bot;
             CalcBestMove(board);
 
+            
             renderDynamic(renderer);
 
 
@@ -178,12 +136,7 @@ int main(int argc, char* argv[]) {
             
             break;
         case SDL_MOUSEBUTTONDOWN: {
-            /*
-            renderDynamic(renderer);
-            CalcBestMove(board);
-            Update(board);
-            break;
-            */
+
             int moveIndex = hasMove(selectedPos, howerPos);
             if (selectedPos.rank != 9 && (moveIndex != -1)) {
                 move = validMoves[moveIndex];
@@ -203,8 +156,8 @@ int main(int argc, char* argv[]) {
 
 
                 Update(board);
-
-                //CalcBestMove(board);
+                if(bot)
+                    CalcBestMove(board);
 
                 Update(board);
 
@@ -244,9 +197,9 @@ int main(int argc, char* argv[]) {
     }
     
     // Cleanups
-    freeMoves(moves);
+    //freeMoves(moves);
     rederer_cleanUp();
-    cleanUpGameHandler();
+    //cleanUpGameHandler();
     free(board);
 
     SDL_Quit();
@@ -285,7 +238,8 @@ void Update(Board* board) {
             highlightCell(renderer, (Pos) {target%8,target/8}, (SDL_Color) { 100, 100, 200, 150 });
         }
     }
-
+    displayBitboard(renderer, board->underAttackMap, (SDL_Color) { 200, 100, 100, 150 });
+    highlightCells(renderer, &board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex], 1, (SDL_Color) { 100, 200, 100, 150 });
     renderPieces(renderer, board->square);
     SDL_RenderPresent(renderer);
 }

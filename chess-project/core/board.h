@@ -31,6 +31,8 @@ typedef struct Board {
 	GameState gameStateHistory[10000]; // a static size stack to store the history of the game states !!!!!!!! the game breaks over 10000 moves!!!!!!!
 	int gameStateHistoryCount;
 	bool isWhitesMove;
+
+	Uint64 underAttackMap;
 } Board;
 
 void MakeMove(Board* board, Move move);

@@ -1,53 +1,57 @@
 #include "chess-bot.h"
 #include "../logic/evaluator.h"
+#include "moveOrdering.h"
 
 #include <time.h>
 #include <stdlib.h>
 
 Board* board;
 
-int searchAttacks() {
-	
+int n;
+
+void mesureBot(Board* boardIn, int depth) {
+	board = boardIn;
+
+	search(depth, -1234567, 1234567);
+
+	printf("Iterations: %d\n", n);
+}
+
+int searchAttacks(int alpha, int beta) {
+	n++;
+	int eval = evalBoard(board);
+	if (eval >= beta)
+		return beta;
+	alpha = max(alpha, eval);
+
 	Move* attackMoves = malloc(sizeof(Move) * 100);
 	if (attackMoves == NULL) return 0;
 	int moveCount = generateMoves(board, attackMoves, true);
 
-	if (moveCount == 0) {
-		// TODO: Test for checkmate
-		Uint64 attackMap = generateUnderAttackBitmap(board);
-		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? BlackIndex : WhiteIndex]) & attackMap) != 0)
-		{
-			free(attackMoves);
-			return -1234567;
-		}
+	orderMoves(board, attackMoves, moveCount);
 
-		free(attackMoves);
-		return evalBoard(board);
-	}
-
-	//printf("%d\n", moveCount);
-
-	//if (depth < 0) return evalBoard(board);
-
-	int maxValue = -1234567;
-
-	for (int i = 0; i <moveCount; i++) {
+	for (int i = 0; i < moveCount; i++) {
 
 		MakeMove(board, attackMoves[i]);
 
-		maxValue = max(maxValue, -evalBoard(board));
+		int eval = -searchAttacks(-beta, -alpha);
 
 		RevokeMove(board, attackMoves[i]);
+		if (eval >= beta) {
+			free(attackMoves);
+			return beta;
+		}
+		alpha = max(alpha, eval);
 	}
 	free(attackMoves);
 
-	return maxValue;
+	return alpha;
 }
 
 int search(int depth, int alpha, int beta) {
-
 	if (depth == 0) {
-		return searchAttacks();
+		//return evalBoard(board);
+		return searchAttacks(alpha, beta);
 	}
 	Move* moves = malloc(sizeof(Move) * 100);
 	if (moves == NULL) return 0;
@@ -55,19 +59,19 @@ int search(int depth, int alpha, int beta) {
 
 	if (moveCount == 0) {
 		// TODO: Test for checkmate
-		Uint64 attackMap = generateUnderAttackBitmap(board);
-		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? BlackIndex : WhiteIndex]) & attackMap) != 0)
+				
+		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
 		{
 			free(moves);
-			return -1234567;
+			return -1000000;
 		}
-
+ 
 		free(moves);
 
 		return 0;
 	}
 
-	int maxValue = -1234567;
+	orderMoves(board, moves, moveCount);
 
 	for (int i = 0; i < moveCount; i++) {
 		MakeMove(board, moves[i]);
@@ -87,6 +91,10 @@ int search(int depth, int alpha, int beta) {
 }
 
 void CalcBestMove(Board* boardIn) {
+	n = 0;
+
+	int alpha = -1000000;
+	int beta = 1000000;
 
 	board = boardIn;
 
@@ -97,25 +105,35 @@ void CalcBestMove(Board* boardIn) {
 	if (moveCount == 0)
 		return;
 
-	int maxValue = INT_MIN;
 	int maxIndex = 0;
+	orderMoves(board, moves, moveCount);
 
 	for (int i = 0; i < moveCount; i++) {
 		MakeMove(board, moves[i]);
 
-		int eval = -search(3, -1234567, 1234567);
-		if (eval > maxValue) {
-			maxValue = eval;
-			maxIndex = i;
-		}
+		int eval = -search(5, -beta, -alpha);
 
 		RevokeMove(board, moves[i]);
+		if (eval >= beta) {
+			//printf("Hello!\n");
+			alpha = eval;
+			maxIndex = i;
+			break;
+		}
+
+		if (eval > alpha) {
+			alpha = eval;
+			maxIndex = i;
+		}
 	}
 
 	MakeMove(board, moves[maxIndex]);
 
+	free(moves);
 
-	printf("Eval: %5d\n", maxValue);
+	printf("Positions evaluated: %10d\n", n);
+
+	printf("Eval: %5d\n", alpha);
 }
 
 

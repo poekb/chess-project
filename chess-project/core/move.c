@@ -39,3 +39,7 @@ bool isCastle(Move move) {
 bool isPawnTwoUp(Move move) {
 	return (move >> 12) == PawnTwoUpFlag;
 }
+
+bool isPromotion(Move move) {
+	return (move >> 12) >= PromoteToQueenFlag;
+}

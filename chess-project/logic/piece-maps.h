@@ -1,15 +1,28 @@
 #include "../global.h"
+#include "../core/board.h"
+#include "../core/piece.h"
+#include "../core/move.h"
+
+int getPositionValue(Board* board, PieceType type, Uint8 square);
 
 int getMapValue(int map[], int rank, int file, bool color);
 
 #ifndef MAP
 #define MAP
 
-static int PAWN_VALUE = 100;
-static int KNIGHT_VALUE = 300;
-static int BISHOP_VALUE = 320;
-static int ROOK_VALUE = 500;
-static int QUEEN_VALUE = 900;
+#define PAWN_VALUE 100
+#define KNIGHT_VALUE 300
+#define BISHOP_VALUE 320
+#define ROOK_VALUE 500
+#define QUEEN_VALUE 900
+
+static int PieceTypeValues[5] = {
+	PAWN_VALUE,
+	KNIGHT_VALUE,
+	BISHOP_VALUE,
+	ROOK_VALUE,
+	QUEEN_VALUE
+};
 
 static int PAWN_MAP[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,

@@ -27,3 +27,5 @@ bool isEnPassantCapture(Move move);
 bool isCastle(Move move);
 
 bool isPawnTwoUp(Move move);
+
+bool isPromotion(Move move);

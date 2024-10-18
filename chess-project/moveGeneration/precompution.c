@@ -1,5 +1,5 @@
 #include "precompution.h"
-
+#include "../logic/evaluator.h"
 // Direction N, S, E, W, NW, SE, NE, SW
 int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 

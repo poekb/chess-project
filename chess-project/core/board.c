@@ -3,7 +3,12 @@
 const int WhiteIndex = 0;
 const int BlackIndex = 1;
 
+void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
+void removePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
+
 void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn);
+void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target, Uint8 colorIndex, bool isWhite);
+
 
 void MakeMove(Board* board, Move move) {
 
@@ -21,12 +26,11 @@ void MakeMove(Board* board, Move move) {
 	bool enpassantCapture = isEnPassantCapture(move);
 	bool castle = isCastle(move);
 	bool doublePawn = isPawnTwoUp(move);
+	bool promotion = isPromotion(move);
 
 	GameState prevGameState = board->currentGameState;
 	board->currentGameState.enpassantFile = 0;
 	board->currentGameState.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
-
-
 
 	// There is a capture
 	if (board->currentGameState.capturedPiece != None || enpassantCapture) {
@@ -34,26 +38,7 @@ void MakeMove(Board* board, Move move) {
 		if (enpassantCapture)
 			board->square[capture] = None;
 
-		switch (board->currentGameState.capturedPiece)
-		{
-		case Pawn:
-			removePieceListAtSquare(&(board->Pawns[enemyIndex]), capture);
-			break;
-		case Knight:
-			removePieceListAtSquare(&(board->Knights[enemyIndex]), capture);
-			break;
-		case Bishop:
-			removePieceListAtSquare(&(board->Bishops[enemyIndex]), capture);
-			break;
-		case Rook:
-			removePieceListAtSquare(&(board->Rooks[enemyIndex]), capture);
-			break;
-		case Queen:
-			removePieceListAtSquare(&(board->Queens[enemyIndex]), capture);
-			break;
-		default:
-			break;
-		}
+		removePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
 	}
 	else if (doublePawn) {
 		board->currentGameState.enpassantFile = (Uint8)1 << start % 8;
@@ -83,7 +68,11 @@ void MakeMove(Board* board, Move move) {
 		board->currentGameState.castleRights &= ClearWhiteKingSide;
 	
 
-
+	if (promotion) {
+		if (move >> 12 == PromoteToQueenFlag) {
+			promotePiece(board, target, Pawn, Queen, colorIndex, turn);
+		}
+	}
 
 	board->isWhitesMove = !board->isWhitesMove;
 
@@ -109,9 +98,17 @@ void RevokeMove(Board* board, Move move) {
 	bool enpassantCapture = isEnPassantCapture(move);
 	bool castle = isCastle(move);
 	bool doublePawn = isPawnTwoUp(move);
+	bool promotion = isPromotion(move);
+
 
 
 	movePiece(board, target, start, type, turn);
+
+	if (promotion) {
+		if (move >> 12 == PromoteToQueenFlag) {
+			promotePiece(board, start, Queen, Pawn, colorIndex, turn);
+		}
+	}
 
 	// There was a capture
 	if (board->currentGameState.capturedPiece != None || enpassantCapture) {
@@ -119,26 +116,7 @@ void RevokeMove(Board* board, Move move) {
 
 		board->square[capture] = makePieceIsWhite(board->currentGameState.capturedPiece, !turn);
 
-		switch (board->currentGameState.capturedPiece)
-		{
-		case Pawn:
-			addPieceListAtSquare(&(board->Pawns[enemyIndex]), capture);
-			break;
-		case Knight:
-			addPieceListAtSquare(&(board->Knights[enemyIndex]), capture);
-			break;
-		case Bishop:
-			addPieceListAtSquare(&(board->Bishops[enemyIndex]), capture);
-			break;
-		case Rook:
-			addPieceListAtSquare(&(board->Rooks[enemyIndex]), capture);
-			break;
-		case Queen:
-			addPieceListAtSquare(&(board->Queens[enemyIndex]), capture);
-			break;
-		default:
-			break;
-		}
+		makePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
 	}
 
 	if (castle) {
@@ -152,6 +130,55 @@ void RevokeMove(Board* board, Move move) {
 
 
 	board->currentGameState = board->gameStateHistory[--board->gameStateHistoryCount];
+}
+
+void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target,Uint8 colorIndex, bool isWhite) {
+	board->square[square] = makePieceIsWhite(target, isWhite);
+	removePieceAtSquare(board, square, source, colorIndex);
+	makePieceAtSquare(board, square, target, colorIndex);
+}
+
+void removePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
+	switch (type)
+	{
+	case Pawn:
+		removePieceListAtSquare(&(board->Pawns[colorIndex]), square);
+		break;
+	case Knight:
+		removePieceListAtSquare(&(board->Knights[colorIndex]), square);
+		break;
+	case Bishop:
+		removePieceListAtSquare(&(board->Bishops[colorIndex]), square);
+		break;
+	case Rook:
+		removePieceListAtSquare(&(board->Rooks[colorIndex]), square);
+		break;
+	case Queen:
+		removePieceListAtSquare(&(board->Queens[colorIndex]), square);
+		break;
+	}
+}
+
+void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
+	
+	switch (type)
+	{
+	case Pawn:
+		addPieceListAtSquare(&(board->Pawns[colorIndex]), square);
+		break;
+	case Knight:
+		addPieceListAtSquare(&(board->Knights[colorIndex]), square);
+		break;
+	case Bishop:
+		addPieceListAtSquare(&(board->Bishops[colorIndex]), square);
+		break;
+	case Rook:
+		addPieceListAtSquare(&(board->Rooks[colorIndex]), square);
+		break;
+	case Queen:
+		addPieceListAtSquare(&(board->Queens[colorIndex]), square);
+		break;
+	}
 }
 
 void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn) {
@@ -227,8 +254,6 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 		}
 		strPointer++;
 	}
-
-	// TODO: Read other data
 
 	strPointer++;
 	board->isWhitesMove = (FENString[strPointer] == 'w');

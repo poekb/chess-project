@@ -14,7 +14,7 @@ bool onlyAttack;
 
 Board* board;
 
-static addMove(Move move) {
+static void addMove(Move move) {
 	Uint8 target = getTarget(move);
 	if (onlyAttack && (
 		!isEnPassantCapture(move) && (board->square[target] == None)
@@ -35,8 +35,8 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
 
-
 	Uint64 underAttack = generateUnderAttackBitmap(board);
+	board->underAttackMap = underAttack;
 	//displayBitboard(renderer, underAttack, (SDL_Color) { 100, 0, 0, 200 });
 
 	Uint8 king = board->kingSquare[colorIndex];
@@ -113,8 +113,6 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		}
 	}
 
-
-
 	// King
 	if (!onlyAttack) {
 		for (int i = 0; i < kingMovesCount[king]; i++) {
@@ -127,6 +125,82 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	
 
 	if (checkersBitBoard == 0) return count; // there is no moves left
+
+	// Knights
+	PieceList* Knights = &(board->Knights[colorIndex]);
+	for (int i = 0; i < Knights->count; i++) {
+		Uint8 index = Knights->list[i];
+
+		for (int j = 0; j < knightMovesCount[index]; j++) {
+			Uint8 target = knightMoves[index][j];
+			if (board->square[target] == None || isWhite(board->square[target]) != turn)
+				addMove(getMove(index, target));
+		}
+	}
+
+	// Bishops
+	PieceList* Bishops = &(board->Bishops[colorIndex]);
+	for (int i = 0; i < Bishops->count; i++) {
+		Uint8 index = Bishops->list[i];
+		for (int d = 4; d < 8; d++) {
+			Uint8 current = index;
+
+			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			{
+				current += Directions[d];
+
+				if (board->square[current] != None) {
+					if (isWhite(board->square[current]) != turn)
+						addMove(getMove(index, current));
+					break;
+				}
+				addMove(getMove(index, current));
+			}
+		}
+	}
+
+	// Rooks
+	PieceList* Rooks = &(board->Rooks[colorIndex]);
+	for (int i = 0; i < Rooks->count; i++) {
+		Uint8 index = Rooks->list[i];
+		for (int d = 0; d < 4; d++) {
+			Uint8 current = index;
+
+			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			{
+				current += Directions[d];
+
+				if (board->square[current] != None) {
+					if (isWhite(board->square[current]) != turn)
+						addMove(getMove(index, current));
+					break;
+				}
+				addMove(getMove(index, current));
+			}
+		}
+	}
+
+
+	// Queens
+	PieceList* Queens = &(board->Queens[colorIndex]);
+	for (int i = 0; i < Queens->count; i++) {
+		Uint8 index = Queens->list[i];
+		for (int d = 0; d < 8; d++) {
+			Uint8 current = index;
+
+			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			{
+				current += Directions[d];
+
+				if (board->square[current] != None) {
+					if (isWhite(board->square[current]) != turn)
+						addMove(getMove(index, current));
+					break;
+				}
+				addMove(getMove(index, current));
+			}
+		}
+	}
 
 	if ((underAttack & ((Uint64)1 << king)) == 0 && !onlyAttack) {
 
@@ -167,8 +241,9 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	for (int i = 0; i < Pawns->count; i++) {
 		Uint8 index = Pawns->list[i];
 		Uint8 rank = index / 8;
+		bool isPromotion = (rank == (turn ? 1 : 6));
 		if (board->square[index + (turn ? -8 : 8)] == None) {
-			addMove(getMove(index, index + (turn ? -8 : 8)));
+			addMove(getMove(index, index + (turn ? -8 : 8)) | (isPromotion ? PromoteToQueenFlag << 12 : 0));
 			if ((rank == (turn ? 6 : 1)) && (board->square[index + (turn ? -16 : 16)] == None))
 			{
 				addMove((getMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
@@ -223,88 +298,11 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				}else addMove(getMove(index, target) | EnPassantCaptureFlag << 12);
 			}
 			else if (board->square[target] != None && isWhite(board->square[target]) != turn) {
-				addMove((getMove(index, target) | (PawnTwoUpFlag << 12)));
+				addMove((getMove(index, target)) | (isPromotion ? PromoteToQueenFlag << 12 : 0));
 			}
 
 		}
 
-	}
-	
-
-	// Knights
-	PieceList* Knights = &(board->Knights[colorIndex]);
-	for (int i = 0; i < Knights->count; i++) {
-		Uint8 index = Knights->list[i];
-
-		for (int j = 0; j < knightMovesCount[index]; j++) {
-			Uint8 target = knightMoves[index][j];
-			if (board->square[target] == None || isWhite(board->square[target]) != turn)
-				addMove(getMove(index, target));
-		}
-	}
-
-	// Bishops
-	PieceList* Bishops = &(board->Bishops[colorIndex]);
-	for (int i = 0; i < Bishops->count; i++) {
-		Uint8 index = Bishops->list[i];
-		for (int d = 4; d < 8; d++) {
-			Uint8 current = index;
-
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-
-				if (board->square[current] != None) {
-					if(isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
-					break;
-				}
-				addMove(getMove(index, current));
-			}
-		}
-	}
-
-	// Rooks
-	PieceList* Rooks = &(board->Rooks[colorIndex]);
-	for (int i = 0; i < Rooks->count; i++) {
-		Uint8 index = Rooks->list[i];
-		for (int d = 0; d < 4; d++) {
-			Uint8 current = index;
-
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-
-				if (board->square[current] != None) {
-					if (isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
-					break;
-				}
-				addMove(getMove(index, current));
-			}
-		}
-	}
-
-
-	// Queens
-	PieceList* Queens = &(board->Queens[colorIndex]);
-	for (int i = 0; i < Queens->count; i++) {
-		Uint8 index = Queens->list[i];
-		for (int d = 0; d < 8; d++) {
-			Uint8 current = index;
-
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-
-				if (board->square[current] != None) {
-					if (isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
-					break;
-				}
-				addMove(getMove(index, current));
-			}
-		}
 	}
 
 	return count;
