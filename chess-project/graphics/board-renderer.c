@@ -1,5 +1,4 @@
-﻿#include "../logic/rules.h"
-#include "svg-loader.h"
+﻿#include "svg-loader.h"
 #include "text-renderer.h"
 
 #include "board-renderer.h"
@@ -91,7 +90,7 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
     SDL_RenderPresent(renderer);
 }
 
-void renderPieces(SDL_Renderer* renderer, Uint8 board[64]) {
+void renderPieces(SDL_Renderer* renderer, Piece board[64]) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
@@ -100,10 +99,7 @@ void renderPieces(SDL_Renderer* renderer, Uint8 board[64]) {
     }
 }
 
-
-
 void renderDynamic(SDL_Renderer* renderer) {
-
 
     SDL_SetRenderTarget(renderer, NULL);
 
@@ -125,17 +121,6 @@ void drawThickrect(SDL_Renderer* renderer,int x, int y, int w, int h) {
         SDL_RenderDrawRect(renderer, &r);
     }
     
-}
-
-void displayEval(SDL_Renderer* renderer, Move2* move) {
-    setDrawColor(renderer, COLOR_HIGH);
-
-    while (move != NULL) {
-
-        drawThickrect(renderer, (int)((double)move->pos.file * cellSize), (int)((double)move->pos.rank * cellSize), (int)cellSize, (int)cellSize);
-
-        move = move->next;
-    }
 }
 
 void highlightCell(SDL_Renderer* renderer,Pos pos, SDL_Color color) {

@@ -9,6 +9,8 @@ Board* board;
 
 int n;
 
+int searchAttacks(int alpha, int beta);
+
 void mesureBot(Board* boardIn, int depth) {
 	board = boardIn;
 
@@ -98,8 +100,8 @@ void CalcBestMove(Board* boardIn) {
 
 	board = boardIn;
 
-	Move* moves = malloc(sizeof(Move) * 100);
-	if (moves == NULL) return 0;
+	Move* moves = (Move*)malloc(sizeof(Move) * 100);
+	if (moves == NULL) return;
 	int moveCount = generateMoves(board, moves, false);
 
 	if (moveCount == 0)

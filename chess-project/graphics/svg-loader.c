@@ -1,6 +1,5 @@
 #include "../chess-project.h"
 #include "svg-loader.h"
-#include "../core/piece.h"
 
 
 const char PIECE_FILES[6] = {
@@ -39,7 +38,7 @@ void SVG_init(SDL_Renderer *renderer) {
 	}
 }
 
-void SVG_renderPiece(SDL_Renderer* renderer, Uint8 piece, int pos_x, int pos_y, double cellSize) {
+void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, int pos_x, int pos_y, double cellSize) {
 	if (piece == 0) return;
 	if (!isWhite(piece)) piece -= 2;
 	SDL_Rect texture_rect;

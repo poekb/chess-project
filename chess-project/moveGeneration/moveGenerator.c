@@ -308,9 +308,6 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	return count;
 }
 
-
-
-
 Uint64 generateUnderAttackBitmap(Board* board) {
 	Uint64 result = 0;
 

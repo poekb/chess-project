@@ -1,8 +1,6 @@
 ﻿#include "chess-project.h"
 
 #include "graphics/board-renderer.h"
-#include "logic/rules.h"
-#include "logic/game-handler.h"
 #include "core/move.h"
 
 #include "./core/board.h"
@@ -15,7 +13,6 @@ SDL_Renderer* renderer;
 
 Pos selectedPos = { 9,9 };
 Pos howerPos = { 9,9 };
-Move2* moves = NULL;
 
 Move validMoves[100];
 Move move;
@@ -23,7 +20,6 @@ int moveCount = 0;
 
 
 void Update(Board* board);
-
 
 int hasMove(Pos start, Pos target) {
     for (int i = 0; i < moveCount; i++) {
