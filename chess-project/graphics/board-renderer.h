@@ -6,7 +6,7 @@
 
 void rendererInit(SDL_Renderer* renderer);
 void rederer_cleanUp();
-void renderBoard(SDL_Renderer* renderer, double tableSize);
+void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY);
 void renderPieces(SDL_Renderer* renderer, Piece board[64]);
 void renderDynamic(SDL_Renderer* renderer);
 void highlightCell(SDL_Renderer* renderer, Pos pos, SDL_Color color);

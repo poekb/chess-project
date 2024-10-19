@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 
     printf("Eval: %d\n", evalBoard(board));
 
-    renderBoard(renderer, boardSize);
+    renderBoard(renderer, boardSize - 20, 10,10);
 
     highlightCells(renderer, board->Knights[0].list, board->Knights[0].count, (SDL_Color) {255,255,255,255});
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
             SDL_GetWindowSize(window, &w, &h);
             boardSize = min(w, h);
 
-            renderBoard(renderer, boardSize);
+            renderBoard(renderer, boardSize - 20, 10, 10);
             Update(board);
             
             break;

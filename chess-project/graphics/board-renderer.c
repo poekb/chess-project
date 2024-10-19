@@ -10,6 +10,8 @@ const SDL_Color COLOR_HIGH = { 0x70, 0x70, 0xf0, 0xa0 };
 
 SDL_Texture* staticImgBuffer;
 
+SDL_Rect getCellRect(int x, int y);
+
 void setDrawColor(SDL_Renderer* renderer, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
@@ -26,11 +28,15 @@ void rederer_cleanUp() {
     SVG_clear();
 }
 
-double tableSize = 0;
+double boardSize = 0;
+int offsetX = 0;
+int offsetY = 0;
 double cellSize;
 
-void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
-    tableSize = tableSizeNew;
+void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY) {
+    boardSize = boardSizeNew;
+    offsetX = boardOffsetX;
+    offsetY = boardOffsetY;
 
     if (staticImgBuffer != NULL) {
         SDL_DestroyTexture(staticImgBuffer);
@@ -45,14 +51,14 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
 
     SDL_SetRenderTarget(renderer, staticImgBuffer);
 
-    cellSize = tableSize / 8;
+    cellSize = boardSize / 8;
 
     setDrawColor(renderer, COLOR_BLACK);
     SDL_RenderClear(renderer);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
-            SDL_Rect rect = { (int)((double)i * cellSize),(int)((double)j * cellSize),  (int)cellSize,  (int)cellSize };
+            SDL_Rect rect = getCellRect(i, j);
             if (i % 2 == j % 2)
                 setDrawColor(renderer, COLOR_WHITE);
             else
@@ -71,8 +77,8 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
         render_char(
             renderer, '8' - i, 
             (int)fontSize, 
-            (int)(fontSize / 4), 
-            (int)(fontSize / 4) + (int)((double)i * cellSize), 
+            offsetX + (int)(fontSize / 4), 
+            offsetY + (int)(fontSize / 4) + (int)((double)i * cellSize), 
             i % 2 == 0 ? COLOR_BLACK : COLOR_WHITE);
 
     }
@@ -80,21 +86,29 @@ void renderBoard(SDL_Renderer* renderer, double tableSizeNew) {
     for (int i = 0; i < 8; i++) {
         render_char(renderer, 'a' + i, 
             (int)fontSize, 
-            (int)((double)i * cellSize + cellSize - fontSize),
-            (int)(tableSize - fontSize - fontSize / 4), 
+            offsetX + (int)((double)i * cellSize + cellSize - fontSize),
+            offsetY + (int)(boardSize - fontSize - fontSize / 4),
             i % 2 != 0 ? COLOR_BLACK : COLOR_WHITE);
 
     }
 
-
     SDL_RenderPresent(renderer);
+}
+
+SDL_Rect getCellRect(int x, int y) {
+    return (SDL_Rect){ 
+        offsetX + (int)floor(cellSize * x),
+        offsetY + (int)floor(cellSize * y),
+        (int)(floor(cellSize * (x + 1)) - floor(cellSize * x)),
+        (int)(floor(cellSize * (y + 1)) - floor(cellSize * y))
+     };
 }
 
 void renderPieces(SDL_Renderer* renderer, Piece board[64]) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
-            SVG_renderPiece(renderer, board[j * 8 + i], (int)((double)i * cellSize), (int)((double)j * cellSize), cellSize);
+            SVG_renderPiece(renderer, board[j * 8 + i], getCellRect(i,j));
         }
     }
 }
@@ -109,25 +123,15 @@ void renderDynamic(SDL_Renderer* renderer) {
     setDrawColor(renderer, COLOR_BLACK);
 }
 
-void drawThickrect(SDL_Renderer* renderer,int x, int y, int w, int h) {
-    SDL_Rect rect = { x , y , w, h }; 
+static void drawThickrect(SDL_Renderer* renderer, SDL_Rect rect) {
     SDL_RenderFillRect(renderer, &rect);
-    return;
-
-    const int THICKNESS = 10;
-
-    for (int i = 0; i < THICKNESS; ++i) {
-        SDL_Rect r = { x + i, y + i, w - 2 * i, h - 2 * i };
-        SDL_RenderDrawRect(renderer, &r);
-    }
-    
 }
 
 void highlightCell(SDL_Renderer* renderer,Pos pos, SDL_Color color) {
 
     setDrawColor(renderer, color);
 
-    drawThickrect(renderer, (int)((double)pos.file* cellSize), (int)((double)pos.rank* cellSize), (int)cellSize, (int)cellSize);
+    drawThickrect(renderer, getCellRect(pos.file, pos.rank));
 }
 
 void highlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color) {

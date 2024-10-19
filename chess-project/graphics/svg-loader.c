@@ -38,18 +38,22 @@ void SVG_init(SDL_Renderer *renderer) {
 	}
 }
 
-void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, int pos_x, int pos_y, double cellSize) {
+void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
 	if (piece == 0) return;
 	if (!isWhite(piece)) piece -= 2;
-	SDL_Rect texture_rect;
 	SDL_Surface* surface = piece_tex_data[piece-1].surface;
 	SDL_Texture* texture = piece_tex_data[piece-1].texture;
-	texture_rect.x = pos_x + (int)(cellSize * 0.05);
-	texture_rect.y = pos_y + (int)(cellSize * 0.05);
-	texture_rect.w = (int)((double)surface->w / max(surface->w, surface->h) * cellSize * 0.9);
-	texture_rect.h = (int)((double)surface->h / max(surface->w, surface->h) * cellSize * 0.9);
 
-	SDL_RenderCopy(renderer, texture, NULL, &texture_rect);
+	int trimX = (int)(rect.w * 0.05);
+	int trimY = (int)(rect.h * 0.05);
+
+	rect.x += trimX;
+	rect.y += trimY;
+	rect.w -= trimX*2;
+	rect.h -= trimY*2;
+
+
+	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
 
 void SVG_clear() {
