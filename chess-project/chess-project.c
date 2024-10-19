@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 
             break;
         case SDL_MOUSEMOTION:
-            howerPos = (Pos){ (int)(event.motion.x * 8 / boardSize), (int)(event.motion.y * 8 / boardSize) };
+            howerPos = getCell(event.motion.x, event.motion.y);
 
             Update(board);
             

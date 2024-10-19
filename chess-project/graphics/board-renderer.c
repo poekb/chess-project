@@ -95,6 +95,16 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
     SDL_RenderPresent(renderer);
 }
 
+Pos getCell(int x, int y) {
+    int cellX = (int)((x - offsetX) / cellSize);
+    int cellY = (int)((y - offsetY) / cellSize);
+
+    if (cellX >= 0 && cellX < 8 && cellY >= 0 && cellY < 8) {
+        return (Pos) { cellX, cellY };
+    }
+    return (Pos) { 9, 9 };
+}
+
 SDL_Rect getCellRect(int x, int y) {
     return (SDL_Rect){ 
         offsetX + (int)floor(cellSize * x),
@@ -155,13 +165,13 @@ void displayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color) {
     }
 }
 
-void sdlInit(int szeles, int magas, SDL_Window** pwindow, SDL_Renderer** prenderer) {
+void sdlInit(int width, int height, SDL_Window** pwindow, SDL_Renderer** prenderer) {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         SDL_Log("Nem indithato az SDL: %s", SDL_GetError());
         exit(1);
     }
 
-    SDL_Window* window = SDL_CreateWindow("SDL sakk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, szeles, magas,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("SDL sakk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     if (window == NULL) {
         SDL_Log("Nem hozhato letre az ablak: %s", SDL_GetError());
         exit(1);
