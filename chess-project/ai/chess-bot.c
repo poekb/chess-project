@@ -65,7 +65,7 @@ int search(int depth, int alpha, int beta) {
 		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
 		{
 			free(moves);
-			return -1000000;
+			return -1000000-depth;
 		}
  
 		free(moves);
@@ -113,7 +113,7 @@ void CalcBestMove(Board* boardIn) {
 	for (int i = 0; i < moveCount; i++) {
 		MakeMove(board, moves[i]);
 
-		int eval = -search(5, -beta, -alpha);
+		int eval = -search(5 , -beta, -alpha);
 
 		RevokeMove(board, moves[i]);
 		if (eval >= beta) {

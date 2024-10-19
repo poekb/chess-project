@@ -71,10 +71,10 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     preCompute();
-    //LoadBoardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
-    *board = (Board){ 0 };
-    LoadBoardFromFEN(board, "3k4/2n2B2/1KP5/2B2p2/5b1p/7P/8/8 b - - 0 0");
+    LoadBoardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
+    
+    //LoadBoardFromFEN(board, "3k4/2n2B2/1KP5/2B2p2/5b1p/7P/8/8 b - - 0 0");
     
     //LoadBoardFromFEN(board, "5k2/1B1r3p/3N4/p3P3/2b2P2/P3P3/n2K4/2R5 b - - 0 1");
     //LoadBoardFromFEN(board, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ");
@@ -112,15 +112,11 @@ int main(int argc, char* argv[]) {
         
         switch (event.type) {
         case SDL_KEYDOWN:
-            //
-            //RevokeMove(board, move);
-            
+
             bot = !bot;
             CalcBestMove(board);
-
             
             renderDynamic(renderer);
-
 
             Update(board);
 
@@ -141,17 +137,8 @@ int main(int argc, char* argv[]) {
                 MakeMove(board, move);
                 renderPieces(renderer, board->square);
 
-
-                //Test performance
-                /*
-                for (int i = 0; i < 1000000; i++) {
-                    moveCount = generateMoves(board, &validMoves, renderer);
-                }
-                
-                */
-
-
                 Update(board);
+
                 if(bot)
                     CalcBestMove(board);
 
@@ -181,21 +168,11 @@ int main(int argc, char* argv[]) {
             quit = true;
             break;
         }
-        
-        /*
-        CalcBestMove(getGame());
-        renderBoard(renderer, boardSize, getGame()->position.board);
-        renderDynamic(renderer);
-        SDL_RenderPresent(renderer);
-        SDL_Delay(0);
-        */
 
     }
     
     // Cleanups
-    //freeMoves(moves);
     rederer_cleanUp();
-    //cleanUpGameHandler();
     free(board);
 
     SDL_Quit();
@@ -221,8 +198,6 @@ void Update(Board* board) {
     highlightCells(renderer, board->Rooks[0].list, board->Rooks[0].count, (SDL_Color) { 0, 0, 100, 200 });
     highlightCells(renderer, board->Queens[0].list, board->Queens[0].count, (SDL_Color) { 100, 0, 100, 200 });
     */
-
-    //highlightCells(renderer, &blackPawnAttacks[31], blackPawnAttacksCount[31], (SDL_Color) { 0, 100, 0, 200 });
 
     moveCount = generateMoves(board, &validMoves, false);
 
