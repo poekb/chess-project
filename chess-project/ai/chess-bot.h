@@ -12,4 +12,4 @@ typedef struct EvalCase {
 void mesureBot(Board* boardIn, int depth);
 
 int search(int depth, int alpha, int beta);
-void CalcBestMove(Board* board);
+Move CalcBestMove(Board* board);

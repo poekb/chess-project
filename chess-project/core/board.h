@@ -28,8 +28,8 @@ typedef struct Board {
 
 	// State of the game (castling, enpassant, last captured piece)
 	GameState currentGameState;
-	GameState gameStateHistory[10000]; // a static size stack to store the history of the game states !!!!!!!! the game breaks over 10000 moves!!!!!!!
-	int gameStateHistoryCount;
+	GameState gameStateHistory[10000]; // there can't be a chess game this long, so it should be sufficient
+	Uint16 gameStateHistoryCount;
 	bool isWhitesMove;
 
 	Uint64 underAttackMap;

@@ -92,7 +92,7 @@ int search(int depth, int alpha, int beta) {
 	return alpha;
 }
 
-void CalcBestMove(Board* boardIn) {
+Move CalcBestMove(Board* boardIn) {
 	n = 0;
 
 	int alpha = -1000000;
@@ -101,11 +101,11 @@ void CalcBestMove(Board* boardIn) {
 	board = boardIn;
 
 	Move* moves = (Move*)malloc(sizeof(Move) * 100);
-	if (moves == NULL) return;
+	if (moves == NULL) return 0;
 	int moveCount = generateMoves(board, moves, false);
 
 	if (moveCount == 0)
-		return;
+		return 0;
 
 	int maxIndex = 0;
 	orderMoves(board, moves, moveCount);
@@ -129,13 +129,14 @@ void CalcBestMove(Board* boardIn) {
 		}
 	}
 
-	MakeMove(board, moves[maxIndex]);
-
+	Move bestMove = moves[maxIndex];
 	free(moves);
 
 	printf("Positions evaluated: %10d\n", n);
 
 	printf("Eval: %5d\n", alpha);
+
+	return bestMove;
 }
 
 
