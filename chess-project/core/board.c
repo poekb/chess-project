@@ -87,14 +87,16 @@ void MakeMove(Board* board, Move move) {
 	}
 
 	board->isWhitesMove = !board->isWhitesMove;
+	if (board->isWhitesMove)
+		board->fullmoveClock++;
 
 	board->gameStateHistory[board->gameStateHistoryCount++] = prevGameState;
-
 }
 
 
 void RevokeMove(Board* board, Move move) {
-
+	if (board->isWhitesMove)
+		board->fullmoveClock--;
 	board->isWhitesMove = !board->isWhitesMove;
 
 	//Get data from move

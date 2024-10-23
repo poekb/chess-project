@@ -5,29 +5,29 @@ void updateLoop();
 
 #ifndef GAME
 #define GAME
-typedef struct UIData {
-    int windowWidth;
-    int windowHeight;
-    int boardSize;
-    int gapTop;
-    int gapRight;
-    int gapLeft;
-} UIData;
-
-typedef struct ButtonData {
-    char text[50];
-    bool* enabled;
-    void(*callBack)();
-    int textColor;
-    int defaultColor;
-    int disabledColor;
-    int howerColor;
-    SDL_Rect* rect;
-} ButtonData;
 
 typedef struct MoveList {
     Move move;
     struct MoveList* next;
 }MoveList;
+
 #endif
+
+void nextMove();
+void prevMove();
+void pasteFEN();
+void copyFEN();
+void copyPGN();
+void resetBoard();
+
+Move getNextMove();
+
+extern char startFEN[];
+
+extern int mouseX;
+extern int mouseY;
+
+extern bool nextEnabled;
+extern bool prevEnabled;
+extern bool gameLoadEnabled;
 

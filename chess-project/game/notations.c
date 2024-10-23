@@ -1,8 +1,16 @@
 #include "notations.h"
 #include "../moveGeneration/moveGenerator.h"
 
-int getMoveNotation(Board* board, Move move, char* string) {
+char* getMoveNotation(Board* board, Move move) {
+	
+	char* string = malloc(sizeof(char) * 10);
+	if (string == NULL) {
+		SDL_Log("Unable to allocate memory");
+		exit(1);
+	}
+
 	int length = 0;
+
 	Move* moves = malloc(sizeof(Move) * 100);
 	if (moves == NULL) return 0;
 	int moveCount = generateMoves(board, moves, false);
@@ -23,8 +31,8 @@ int getMoveNotation(Board* board, Move move, char* string) {
 			string[length++] = '-';
 			string[length++] = '0';
 		}
-
-		return length;
+		string[length] = '\0';
+		return string;
 	}
 
 	switch (type)
@@ -120,7 +128,9 @@ int getMoveNotation(Board* board, Move move, char* string) {
 
 	free(moves);
 
-	return length;
+	string[length] = '\0';
+
+	return string;
 }
 
 void getFENFromBoard(Board* board, char* FEN) {
