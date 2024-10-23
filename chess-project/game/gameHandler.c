@@ -281,35 +281,35 @@ void recalcUIData() {
 
     pasteFENRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        UI.gapTop,
+        boardY,
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
 
     pastePGNRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        UI.gapTop + UI.gapRight / 6 * 1,
+        boardY + UI.gapRight / 6 * 1,
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
 
     copyFENRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        UI.gapTop + UI.gapRight / 6 * 2,
+        boardY + UI.gapRight / 6 * 2,
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
 
     copyPGNRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        UI.gapTop + UI.gapRight / 6 * 3,
+        boardY + UI.gapRight / 6 * 3,
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
 
     resetRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        UI.gapTop +  UI.boardSize - UI.gapRight / 8,
+        boardY +  UI.boardSize - UI.gapRight / 8,
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
@@ -459,6 +459,7 @@ void pasteFEN() {
 void copyFEN() {
     char FEN[100];
     getFENFromBoard(board, FEN);
+    SDL_SetClipboardText(FEN);
 }
 
 void loadFEN(char* fenStr) {

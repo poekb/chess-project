@@ -124,9 +124,7 @@ int getMoveNotation(Board* board, Move move, char* string) {
 }
 
 void getFENFromBoard(Board* board, char* FEN) {
-	int length = 0;
-	char FEN2[100];
-	
+	int length = 0;	
 
 	for (int i = 0; i < 8; i++) {
 		int sum = 0;
@@ -137,21 +135,149 @@ void getFENFromBoard(Board* board, char* FEN) {
 			}
 			else {
 				if (sum != 0)
-					FEN2[length++] = ('0' + sum);
+					FEN[length++] = ('0' + sum);
 				sum = 0;
-				FEN2[length++] = charFromPiece(piece);
+				FEN[length++] = charFromPiece(piece);
 			}
 			
 		}
 		if (sum != 0)
-			FEN2[length++] = ('0' + sum);
+			FEN[length++] = ('0' + sum);
 		if(i < 7)
-			FEN2[length++] = '/';
+			FEN[length++] = '/';
 	}
-	FEN2[length++] = ' ';
+	FEN[length++] = ' ';
+	FEN[length++] = (board->isWhitesMove ? 'w' : 'b');
+	FEN[length++] = ' ';
+
+	Uint8 castleRights = board->currentGameState.castleRights;
+	if (castleRights > 0) {
+		if ((castleRights & WhiteKingSide) != 0) FEN[length++] = 'K';
+		if ((castleRights & WhiteQueenSide) != 0) FEN[length++] = 'Q';
+		if ((castleRights & BlackKingSide) != 0) FEN[length++] = 'k';
+		if ((castleRights & BlackQueenSide) != 0) FEN[length++] = 'q';
+	}
+	else {
+		FEN[length++] = '-';
+	}
+
+	FEN[length++] = ' ';
+
+	Uint8 enPassantFile = board->currentGameState.enpassantFile;
+	if (enPassantFile == 0) {
+		FEN[length++] = '-';
+	}
+	else {
+		char file = 'a' - 1;
+		while (enPassantFile != 0) {
+			enPassantFile >>= 1;
+			file++;
+		}
+		FEN[length++] = file;
+	}
 
 
-	FEN2[length] = '\0';
+	int result = sprintf(&FEN[length], " %d %d", board->currentGameState.halfmoveClock, board->fullmoveClock);
+	length += result;
 
-	printf("%s\n",FEN2);
+	FEN[length] = '\0';
+
+	return length;
+}
+
+
+
+void LoadBoardFromFEN(Board* board, char* FENString) {
+	int strPointer = 0;
+	int pointer = 0;
+	while (pointer < 64) {
+		char c = FENString[strPointer];
+		if ('0' < c && c < '9') {
+			for (int i = 1; i < c - '0'; i++) {
+				board->square[pointer++] = None;
+			}
+			pointer++;
+		}
+		else if (c != '/') {
+			Piece piece = pieceFromChar(c);
+			board->square[pointer] = piece;
+			int colorIndex = isWhite(piece) ? WhiteIndex : BlackIndex;
+			PieceType type = getPieceType(piece);
+			switch (type)
+			{
+			case Pawn:
+				addPieceListAtSquare(&(board->Pawns[colorIndex]), pointer);
+				break;
+			case Knight:
+				addPieceListAtSquare(&(board->Knights[colorIndex]), pointer);
+				break;
+			case Bishop:
+				addPieceListAtSquare(&(board->Bishops[colorIndex]), pointer);
+				break;
+			case Rook:
+				addPieceListAtSquare(&(board->Rooks[colorIndex]), pointer);
+				break;
+			case Queen:
+				addPieceListAtSquare(&(board->Queens[colorIndex]), pointer);
+				break;
+			case King:
+				board->kingSquare[colorIndex] = pointer;
+			default:
+				break;
+			}
+			pointer++;
+		}
+		strPointer++;
+	}
+
+	strPointer++;
+	board->isWhitesMove = (FENString[strPointer] == 'w');
+	board->currentGameState.capturedPiece = None;
+	strPointer++;
+
+	board->currentGameState.castleRights = 0;
+
+	if (FENString[strPointer] != '-') {
+		while (FENString[++strPointer] != ' ') {
+			switch (FENString[strPointer]) {
+			case 'k':
+				board->currentGameState.castleRights |= BlackKingSide;
+				break;
+			case 'q':
+				board->currentGameState.castleRights |= BlackQueenSide;
+				break;
+			case 'K':
+				board->currentGameState.castleRights |= WhiteKingSide;
+				break;
+			case 'Q':
+				board->currentGameState.castleRights |= WhiteQueenSide;
+				break;
+			default: break;
+			}
+		}
+	}
+
+
+	strPointer++;
+
+	if (FENString[strPointer] != '-')
+		board->currentGameState.enpassantFile = ((Uint8)1 << (FENString[strPointer] - 'a'));
+	else
+		board->currentGameState.enpassantFile = 0;
+
+	strPointer++;
+	int halfMove, fullMove;
+	int result = sscanf(&FENString[strPointer], "%d %d", &halfMove, &fullMove);
+
+	if (result < 2) {
+		halfMove = 0;
+		fullMove = 1;
+	}
+
+	board->currentGameState.halfmoveClock = (Uint16)halfMove;
+	board->fullmoveClock = (Uint16)fullMove;
+	
+
+	board->gameStateHistoryCount = 0;
+
 }

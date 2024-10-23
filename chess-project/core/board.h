@@ -33,12 +33,12 @@ typedef struct Board {
 	bool isWhitesMove;
 
 	Uint64 underAttackMap;
+
+	Uint16 fullmoveClock;
 } Board;
 
 void MakeMove(Board* board, Move move);
 void RevokeMove(Board* board, Move move);
-
-void LoadBoardFromFEN(Board* board, char* FENString);
 
 bool isCheckPos(Board* board);
 
