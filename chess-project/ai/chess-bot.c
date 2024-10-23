@@ -1,8 +1,6 @@
-#include "chess-bot.h"
 #include "../logic/evaluator.h"
+#include "chess-bot.h"
 #include "moveOrdering.h"
-
-#include <time.h>
 #include <stdlib.h>
 
 Board* board;
@@ -95,8 +93,8 @@ int search(int depth, int alpha, int beta) {
 Move CalcBestMove(Board* boardIn) {
 	n = 0;
 
-	int alpha = -1000000;
-	int beta = 1000000;
+	int alpha = -1000005;
+	int beta = 1000005;
 
 	board = boardIn;
 

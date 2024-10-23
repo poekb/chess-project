@@ -41,6 +41,7 @@ typedef Uint8 PieceType;
 Piece makePiece(PieceType type, Uint8 color);
 Piece makePieceIsWhite(PieceType type, bool isWhite);
 Piece pieceFromChar(char c);
+char charFromPiece(Piece piece);
 
 bool isColour(Piece piece, Uint8 color);
 

@@ -1,16 +1,10 @@
 #include "gameHandler.h"
-
 #include "../graphics/board-renderer.h"
 #include "../graphics/text-renderer.h"
-
 #include "../core/board.h"
-
-#include "../moveGeneration/precompution.h"
 #include "../moveGeneration/moveGenerator.h"
-
 #include "../ai/chess-bot.h"
-
-#include "../logic/evaluator.h"
+#include "notations.h"
 
 #define GAP_TOP 0.08
 #define GAP_LEFT 0.01
@@ -24,6 +18,14 @@ void recalcUIData();
 void UpdateBoard(Board* board);
 int hasMove(Uint8 start, Uint8 target);
 void stashMove(Move move);
+void pasteFEN();
+void copyFEN();
+void loadFEN(char* fenStr);
+
+void resetBoard();
+
+void freeMoveHistory();
+void freeMoveFuture();
 
 void testButonClick();
 SDL_Color HexToRGBA(int hex);
@@ -41,6 +43,7 @@ UIData UI = { 0 };
 
 Sint32 mouseX, mouseY;
 
+char startFEN[100] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 Board* board;
 MoveList* moveHistory = NULL;
 MoveList* moveFuture = NULL;
@@ -50,12 +53,7 @@ void updateLoop() {
 
     recalcUIData();
 
-    board = calloc(1, sizeof(Board));
-    if (board == NULL) {
-        SDL_Log("Unable to allocate memory");
-        exit(1);
-    }
-    LoadBoardFromFEN(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    loadFEN(startFEN);
     //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
 
 
@@ -71,6 +69,12 @@ void updateLoop() {
         case SDL_KEYDOWN:
 
             bot = !bot;
+            if (bot) {
+                Move bestMove = CalcBestMove(board);
+                if (bestMove != 0)
+                    stashMove(bestMove);
+            }
+           
             //CalcBestMove(board);
             renderDynamic(renderer);
             UpdateBoard(board);
@@ -143,8 +147,20 @@ void updateLoop() {
 // Button and textbox rectangles
 SDL_Rect nextMoveRect;
 SDL_Rect prevMoveRect;
+SDL_Rect pasteFENRect;
+SDL_Rect pastePGNRect;
+
+SDL_Rect copyFENRect;
+SDL_Rect copyPGNRect;
+
+SDL_Rect resetRect;
+
+
 bool nextEnabled = false;
 bool prevEnabled = false;
+
+bool gameLoadEnabled = true;
+
 ButtonData nextMoveButton = {
     ">",
     &nextEnabled,
@@ -167,9 +183,65 @@ ButtonData prevMoveButton = {
     &prevMoveRect
 };
 
-#define ButtonCount 2
+ButtonData pasteFENButton = {
+    "Paste FEN",
+    &gameLoadEnabled,
+    &pasteFEN,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &pasteFENRect
+};
+
+ButtonData pastePGNButton = {
+    "Paste PGN",
+    &gameLoadEnabled,
+    &prevMove,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &pastePGNRect
+};
+
+ButtonData copyFENButton = {
+    "Copy FEN",
+    &gameLoadEnabled,
+    &copyFEN,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &copyFENRect
+};
+
+ButtonData copyPGNButton = {
+    "Copy PGN",
+    &gameLoadEnabled,
+    &prevMove,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &copyPGNRect
+};
+
+
+ButtonData resetButton = {
+    "Reset Board",
+    &gameLoadEnabled,
+    &resetBoard,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &resetRect
+};
+
+#define ButtonCount 7
 ButtonData* buttons[ButtonCount] = {
-    &nextMoveButton, &prevMoveButton
+    &nextMoveButton, &prevMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton
 };
 
 
@@ -207,6 +279,40 @@ void recalcUIData() {
         moveButtonSize
     };
 
+    pasteFENRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        UI.gapTop,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+    pastePGNRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        UI.gapTop + UI.gapRight / 6 * 1,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+    copyFENRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        UI.gapTop + UI.gapRight / 6 * 2,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+    copyPGNRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        UI.gapTop + UI.gapRight / 6 * 3,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+    resetRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        UI.gapTop +  UI.boardSize - UI.gapRight / 8,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
 }
 
 void testButonClick() {
@@ -220,6 +326,12 @@ void testButonClick() {
 }
 
 void stashMove(Move move) {
+
+    char notationStr[20];
+    int length = getMoveNotation(board, move, notationStr);
+    notationStr[length] = '\0';
+    printf("%s\n", notationStr);
+
     MakeMove(board,move);
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
@@ -235,11 +347,7 @@ void stashMove(Move move) {
     nextEnabled = false;
     prevEnabled = true;
 
-    while (moveFuture != NULL) {
-        MoveList* current = moveFuture;
-        moveFuture = moveFuture->next;
-        free(current);
-    }
+    freeMoveFuture();
 }
 
 void nextMove() {
@@ -270,6 +378,20 @@ void prevMove() {
     }
 }
 
+void freeMoveHistory() {
+    while (moveHistory != NULL) {
+        MoveList* current = moveHistory;
+        moveHistory = moveHistory->next;
+        free(current);
+    }
+}
+void freeMoveFuture() {
+    while (moveFuture != NULL) {
+        MoveList* current = moveFuture;
+        moveFuture = moveFuture->next;
+        free(current);
+    }
+}
 
 void UpdateBoard(Board* board) {
 
@@ -310,10 +432,52 @@ void UpdateBoard(Board* board) {
         }
     }
 
+    if (prevEnabled) {
+        highlightCell(renderer, getStart(moveHistory->move), (SDL_Color) { 70, 200, 70, 150 });
+        highlightCell(renderer, getTarget(moveHistory->move), (SDL_Color) { 130, 230, 130, 150 });
+    }
+
     /*displayBitboard(renderer, board->underAttackMap, (SDL_Color) { 200, 100, 100, 150 });
     highlightCells(renderer, &board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex], 1, (SDL_Color) { 100, 200, 100, 150 });*/
     renderPieces(renderer, board->square);
     SDL_RenderPresent(renderer);
+}
+
+void resetBoard() {
+    loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+}
+
+void pasteFEN() {
+    char* clipBoard = SDL_GetClipboardText();
+
+    printf("%s\n",clipBoard);
+    loadFEN(clipBoard);
+
+    SDL_free(clipBoard);
+}
+
+void copyFEN() {
+    char FEN[100];
+    getFENFromBoard(board, FEN);
+}
+
+void loadFEN(char* fenStr) {
+    memcpy(startFEN, fenStr, min(strlen(fenStr) + 1,100));
+    startFEN[99] = '\0';
+
+    freeMoveFuture();
+    freeMoveHistory();
+    prevEnabled = false;
+    nextEnabled = false;
+
+    if (board != NULL) free(board);
+
+    board = calloc(1, sizeof(Board));
+    if (board == NULL) {
+        SDL_Log("Unable to allocate memory");
+        exit(1);
+    }
+    LoadBoardFromFEN(board, fenStr);
 }
 
 int hasMove(Uint8 start, Uint8 target) {

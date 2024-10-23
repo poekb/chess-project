@@ -10,10 +10,10 @@ extern const Uint16 EnPassantCaptureFlag;
 extern const Uint16 CastleFlag;
 extern const Uint16 PawnTwoUpFlag;
 
-extern const Uint16 PromoteToQueenFlag;
-extern const Uint16 PromoteToKnightFlag;
-extern const Uint16 PromoteToRookFlag;
-extern const Uint16 PromoteToBishopFlag;
+#define PromoteToQueenFlag 0b0100
+#define PromoteToKnightFlag 0b0101
+#define PromoteToRookFlag 0b0110
+#define PromoteToBishopFlag 0b0111
 
 #endif
 

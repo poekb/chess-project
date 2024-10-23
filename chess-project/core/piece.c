@@ -38,3 +38,20 @@ Piece pieceFromChar(char c) {
 	}
 	return makePieceIsWhite(type, isWhite);
 }
+
+char charFromPiece(Piece piece) {
+	PieceType type = getPieceType(piece);
+	char c = ' ';
+	switch (type)
+	{
+	case Pawn: c = 'p'; break;
+	case Knight: c = 'n'; break;
+	case Bishop: c = 'b'; break;
+	case Rook: c = 'r'; break;
+	case Queen: c = 'q'; break;
+	case King: c = 'k'; break;
+	default: break;
+	}
+
+	return isWhite(piece) ? toupper(c) : c;
+}

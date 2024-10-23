@@ -69,8 +69,20 @@ void MakeMove(Board* board, Move move) {
 	
 
 	if (promotion) {
-		if (move >> 12 == PromoteToQueenFlag) {
+		switch (move >> 12) {
+		case PromoteToQueenFlag:
 			promotePiece(board, target, Pawn, Queen, colorIndex, turn);
+			break;
+		case PromoteToBishopFlag:
+			promotePiece(board, target, Pawn, Bishop, colorIndex, turn);
+			break;
+		case PromoteToRookFlag:
+			promotePiece(board, target, Pawn, Rook, colorIndex, turn);
+			break;
+		case PromoteToKnightFlag:
+			promotePiece(board, target, Pawn, Knight, colorIndex, turn);
+			break;
+
 		}
 	}
 
@@ -105,8 +117,20 @@ void RevokeMove(Board* board, Move move) {
 	movePiece(board, target, start, type, turn);
 
 	if (promotion) {
-		if (move >> 12 == PromoteToQueenFlag) {
+		switch (move >> 12) {
+		case PromoteToQueenFlag:
 			promotePiece(board, start, Queen, Pawn, colorIndex, turn);
+			break;
+		case PromoteToBishopFlag:
+			promotePiece(board, start, Bishop, Pawn, colorIndex, turn);
+			break;
+		case PromoteToRookFlag:
+			promotePiece(board, start, Rook, Pawn, colorIndex, turn);
+			break;
+		case PromoteToKnightFlag:
+			promotePiece(board, start, Knight, Pawn, colorIndex, turn);
+			break;
+
 		}
 	}
 
@@ -292,4 +316,8 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 
 	board->gameStateHistoryCount = 0;
 
+}
+
+bool isCheckPos(Board* board) {
+	return ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0);
 }

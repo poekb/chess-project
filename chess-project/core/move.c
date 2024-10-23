@@ -10,12 +10,6 @@ const Uint16 EnPassantCaptureFlag = 0b0001;
 const Uint16 CastleFlag = 0b0010;
 const Uint16 PawnTwoUpFlag = 0b0011;
 
-// TODO: leave promotions to last
-const Uint16 PromoteToQueenFlag = 0b0100;
-const Uint16 PromoteToKnightFlag = 0b0101;
-const Uint16 PromoteToRookFlag = 0b0110;
-const Uint16 PromoteToBishopFlag = 0b0111;
-
 Uint8 getTarget(Move move) {
 	return move & TargetMask;
 }

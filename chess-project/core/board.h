@@ -40,4 +40,6 @@ void RevokeMove(Board* board, Move move);
 
 void LoadBoardFromFEN(Board* board, char* FENString);
 
+bool isCheckPos(Board* board);
+
 #endif
