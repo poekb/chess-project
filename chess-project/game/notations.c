@@ -133,6 +133,121 @@ char* getMoveNotation(Board* board, Move move) {
 	return string;
 }
 
+
+Move getMoveFromNotation(Board* board, char* notation) {
+	char typeChar = notation[0];
+	PieceType type = Pawn;
+
+	Move* moves = malloc(sizeof(Move) * 100);
+	if (moves == NULL) return 0;
+	int moveCount = generateMoves(board, moves, false);
+
+	switch (typeChar)
+	{
+	case 'K':
+		type = King;
+		break;
+	case 'Q':
+		type = Queen;
+		break;
+	case 'R':
+		type = Rook;
+		break;
+	case 'B':
+		type = Bishop;
+		break;
+	case 'N':
+		type = Knight;
+		break;
+	case 'O':
+	case '0': {
+		//castling
+		bool queenSide = (notation[3] == '-');
+
+		for (int i = 0; i < moveCount; i++) {
+			Move move = moves[i];
+			if (isCastle(move)) {
+				Uint8 target = getTarget(move);
+				Uint8 targetFile = target % 8;
+
+				if (targetFile == (queenSide ? 2 : 6)) {
+					return move;
+				}
+			}
+		}
+
+		return 0;
+	}
+		
+	}
+
+	int ptr = strlen(notation);
+	while (!isalnum(notation[--ptr])) {}
+
+	int promotion = 0;
+
+	if (isupper(notation[ptr])) {
+		//promotion
+		switch (notation[ptr])
+		{
+		case 'Q':
+			promotion = PromoteToQueenFlag;
+			break;
+		case 'R':
+			promotion = PromoteToRookFlag;
+			break;
+		case 'B':
+			promotion = PromoteToBishopFlag;
+			break;
+		case 'N':
+			promotion = PromoteToKnightFlag;
+			break;
+		}
+		if (notation[--ptr] == '=') ptr--;
+	}
+	//printf("%c\n", notation[ptr]);
+	Uint8 targetRank = 8 - (notation[ptr--] - '0');
+	//printf("%c\n", notation[ptr]);
+	Uint8 targetFile = notation[ptr--] - 'a';
+
+	Uint8 targetSquare = targetRank * 8 + targetFile;
+
+	bool isCapture = false;
+	if (notation[ptr] == 'x') { isCapture = true; ptr--; }
+
+	bool startRankPresent = false;
+	bool startFilePresent = false;
+	Uint8 startRank = 0;
+	Uint8 startFile = 0;
+
+	if (ptr >= 0 && isdigit(notation[ptr]))
+		startRankPresent = true, startRank = 8 - (notation[ptr--] - '0');
+	if (ptr >= 0 && islower(notation[ptr]))
+		startFilePresent = true, startFile = notation[ptr--] - 'a';
+	
+
+	for (int i = 0; i < moveCount; i++) {
+		Move move = moves[i];
+		Uint8 target = getTarget(move);
+		Uint8 moveStart = getStart(move);
+		Uint8 moveStartRank = moveStart / 8;
+		Uint8 moveStartFile = moveStart % 8;
+
+		
+
+		if ((target == targetSquare) && (getPieceType(board->square[moveStart]) == type)
+			&& (!startRankPresent || (moveStartRank == startRank))
+			&& (!startFilePresent || (moveStartFile == startFile))
+			&& (((promotion == 0) && !isPromotion(move)) || ((move >> 12) == promotion))
+			) {
+			//printf("%d %d\n", target, targetSquare);
+
+			return move;
+		}
+	}
+	return 0;
+}
+
 void getFENFromBoard(Board* board, char* FEN) {
 	int length = 0;	
 
@@ -270,8 +385,10 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 
 	strPointer++;
 
-	if (FENString[strPointer] != '-')
+	if (FENString[strPointer] != '-') {
 		board->currentGameState.enpassantFile = ((Uint8)1 << (FENString[strPointer] - 'a'));
+		if (isdigit(FENString[strPointer + 1])) strPointer++; //If they provide the en passant rank we discard it, because it is unnecessary
+	}
 	else
 		board->currentGameState.enpassantFile = 0;
 

@@ -5,3 +5,4 @@
 #include "../core/piece.h"
 
 char* getPGN(Board* board);
+void loadGameFromPGN(Board* board, char* PGN);

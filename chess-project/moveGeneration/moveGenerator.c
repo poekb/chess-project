@@ -16,10 +16,13 @@ Board* board;
 
 static void addMove(Move move) {
 	Uint8 target = getTarget(move);
-	if (onlyAttack && (
-		!isEnPassantCapture(move) && (board->square[target] == None)
-		)) return;
 	Uint8 start = getStart(move);
+	
+	if (isEnPassantCapture(move)) {
+		target = target % 8 + (start / 8) * 8;
+	}
+	if (onlyAttack && (board->square[target] == None)) return;
+
 	if((checkersBitBoard & ((Uint64)1 << target)) != 0 && ((pinnedPieces & ((Uint64)1 << start)) == 0 || (pinMaps[start] & ((Uint64)1 << target)) != 0))
 		result[count++] = move;
 }
@@ -243,7 +246,16 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		Uint8 rank = index / 8;
 		bool isPromotion = (rank == (turn ? 1 : 6));
 		if (board->square[index + (turn ? -8 : 8)] == None) {
-			addMove(getMove(index, index + (turn ? -8 : 8)) | (isPromotion ? PromoteToQueenFlag << 12 : 0));
+			Move move = getMove(index, index + (turn ? -8 : 8));
+			if (isPromotion) {
+				addMove(move | (PromoteToQueenFlag << 12));
+				addMove(move | (PromoteToBishopFlag << 12));
+				addMove(move | (PromoteToRookFlag << 12));
+				addMove(move | (PromoteToKnightFlag << 12));
+			}
+			else {
+				addMove(move);
+			}
 			if ((rank == (turn ? 6 : 1)) && (board->square[index + (turn ? -16 : 16)] == None))
 			{
 				addMove((getMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
@@ -298,7 +310,18 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				}else addMove(getMove(index, target) | EnPassantCaptureFlag << 12);
 			}
 			else if (board->square[target] != None && isWhite(board->square[target]) != turn) {
-				addMove((getMove(index, target)) | (isPromotion ? PromoteToQueenFlag << 12 : 0));
+
+				Move move = getMove(index, target);
+				if (isPromotion) {
+					addMove(move | (PromoteToQueenFlag << 12));
+					addMove(move | (PromoteToBishopFlag << 12));
+					addMove(move | (PromoteToRookFlag << 12));
+					addMove(move | (PromoteToKnightFlag << 12));
+				}
+				else {
+					addMove(move);
+				}
+
 			}
 
 		}

@@ -12,9 +12,7 @@ void recalcUIData();
 
 void UpdateBoard(Board* board);
 int hasMove(Uint8 start, Uint8 target);
-void stashMove(Move move);
-
-void loadFEN(char* fenStr);
+int countMoves(Board* board, int depth);
 
 void freeMoveHistory();
 void freeMoveFuture();
@@ -30,7 +28,7 @@ bool bot = false;
 
 Sint32 mouseX, mouseY;
 
-char startFEN[100] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+char startFEN[100] = DefaultStart;
 Board* board;
 MoveList* moveHistory = NULL;
 MoveList* moveFuture = NULL;
@@ -41,6 +39,9 @@ void updateLoop() {
     recalcUIData();
 
     loadFEN(startFEN);
+
+
+    getMoveFromNotation(board, "Nc3");
     //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
 
 
@@ -138,6 +139,7 @@ void stashMove(Move move) {
 
     char* notationStr = getMoveNotation(board, move);
     printf("%s\n", notationStr);
+    free(notationStr);
 
     MakeMove(board,move);
     MoveList* moveList = malloc(sizeof(MoveList));
@@ -236,7 +238,8 @@ void UpdateBoard(Board* board) {
 }
 
 void resetBoard() {
-    loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    loadFEN(DefaultStart);
+
 }
 
 void pasteFEN() {
@@ -248,6 +251,15 @@ void pasteFEN() {
     SDL_free(clipBoard);
 }
 
+void pastePGN() {
+    char* clipBoard = SDL_GetClipboardText();
+
+    printf("%s\n", clipBoard);
+    loadGameFromPGN(board, clipBoard);
+
+    SDL_free(clipBoard);
+}
+
 void copyFEN() {
     char FEN[100];
     getFENFromBoard(board, FEN);
@@ -255,9 +267,39 @@ void copyFEN() {
 }
 
 void copyPGN() {
-    char* pgn = getPGN(board);
-    printf("%s\n", pgn);
-    free(pgn);
+    char* PGN = getPGN(board);
+    SDL_SetClipboardText(PGN);
+    printf("%s\n", PGN);
+    free(PGN);
+}
+
+void savePGN() {
+    char* PGN = getPGN(board);
+
+    FILE* fptr = fopen("game.pgn", "w");
+
+    fprintf(fptr, "%s", PGN);
+    fclose(fptr);
+
+    free(PGN);
+}
+
+void loadPGN() {
+    FILE* fptr = fopen("game.pgn", "r");
+    if (fptr == NULL) return;
+    fseek(fptr, 0L, SEEK_END);
+    size_t size = ftell(fptr);
+    rewind(fptr);
+    char* PGN = calloc(size + 1, sizeof(char));
+
+    if (PGN == NULL) return;
+
+    fread(PGN, sizeof(char), size, fptr);
+    fclose(fptr);
+
+    loadGameFromPGN(board, PGN);
+    
+    free(PGN);
 }
 
 void loadFEN(char* fenStr) {
@@ -277,7 +319,55 @@ void loadFEN(char* fenStr) {
         exit(1);
     }
     LoadBoardFromFEN(board, fenStr);
+
+    Uint64 oldTick = SDL_GetTicks64();
+
+    return;
+    
+    printf("Num of possiblemoves (%d): %10d ", 1, countMoves(board, 1));
+    Uint64 tick = SDL_GetTicks64();
+    printf("in %lu ms\n", (int)(tick - oldTick));
+    oldTick = tick;
+    printf("Num of possiblemoves (%d): %10d ", 2, countMoves(board, 2));
+    tick = SDL_GetTicks64();
+    printf("in %lu ms\n", (int)(tick - oldTick));
+    oldTick = tick;
+    printf("Num of possiblemoves (%d): %10d ", 3, countMoves(board, 3));
+    tick = SDL_GetTicks64();
+    printf("in %lu ms\n", (int)(tick - oldTick));
+    oldTick = tick;
+    printf("Num of possiblemoves (%d): %10d ", 4, countMoves(board, 4));
+    tick = SDL_GetTicks64();
+    printf("in %lu ms\n", (int)(tick - oldTick));
+    oldTick = tick;
+    printf("Num lu possiblemoves (%d): %10d ", 5, countMoves(board, 5));
+    tick = SDL_GetTicks64();
+    printf("in %lu ms\n", (int)(tick - oldTick));
+    oldTick = tick;
 }
+
+int countMoves(Board* board, int depth) {
+    if (depth == 0) return 1;
+
+    int sum = 0; // temp 1
+    Move* moves = malloc(sizeof(Move) * 100);
+    if (moves == NULL) return 1;
+    int moveCount = generateMoves(board, moves, false);
+
+    for (int i = 0; i < moveCount; i++) {
+        MakeMove(board, moves[i]);
+        
+        int count = countMoves(board, depth - 1);
+        if (isPromotion(moves[i]))
+            sum += count;
+        else
+            sum += count;
+        RevokeMove(board, moves[i]);
+    }
+    free(moves);
+    return max(sum, 0);
+}
+
 
 int hasMove(Uint8 start, Uint8 target) {
     for (int i = 0; i < moveCount; i++) {

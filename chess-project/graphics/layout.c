@@ -17,6 +17,9 @@ SDL_Rect pastePGNRect;
 SDL_Rect copyFENRect;
 SDL_Rect copyPGNRect;
 
+SDL_Rect savePGNRect;
+SDL_Rect loadPGNRect;
+
 SDL_Rect resetRect;
 
 ButtonData nextMoveButton = {
@@ -55,7 +58,7 @@ ButtonData pasteFENButton = {
 ButtonData pastePGNButton = {
     "Paste PGN",
     &gameLoadEnabled,
-    &prevMove,
+    &pastePGN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -96,9 +99,32 @@ ButtonData resetButton = {
     &resetRect
 };
 
-#define ButtonCount 7
+ButtonData saveButton = {
+    "Save PGN",
+    &gameLoadEnabled,
+    &savePGN,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &savePGNRect
+};
+
+ButtonData loadButton = {
+    "Load PGN",
+    &gameLoadEnabled,
+    &loadPGN,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &loadPGNRect
+};
+
+
+#define ButtonCount 9
 ButtonData* buttons[ButtonCount] = {
-    &nextMoveButton, &prevMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton
+    &nextMoveButton, &prevMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton, &saveButton, &loadButton
 };
 
 UIData UI = { 0 };
@@ -165,6 +191,22 @@ void recalcUIData() {
         UI.gapRight - moveButtonSize,
         UI.gapRight / 8
     };
+
+    savePGNRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        boardY + UI.gapRight / 6 * 4,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+    loadPGNRect = (SDL_Rect){
+        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+        boardY + UI.gapRight / 6 * 5,
+        UI.gapRight - moveButtonSize,
+        UI.gapRight / 8
+    };
+
+
 
     resetRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,

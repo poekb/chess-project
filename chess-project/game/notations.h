@@ -5,6 +5,7 @@
 #include "../core/piece.h"
 
 char* getMoveNotation(Board* board, Move move);
+Move getMoveFromNotation(Board* board, char* notation);
 
 void getFENFromBoard(Board* board, char* FEN);
 void LoadBoardFromFEN(Board* board, char* FENString);

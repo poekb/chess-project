@@ -16,22 +16,6 @@
 #include "game/gameHandler.h"
 
 
-int countMoves(Board* board, int depth) {
-    if (depth == 0) return 1;
-
-    int sum = 0; // temp 1
-    Move* moves = malloc(sizeof(Move) * 100);
-    if (moves == NULL) return 1;
-    int moveCount = generateMoves(board, moves, false);
-
-    for (int i = 0; i < moveCount; i++) {
-        MakeMove(board, moves[i]);
-        sum += countMoves(board, depth - 1);
-        RevokeMove(board, moves[i]);
-    }
-    free(moves);
-    return max(sum,0);
-}
 
 
 
