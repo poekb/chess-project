@@ -41,7 +41,7 @@ void updateLoop() {
     loadFEN(startFEN);
 
 
-    getMoveFromNotation(board, "Nc3");
+    //getMoveFromNotation(board, "Nc3");
     //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
 
 
@@ -137,9 +137,9 @@ bool gameLoadEnabled = true;
 
 void stashMove(Move move) {
 
-    char* notationStr = getMoveNotation(board, move);
+    /*char* notationStr = getMoveNotation(board, move);
     printf("%s\n", notationStr);
-    free(notationStr);
+    free(notationStr);*/
 
     MakeMove(board,move);
     MoveList* moveList = malloc(sizeof(MoveList));
@@ -184,6 +184,18 @@ void prevMove() {
 
     if (moveHistory == NULL) {
         prevEnabled = false;
+    }
+}
+
+void firstMove() {
+    while (prevEnabled) {
+        prevMove();
+    }
+}
+
+void lastMove() {
+    while (nextEnabled) {
+        nextMove();
     }
 }
 

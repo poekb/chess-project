@@ -37,7 +37,7 @@ enum {
     #else
         /* other windows. the declaration is unfortunately hidden
          * in mingw header files by ifdefs. */
-        int putenv(const char *);
+        /*int putenv(const char *);*/
     #endif
 #else
     /* posix */

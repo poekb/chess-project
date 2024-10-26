@@ -11,6 +11,9 @@
 // Button and textbox rectangles
 SDL_Rect nextMoveRect;
 SDL_Rect prevMoveRect;
+SDL_Rect firstMoveRect;
+SDL_Rect lastMoveRect;
+
 SDL_Rect pasteFENRect;
 SDL_Rect pastePGNRect;
 
@@ -43,6 +46,29 @@ ButtonData prevMoveButton = {
     0x505060FF,
     &prevMoveRect
 };
+
+ButtonData lastMoveButton = {
+    ">>",
+    &nextEnabled,
+    &lastMove,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &lastMoveRect
+};
+
+ButtonData firstMoveButton = {
+    "<<",
+    &prevEnabled,
+    &firstMove,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &firstMoveRect
+};
+
 
 ButtonData pasteFENButton = {
     "Paste FEN",
@@ -122,9 +148,9 @@ ButtonData loadButton = {
 };
 
 
-#define ButtonCount 9
+#define ButtonCount 11
 ButtonData* buttons[ButtonCount] = {
-    &nextMoveButton, &prevMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton, &saveButton, &loadButton
+    &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton, &saveButton, &loadButton
 };
 
 UIData UI = { 0 };
@@ -149,20 +175,35 @@ void recalcUIData() {
 
     int moveButtonSize = (int)(UI.gapTop * MOVE_BUTTON_SIZE);
 
-    // Calculating the positions of
-    nextMoveRect = (SDL_Rect){
+    // Calculating the positions of the buttons
+    lastMoveRect = (SDL_Rect){
         UI.gapLeft + UI.boardSize - moveButtonSize,
         boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
         moveButtonSize,
         moveButtonSize
     };
 
-    prevMoveRect = (SDL_Rect){
+    nextMoveRect = (SDL_Rect){
         UI.gapLeft + UI.boardSize - 2 * moveButtonSize - (UI.gapTop - moveButtonSize) / 2,
         boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
         moveButtonSize,
         moveButtonSize
     };
+
+    prevMoveRect = (SDL_Rect){
+        UI.gapLeft + UI.boardSize - 3 * moveButtonSize - 2 * (UI.gapTop - moveButtonSize) / 2,
+        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
+        moveButtonSize,
+        moveButtonSize
+    };
+
+    firstMoveRect = (SDL_Rect){
+        UI.gapLeft + UI.boardSize - 4 * moveButtonSize - 3 * (UI.gapTop - moveButtonSize) / 2,
+        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
+        moveButtonSize,
+        moveButtonSize
+    };
+
 
     pasteFENRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,

@@ -19,6 +19,9 @@ void loadFEN(char* fenStr);
 
 void nextMove();
 void prevMove();
+void firstMove();
+void lastMove();
+
 void pasteFEN();
 void pastePGN();
 void copyFEN();

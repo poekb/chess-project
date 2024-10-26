@@ -65,12 +65,12 @@ void loadGameFromPGN(Board* board, char* PGN) {
 	char FENString[150] = DefaultStart;
 	
 	int consumed;
-	int result = sscanf(&PGN[offset], "[%[^]]%*[^\n]%n", tagLine, &consumed);
+	int result = sscanf_s(&PGN[offset], "[%[^]]%*[^\n]%n", tagLine, 200, &consumed);
 
 	while (result > 0) {
 		offset += consumed + 1;
 		int _ = sscanf(tagLine, "FEN \"%[^\"]", FENString);
-		result = sscanf(&PGN[offset], "[%[^]]%*[^\n]%n", tagLine, &consumed);
+		result = sscanf_s(&PGN[offset], "[%[^]]%*[^\n]%n", tagLine, 200, &consumed);
 
 	}
 
@@ -118,7 +118,6 @@ void loadGameFromPGN(Board* board, char* PGN) {
 	PGN[offset] = '\0';
 
 	offset = startOffset;
-
 	//printf("%s\n", &PGN[offset]);
 
 	int noteStart = offset;
@@ -160,9 +159,7 @@ void loadGameFromPGN(Board* board, char* PGN) {
 					//printf("%s\n", note);
 					//free(note);
 					stashMove(move);
-
 				}
-				
 			}
 			break;
 		default:

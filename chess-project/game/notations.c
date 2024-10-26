@@ -171,17 +171,18 @@ Move getMoveFromNotation(Board* board, char* notation) {
 				Uint8 targetFile = target % 8;
 
 				if (targetFile == (queenSide ? 2 : 6)) {
+					free(moves);
 					return move;
 				}
 			}
 		}
-
+		free(moves);
 		return 0;
 	}
 		
 	}
 
-	int ptr = strlen(notation);
+	int ptr = (int)strlen(notation);
 	while (!isalnum(notation[--ptr])) {}
 
 	int promotion = 0;
@@ -241,14 +242,15 @@ Move getMoveFromNotation(Board* board, char* notation) {
 			&& (((promotion == 0) && !isPromotion(move)) || ((move >> 12) == promotion))
 			) {
 			//printf("%d %d\n", target, targetSquare);
-
+			free(moves);
 			return move;
 		}
 	}
+	free(moves);
 	return 0;
 }
 
-void getFENFromBoard(Board* board, char* FEN) {
+int getFENFromBoard(Board* board, char* FEN) {
 	int length = 0;	
 
 	for (int i = 0; i < 8; i++) {
