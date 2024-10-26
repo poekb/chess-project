@@ -18,7 +18,7 @@ typedef struct GameState {
 	Uint8 enpassantFile;
 	Uint8 castleRights;
 	PieceType capturedPiece;
-	Uint16 halfmoveClock;
+	Uint8 halfmoveClock;
 } GameState;
 
 #endif

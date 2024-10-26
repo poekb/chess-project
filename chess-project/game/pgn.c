@@ -154,10 +154,11 @@ void loadGameFromPGN(Board* board, char* PGN) {
 				state = Start;
 				PGN[offset] = '\0';
 				Move move = getMoveFromNotation(board, &PGN[noteStart]);
+				
 				if (move != 0) {
-					//char* note = getMoveNotation(board, move);
-					//printf("%s\n", note);
-					//free(note);
+					/*char* note = getMoveNotation(board, move);
+					printf("%s -> %s\n", &PGN[noteStart], note);
+					free(note);*/
 					stashMove(move);
 				}
 			}

@@ -15,7 +15,7 @@
 
 #include "game/gameHandler.h"
 
-
+#include "zobrist/zobristHashing.h"
 
 
 
@@ -27,7 +27,10 @@ int main(int argc, char* argv[]) {
 
     double boardSize = 720;
 
+    initZobrist();
+
     preCompute();
+    
     
     //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
     //LoadBoardFromFEN(board, "3k4/2n2B2/1KP5/2B2p2/5b1p/7P/8/8 b - - 0 0");

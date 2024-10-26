@@ -1,6 +1,8 @@
 #include "notations.h"
 #include "../moveGeneration/moveGenerator.h"
 
+#include "../zobrist/zobristHashing.h"
+
 char* getMoveNotation(Board* board, Move move) {
 	
 	char* string = malloc(sizeof(char) * 10);
@@ -162,8 +164,9 @@ Move getMoveFromNotation(Board* board, char* notation) {
 	case 'O':
 	case '0': {
 		//castling
-		bool queenSide = (notation[3] == '-');
 
+		bool queenSide = (notation[3] == '-');
+		board->currentGameState.castleRights;
 		for (int i = 0; i < moveCount; i++) {
 			Move move = moves[i];
 			if (isCastle(move)) {
@@ -291,15 +294,12 @@ int getFENFromBoard(Board* board, char* FEN) {
 	FEN[length++] = ' ';
 
 	Uint8 enPassantFile = board->currentGameState.enpassantFile;
-	if (enPassantFile == 0) {
+	if (enPassantFile == (Uint8)-1) {
 		FEN[length++] = '-';
 	}
 	else {
-		char file = 'a' - 1;
-		while (enPassantFile != 0) {
-			enPassantFile >>= 1;
-			file++;
-		}
+		char file = 'a' + enPassantFile;
+		
 		FEN[length++] = file;
 	}
 
@@ -315,6 +315,8 @@ int getFENFromBoard(Board* board, char* FEN) {
 
 
 void LoadBoardFromFEN(Board* board, char* FENString) {
+	board->zobristHash = 0;
+
 	int strPointer = 0;
 	int pointer = 0;
 	while (pointer < 64) {
@@ -330,28 +332,31 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 			board->square[pointer] = piece;
 			int colorIndex = isWhite(piece) ? WhiteIndex : BlackIndex;
 			PieceType type = getPieceType(piece);
-			switch (type)
-			{
-			case Pawn:
-				addPieceListAtSquare(&(board->Pawns[colorIndex]), pointer);
-				break;
-			case Knight:
-				addPieceListAtSquare(&(board->Knights[colorIndex]), pointer);
-				break;
-			case Bishop:
-				addPieceListAtSquare(&(board->Bishops[colorIndex]), pointer);
-				break;
-			case Rook:
-				addPieceListAtSquare(&(board->Rooks[colorIndex]), pointer);
-				break;
-			case Queen:
-				addPieceListAtSquare(&(board->Queens[colorIndex]), pointer);
-				break;
-			case King:
-				board->kingSquare[colorIndex] = pointer;
-			default:
-				break;
-			}
+			//switch (type)
+			//{
+			//case Pawn:
+			//	addPieceListAtSquare(&(board->Pawns[colorIndex]), pointer);
+			//	break;
+			//case Knight:
+			//	addPieceListAtSquare(&(board->Knights[colorIndex]), pointer);
+			//	break;
+			//case Bishop:
+			//	addPieceListAtSquare(&(board->Bishops[colorIndex]), pointer);
+			//	break;
+			//case Rook:
+			//	addPieceListAtSquare(&(board->Rooks[colorIndex]), pointer);
+			//	break;
+			//case Queen:
+			//	addPieceListAtSquare(&(board->Queens[colorIndex]), pointer);
+			//	break;
+			//case King:
+			//	board->kingSquare[colorIndex] = pointer;
+			//default:
+			//	break;
+			//}
+			
+			makePieceAtSquare(board, pointer, type, colorIndex);
+
 			pointer++;
 		}
 		strPointer++;
@@ -359,6 +364,7 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 
 	strPointer++;
 	board->isWhitesMove = (FENString[strPointer] == 'w');
+	if (!(board->isWhitesMove)) board->zobristHash ^= zobristBlacksTurn;
 	board->currentGameState.capturedPiece = None;
 	strPointer++;
 
@@ -384,15 +390,18 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 		}
 	}
 
+	board->zobristHash ^= zobristCastlingRights[board->currentGameState.castleRights];
 
 	strPointer++;
 
 	if (FENString[strPointer] != '-') {
-		board->currentGameState.enpassantFile = ((Uint8)1 << (FENString[strPointer] - 'a'));
+		board->currentGameState.enpassantFile = (FENString[strPointer] - 'a');
 		if (isdigit(FENString[strPointer + 1])) strPointer++; //If they provide the en passant rank we discard it, because it is unnecessary
+
+		board->zobristHash ^= zobristEnpassant[board->currentGameState.enpassantFile];
 	}
 	else
-		board->currentGameState.enpassantFile = 0;
+		board->currentGameState.enpassantFile = -1;
 
 	strPointer++;
 	int halfMove, fullMove;
@@ -403,10 +412,9 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 		fullMove = 1;
 	}
 
-	board->currentGameState.halfmoveClock = (Uint16)halfMove;
+	board->currentGameState.halfmoveClock = (Uint8)halfMove;
 	board->fullmoveClock = (Uint16)fullMove;
 	
 
 	board->gameStateHistoryCount = 0;
-
 }

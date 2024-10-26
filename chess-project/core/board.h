@@ -26,6 +26,8 @@ typedef struct Board {
 	PieceList Knights[2];
 	PieceList Pawns[2];
 
+	Uint64 zobristHash;
+	Uint64 zobristHistory[10000];
 	// State of the game (castling, enpassant, last captured piece)
 	GameState currentGameState;
 	GameState gameStateHistory[10000]; // there can't be a chess game this long, so it should be sufficient
@@ -39,6 +41,8 @@ typedef struct Board {
 
 void MakeMove(Board* board, Move move);
 void RevokeMove(Board* board, Move move);
+
+void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
 
 bool isCheckPos(Board* board);
 
