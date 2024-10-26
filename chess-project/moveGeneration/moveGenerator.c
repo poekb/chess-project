@@ -263,12 +263,12 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 
 		}
 
-		bool enPassant = board->currentGameState.enpassantFile != 0 && rank == (turn ? 3 : 4);
+		bool enPassant = (board->currentGameState.enpassantFile != (Uint8)-1) && rank == (turn ? 3 : 4);
 
 		for (int i = 0; i < (turn ? whitePawnAttacksCount[index] : blackPawnAttacksCount[index]); i++) {
 			Uint8 target = (turn ? whitePawnAttacks[index][i] : blackPawnAttacks[index][i]);
 
-			if (enPassant && ((board->currentGameState.enpassantFile & (1 << (target % 8))) != 0)) {
+			if (enPassant && (board->currentGameState.enpassantFile == (target % 8))) {
 				// TODO: test for checks
 
 				if (king / 8 == rank) {

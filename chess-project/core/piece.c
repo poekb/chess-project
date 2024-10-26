@@ -55,3 +55,7 @@ char charFromPiece(Piece piece) {
 
 	return isWhite(piece) ? toupper(c) : c;
 }
+
+Uint8 getCode(Piece piece) {
+	return piece - ((piece > 8) ? 1 : 3);
+}

@@ -29,7 +29,7 @@ void MakeMove(Board* board, Move move) {
 	bool promotion = isPromotion(move);
 
 	GameState prevGameState = board->currentGameState;
-	board->currentGameState.enpassantFile = 0;
+	board->currentGameState.enpassantFile = -1;
 	board->currentGameState.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
 
 	// There is a capture
@@ -41,7 +41,7 @@ void MakeMove(Board* board, Move move) {
 		removePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
 	}
 	else if (doublePawn) {
-		board->currentGameState.enpassantFile = (Uint8)1 << start % 8;
+		board->currentGameState.enpassantFile = start % 8;
 	}
 
 	movePiece(board, start, target, type, turn);
