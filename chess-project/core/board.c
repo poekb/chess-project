@@ -28,6 +28,8 @@ void MakeMove(Board* board, Move move) {
 	bool doublePawn = isPawnTwoUp(move);
 	bool promotion = isPromotion(move);
 
+	board->zobristHistory[board->gameStateHistoryCount] = board->zobristHash;
+
 	board->zobristHash ^= zobristCastlingRights[board->currentGameState.castleRights];
 
 	GameState prevGameState = board->currentGameState;
@@ -37,9 +39,15 @@ void MakeMove(Board* board, Move move) {
 	board->currentGameState.enpassantFile = -1;
 	board->currentGameState.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
 
+	board->currentGameState.halfmoveClock++;
+
+	if (type == Pawn)
+		board->currentGameState.halfmoveClock = 0;
+
 	// There is a capture
 	if (board->currentGameState.capturedPiece != None || enpassantCapture) {
-		Uint8 capture = enpassantCapture ? (start / 8)*8 + target % 8 : target;
+		board->currentGameState.halfmoveClock = 0;
+		Uint8 capture = enpassantCapture ? (start / 8) * 8 + target % 8 : target;
 		if (enpassantCapture)
 			board->square[capture] = None;
 
@@ -102,7 +110,6 @@ void MakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
 		board->fullmoveClock++;
 
-	board->zobristHistory[board->gameStateHistoryCount] = board->zobristHash;
 	board->gameStateHistory[board->gameStateHistoryCount++] = prevGameState;
 
 }

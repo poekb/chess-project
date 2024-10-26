@@ -49,6 +49,15 @@ int searchAttacks(int alpha, int beta) {
 }
 
 int search(int depth, int alpha, int beta) {
+
+	if (board->currentGameState.halfmoveClock >= 4) {
+		
+		for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
+			if (board->zobristHistory[i] == board->zobristHash)
+				return 0; // Evaluate as draw if it is a repetition
+		}
+	}
+
 	if (depth == 0) {
 		//return evalBoard(board);
 		return searchAttacks(alpha, beta);

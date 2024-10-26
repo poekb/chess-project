@@ -34,6 +34,24 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	result = resultIn;
 	count = 0;
 
+	if (board->currentGameState.halfmoveClock >= 6) {
+		if (board->currentGameState.halfmoveClock >= 100) {
+			return 0; // 50 move rule
+		}
+		int sum = 0;
+		for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i+=2) {
+
+			if (board->zobristHistory[i] == board->zobristHash)
+				sum++;
+		}
+
+		if (sum >= 2) {
+			return 0; // Draw by repetition
+		}
+	}
+	
+
+
 	bool turn = board->isWhitesMove;
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;

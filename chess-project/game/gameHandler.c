@@ -334,7 +334,6 @@ void loadFEN(char* fenStr) {
 
     Uint64 oldTick = SDL_GetTicks64();
 
-    return;
     
     printf("Num of possiblemoves (%d): %10d ", 1, countMoves(board, 1));
     Uint64 tick = SDL_GetTicks64();
@@ -352,7 +351,7 @@ void loadFEN(char* fenStr) {
     tick = SDL_GetTicks64();
     printf("in %lu ms\n", (int)(tick - oldTick));
     oldTick = tick;
-    printf("Num lu possiblemoves (%d): %10d ", 5, countMoves(board, 5));
+    printf("Num of possiblemoves (%d): %10d ", 5, countMoves(board, 5));
     tick = SDL_GetTicks64();
     printf("in %lu ms\n", (int)(tick - oldTick));
     oldTick = tick;
