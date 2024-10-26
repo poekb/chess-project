@@ -1,7 +1,7 @@
-﻿#include "svg-loader.h"
-#include "text-renderer.h"
+﻿#include "svgLoader.h"
+#include "textRenderer.h"
 
-#include "board-renderer.h"
+#include "boardRenderer.h"
 
 
 

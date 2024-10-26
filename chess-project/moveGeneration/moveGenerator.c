@@ -1,6 +1,6 @@
 #include "moveGenerator.h"
 #include "precompution.h"
-#include "../graphics/board-renderer.h"
+#include "../graphics/boardRenderer.h"
 
 Uint64 pinMaps[64];
 Uint64 pinnedPieces;

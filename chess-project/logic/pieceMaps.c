@@ -1,4 +1,4 @@
-#include "piece-maps.h"
+#include "pieceMaps.h"
 
 int getPositionValue(Board* board, PieceType type, Uint8 square) {
 	bool color = board->isWhitesMove;

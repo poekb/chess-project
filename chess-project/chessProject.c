@@ -1,7 +1,7 @@
-﻿#include "chess-project.h"
+﻿#include "chessProject.h"
 
-#include "graphics/board-renderer.h"
-#include "graphics/text-renderer.h"
+#include "graphics/boardRenderer.h"
+#include "graphics/textRenderer.h"
 
 #include "core/move.h"
 #include "core/board.h"
@@ -9,7 +9,7 @@
 #include "moveGeneration/precompution.h"
 #include "moveGeneration/moveGenerator.h"
 
-#include "ai/chess-bot.h"
+#include "ai/chessBot.h"
 
 #include "logic/evaluator.h"
 

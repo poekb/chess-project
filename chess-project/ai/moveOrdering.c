@@ -1,5 +1,5 @@
 #include "moveOrdering.h"
-#include "../logic/piece-maps.h"
+#include "../logic/pieceMaps.h"
 
 int partition(int low, int high);
 void quickSort(int low, int high);

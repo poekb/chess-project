@@ -1,5 +1,5 @@
 #include "evaluator.h"
-#include "piece-maps.h"
+#include "pieceMaps.h"
 
 int getMaterial(Board* board, int index);
 Uint8 flip(Uint8 pos, bool isWhite);

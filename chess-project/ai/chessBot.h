@@ -11,5 +11,5 @@ typedef struct EvalCase {
 }EvalCase;
 void mesureBot(Board* boardIn, int depth);
 
-int search(int depth, int alpha, int beta);
-Move CalcBestMove(Board* board);
+int search(int depth, int distFromRoot, int alpha, int beta);
+Move findBestMove(Board* board);

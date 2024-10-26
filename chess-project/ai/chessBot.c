@@ -1,7 +1,9 @@
 #include "../logic/evaluator.h"
-#include "chess-bot.h"
+#include "chessBot.h"
 #include "moveOrdering.h"
 #include <stdlib.h>
+
+#include "../game/notations.h"
 
 Board* board;
 
@@ -12,7 +14,7 @@ int searchAttacks(int alpha, int beta);
 void mesureBot(Board* boardIn, int depth) {
 	board = boardIn;
 
-	search(depth, -1234567, 1234567);
+	search(depth, 0, -999999999, 999999999);
 
 	printf("Iterations: %d\n", n);
 }
@@ -48,7 +50,10 @@ int searchAttacks(int alpha, int beta) {
 	return alpha;
 }
 
-int search(int depth, int alpha, int beta) {
+Move bestMove;
+Move bestEval;
+
+int search(int depth, int distFromRoot, int alpha, int beta) {
 
 	if (board->currentGameState.halfmoveClock >= 4) {
 		
@@ -58,7 +63,7 @@ int search(int depth, int alpha, int beta) {
 		}
 	}
 
-	if (depth == 0) {
+	if (depth == distFromRoot) {
 		//return evalBoard(board);
 		return searchAttacks(alpha, beta);
 	}
@@ -72,7 +77,7 @@ int search(int depth, int alpha, int beta) {
 		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
 		{
 			free(moves);
-			return -1000000-depth;
+			return -1000000 + distFromRoot; // higher eval for closest mate
 		}
  
 		free(moves);
@@ -85,63 +90,39 @@ int search(int depth, int alpha, int beta) {
 	for (int i = 0; i < moveCount; i++) {
 		MakeMove(board, moves[i]);
 
-		int eval = -search(depth - 1, -beta, -alpha);
+		int eval = -search(depth, distFromRoot + 1,  -beta, -alpha);
 
 		RevokeMove(board, moves[i]);
+
 		if (eval >= beta) {
 			free(moves);
 			return beta;
 		}
-		alpha = max(alpha, eval);
+
+		
+		if (eval > alpha) {
+			alpha = eval;
+
+			if (distFromRoot == 0) {
+				
+				bestMove = moves[i];
+				bestEval = eval;
+			}
+		}
+		
 	}
 	free(moves);
 
 	return alpha;
 }
 
-Move CalcBestMove(Board* boardIn) {
+Move findBestMove(Board* boardIn) {
 	n = 0;
+	bestMove = 0;
 
-	int alpha = -1000005;
-	int beta = 1000005;
-
-	board = boardIn;
-
-	Move* moves = (Move*)malloc(sizeof(Move) * 100);
-	if (moves == NULL) return 0;
-	int moveCount = generateMoves(board, moves, false);
-
-	if (moveCount == 0)
-		return 0;
-
-	int maxIndex = 0;
-	orderMoves(board, moves, moveCount);
-
-	for (int i = 0; i < moveCount; i++) {
-		MakeMove(board, moves[i]);
-
-		int eval = -search(5 , -beta, -alpha);
-
-		RevokeMove(board, moves[i]);
-		if (eval >= beta) {
-			//printf("Hello!\n");
-			alpha = eval;
-			maxIndex = i;
-			break;
-		}
-
-		if (eval > alpha) {
-			alpha = eval;
-			maxIndex = i;
-		}
-	}
-
-	Move bestMove = moves[maxIndex];
-	free(moves);
+	search(6, 0, -999999999, 999999999);
 
 	printf("Positions evaluated: %10d\n", n);
-
-	printf("Eval: %5d\n", alpha);
 
 	return bestMove;
 }

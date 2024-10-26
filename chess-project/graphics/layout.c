@@ -1,7 +1,7 @@
 #include "layout.h"
 #include "../game/gameHandler.h"
-#include "board-renderer.h"
-#include "text-renderer.h"
+#include "boardRenderer.h"
+#include "textRenderer.h"
 
 #define GAP_TOP 0.08
 #define GAP_LEFT 0.01

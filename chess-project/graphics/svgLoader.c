@@ -1,5 +1,5 @@
-#include "../chess-project.h"
-#include "svg-loader.h"
+#include "../chessProject.h"
+#include "svgLoader.h"
 
 
 const char PIECE_FILES[6] = {

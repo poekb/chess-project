@@ -1,5 +1,5 @@
-#include "text-renderer.h"
-#include "board-renderer.h"
+#include "textRenderer.h"
+#include "boardRenderer.h"
 
 TTF_Font* Font;
 

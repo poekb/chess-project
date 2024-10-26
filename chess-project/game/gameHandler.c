@@ -1,9 +1,9 @@
 #include "gameHandler.h"
-#include "../graphics/board-renderer.h"
-#include "../graphics/text-renderer.h"
+#include "../graphics/boardRenderer.h"
+#include "../graphics/textRenderer.h"
 #include "../core/board.h"
 #include "../moveGeneration/moveGenerator.h"
-#include "../ai/chess-bot.h"
+#include "../ai/chessBot.h"
 #include "notations.h"
 #include "../graphics/layout.h"
 #include "pgn.h"
@@ -58,12 +58,12 @@ void updateLoop() {
 
             bot = !bot;
             if (bot) {
-                Move bestMove = CalcBestMove(board);
+                Move bestMove = findBestMove(board);
                 if (bestMove != 0)
                     stashMove(bestMove);
             }
            
-            //CalcBestMove(board);
+            //findBestMove(board);
             renderDynamic(renderer);
             UpdateBoard(board);
 
@@ -91,7 +91,7 @@ void updateLoop() {
                 UpdateBoard(board);
 
                 if (bot) {
-                    Move bestMove = CalcBestMove(board);
+                    Move bestMove = findBestMove(board);
                     if(bestMove != 0)
                         stashMove(bestMove);
                 }
