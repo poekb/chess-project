@@ -6,7 +6,7 @@ void updateLoop();
 #ifndef GAME
 #define GAME
 
-#define DefaultStart "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#define DefaultBoardFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 typedef struct MoveList {
     Move move;

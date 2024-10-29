@@ -1,6 +1,4 @@
-#include "../chessProject.h"
 #include "svgLoader.h"
-
 
 const char PIECE_FILES[6] = {
 	'p',
@@ -51,7 +49,6 @@ void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
 	rect.y += trimY;
 	rect.w -= trimX*2;
 	rect.h -= trimY*2;
-
 
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }

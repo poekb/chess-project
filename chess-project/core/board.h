@@ -4,8 +4,6 @@
 #include "move.h"
 #include "gameState.h"
 
-
-
 #ifndef BOARD
 #define BOARD
 
@@ -40,7 +38,7 @@ typedef struct Board {
 } Board;
 
 void MakeMove(Board* board, Move move);
-void RevokeMove(Board* board, Move move);
+void UnmakeMove(Board* board, Move move);
 
 void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
 

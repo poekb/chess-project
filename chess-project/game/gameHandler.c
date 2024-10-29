@@ -1,11 +1,12 @@
-#include "gameHandler.h"
-#include "../graphics/boardRenderer.h"
-#include "../graphics/textRenderer.h"
-#include "../core/board.h"
-#include "../moveGeneration/moveGenerator.h"
 #include "../ai/chessBot.h"
-#include "notations.h"
+#include "../ai/transpositionTable.h"
+#include "../core/board.h"
+#include "../graphics/boardRenderer.h"
 #include "../graphics/layout.h"
+#include "../graphics/textRenderer.h"
+#include "../moveGeneration/moveGenerator.h"
+#include "gameHandler.h"
+#include "notations.h"
 #include "pgn.h"
 
 void recalcUIData();
@@ -28,22 +29,18 @@ bool bot = false;
 
 Sint32 mouseX, mouseY;
 
-char startFEN[100] = DefaultStart;
+char startFEN[100] = DefaultBoardFEN;
 Board* board;
 MoveList* moveHistory = NULL;
 MoveList* moveFuture = NULL;
 
+void perftTest(int depth);
 
 void updateLoop() {
 
     recalcUIData();
-
     loadFEN(startFEN);
-
-
-    //getMoveFromNotation(board, "Nc3");
-    //LoadBoardFromFEN(board, "7k/1p4p1/p4b1p/3N3P/2p5/2rb4/PP2r3/K2R2R1 b - - 0 1");
-
+    initTranspositionTable();
 
     // ############################
     // #   Main game event loop   #
@@ -62,9 +59,7 @@ void updateLoop() {
                 if (bestMove != 0)
                     stashMove(bestMove);
             }
-           
-            //findBestMove(board);
-            renderDynamic(renderer);
+            renderStatic(renderer);
             UpdateBoard(board);
 
             break;
@@ -85,7 +80,7 @@ void updateLoop() {
                 move = validMoves[moveIndex];
                 stashMove(move);
 
-                renderDynamic(renderer);
+                renderStatic(renderer);
                 renderPieces(renderer, board->square);
 
                 UpdateBoard(board);
@@ -137,10 +132,6 @@ bool gameLoadEnabled = true;
 
 void stashMove(Move move) {
 
-    /*char* notationStr = getMoveNotation(board, move);
-    printf("%s\n", notationStr);
-    free(notationStr);*/
-
     MakeMove(board,move);
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
@@ -175,7 +166,7 @@ void nextMove() {
 
 void prevMove() {
 
-    RevokeMove(board, moveHistory->move);
+    UnmakeMove(board, moveHistory->move);
     MoveList* current = moveHistory;
     moveHistory = moveHistory->next;
     current->next = moveFuture;
@@ -216,7 +207,7 @@ void freeMoveFuture() {
 
 void UpdateBoard(Board* board) {
 
-    renderDynamic(renderer);
+    renderStatic(renderer);
 
     renderButtons();
 
@@ -243,32 +234,25 @@ void UpdateBoard(Board* board) {
         }
     }
 
-    /*displayBitboard(renderer, board->underAttackMap, (SDL_Color) { 200, 100, 100, 150 });
-    highlightCells(renderer, &board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex], 1, (SDL_Color) { 100, 200, 100, 150 });*/
     renderPieces(renderer, board->square);
     SDL_RenderPresent(renderer);
 }
 
 void resetBoard() {
-    loadFEN(DefaultStart);
-
+    loadFEN(DefaultBoardFEN);
 }
 
 void pasteFEN() {
     char* clipBoard = SDL_GetClipboardText();
 
-    printf("%s\n",clipBoard);
     loadFEN(clipBoard);
-
     SDL_free(clipBoard);
 }
 
 void pastePGN() {
     char* clipBoard = SDL_GetClipboardText();
 
-    printf("%s\n", clipBoard);
     loadGameFromPGN(board, clipBoard);
-
     SDL_free(clipBoard);
 }
 
@@ -281,7 +265,6 @@ void copyFEN() {
 void copyPGN() {
     char* PGN = getPGN(board);
     SDL_SetClipboardText(PGN);
-    printf("%s\n", PGN);
     free(PGN);
 }
 
@@ -289,19 +272,18 @@ void savePGN() {
     char* PGN = getPGN(board);
 
     FILE* fptr = fopen("game.pgn", "w");
-
-    fprintf(fptr, "%s", PGN);
     fclose(fptr);
-
     free(PGN);
 }
 
 void loadPGN() {
     FILE* fptr = fopen("game.pgn", "r");
     if (fptr == NULL) return;
+
     fseek(fptr, 0L, SEEK_END);
     size_t size = ftell(fptr);
     rewind(fptr);
+
     char* PGN = calloc(size + 1, sizeof(char));
 
     if (PGN == NULL) return;
@@ -310,7 +292,6 @@ void loadPGN() {
     fclose(fptr);
 
     loadGameFromPGN(board, PGN);
-    
     free(PGN);
 }
 
@@ -330,31 +311,19 @@ void loadFEN(char* fenStr) {
         SDL_Log("Unable to allocate memory");
         exit(1);
     }
+
     LoadBoardFromFEN(board, fenStr);
 
-    Uint64 oldTick = SDL_GetTicks64();
+    // Optional perft test for validating the move generator:
+    perftTest(5);
+}
 
-    
-    printf("Num of possiblemoves (%d): %10d ", 1, countMoves(board, 1));
-    Uint64 tick = SDL_GetTicks64();
-    printf("in %lu ms\n", (int)(tick - oldTick));
-    oldTick = tick;
-    printf("Num of possiblemoves (%d): %10d ", 2, countMoves(board, 2));
-    tick = SDL_GetTicks64();
-    printf("in %lu ms\n", (int)(tick - oldTick));
-    oldTick = tick;
-    printf("Num of possiblemoves (%d): %10d ", 3, countMoves(board, 3));
-    tick = SDL_GetTicks64();
-    printf("in %lu ms\n", (int)(tick - oldTick));
-    oldTick = tick;
-    printf("Num of possiblemoves (%d): %10d ", 4, countMoves(board, 4));
-    tick = SDL_GetTicks64();
-    printf("in %lu ms\n", (int)(tick - oldTick));
-    oldTick = tick;
-    printf("Num of possiblemoves (%d): %10d ", 5, countMoves(board, 5));
-    tick = SDL_GetTicks64();
-    printf("in %lu ms\n", (int)(tick - oldTick));
-    oldTick = tick;
+void perftTest(int depth) {
+    Uint64 oldTick = SDL_GetTicks64();
+    for (int i = 1; i <= depth; i++) {
+        printf("Num of possiblemoves (%d): %10d ", i, countMoves(board, i));
+        printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
+    }
 }
 
 int countMoves(Board* board, int depth) {
@@ -373,7 +342,7 @@ int countMoves(Board* board, int depth) {
             sum += count;
         else
             sum += count;
-        RevokeMove(board, moves[i]);
+        UnmakeMove(board, moves[i]);
     }
     free(moves);
     return max(sum, 0);

@@ -115,7 +115,7 @@ void MakeMove(Board* board, Move move) {
 }
 
 
-void RevokeMove(Board* board, Move move) {
+void UnmakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
 		board->fullmoveClock--;
 	board->isWhitesMove = !board->isWhitesMove;

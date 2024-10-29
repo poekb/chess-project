@@ -3,10 +3,7 @@
 
 #include "boardRenderer.h"
 
-
-
-
-SDL_Texture* staticImgBuffer;
+SDL_Texture* staticImgBuffer; // the background for the board
 
 SDL_Rect getCellRect(int x, int y);
 SDL_Rect getCellRectRaw(int x, int y);
@@ -22,7 +19,7 @@ void rendererInit(SDL_Renderer* renderer) {
     SVG_init(renderer);
 }
 
-void rederer_cleanUp() {
+void redererCleanup() {
     textRend_clean();
     SVG_clear();
 }
@@ -67,7 +64,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
         }
     }
 
-    // Számozás
+    // Numbering
     double fontSize = cellSize / 5;
 
     for (int i = 0; i < 8; i++) {
@@ -77,7 +74,6 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
             (int)(fontSize / 4), 
             (int)(fontSize / 4) + (int)((double)i * cellSize), 
             i % 2 == 0 ? COLOR_BLACK : COLOR_WHITE);
-
     }
 
     for (int i = 0; i < 8; i++) {
@@ -86,7 +82,6 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
             (int)((double)i * cellSize + cellSize - fontSize),
             (int)(boardSize - fontSize - fontSize / 4),
             i % 2 != 0 ? COLOR_BLACK : COLOR_WHITE);
-
     }
 
     SDL_RenderPresent(renderer);
@@ -129,12 +124,12 @@ void renderPieces(SDL_Renderer* renderer, Piece board[64]) {
     }
 }
 
-void renderDynamic(SDL_Renderer* renderer) {
+void renderStatic(SDL_Renderer* renderer) {
     SDL_SetRenderTarget(renderer, NULL);
     setDrawColor(renderer, COLOR_BACKGROUND);
     SDL_RenderClear(renderer);
 
-    // A pufferelt statikus háttér betöltése, hogy ne kelljen minden kis változásnál újrarenderelni
+    // Loading in the static board background
     SDL_RenderCopy(renderer, staticImgBuffer, NULL, &((SDL_Rect) {offsetX,offsetY, boardSize, boardSize}));
 
     setDrawColor(renderer, COLOR_BLACK);
@@ -147,7 +142,6 @@ static void drawThickrect(SDL_Renderer* renderer, SDL_Rect rect) {
 void highlightCell(SDL_Renderer* renderer,Uint8 pos, SDL_Color color) {
 
     setDrawColor(renderer, color);
-
     drawThickrect(renderer, getCellRect(pos % 8, pos / 8));
 }
 

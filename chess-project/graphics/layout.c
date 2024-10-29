@@ -25,6 +25,8 @@ SDL_Rect loadPGNRect;
 
 SDL_Rect resetRect;
 
+// Data for every button (the unique colors may be unecassary because they are all the same anyway)
+
 ButtonData nextMoveButton = {
     ">",
     &nextEnabled,
@@ -68,7 +70,6 @@ ButtonData firstMoveButton = {
     0x505060FF,
     &firstMoveRect
 };
-
 
 ButtonData pasteFENButton = {
     "Paste FEN",
@@ -175,7 +176,7 @@ void recalcUIData() {
 
     int moveButtonSize = (int)(UI.gapTop * MOVE_BUTTON_SIZE);
 
-    // Calculating the positions of the buttons
+    // Calculating the positions of the buttons ?? Somehow make this cleaner ??
     lastMoveRect = (SDL_Rect){
         UI.gapLeft + UI.boardSize - moveButtonSize,
         boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
@@ -203,7 +204,6 @@ void recalcUIData() {
         moveButtonSize,
         moveButtonSize
     };
-
 
     pasteFENRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
@@ -247,8 +247,6 @@ void recalcUIData() {
         UI.gapRight / 8
     };
 
-
-
     resetRect = (SDL_Rect){
         UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
         boardY + UI.boardSize - UI.gapRight / 8,
@@ -272,7 +270,6 @@ void renderButtons() {
         }
 
         renderTextbox(renderer, button->text, *(button->rect), color, HexToRGBA(button->textColor));
-
     }
 }
 

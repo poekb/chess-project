@@ -1,8 +1,8 @@
 #include "notations.h"
 #include "../moveGeneration/moveGenerator.h"
-
 #include "../zobrist/zobristHashing.h"
 
+// Get algebraic chess notation out of move
 char* getMoveNotation(Board* board, Move move) {
 	
 	char* string = malloc(sizeof(char) * 10);
@@ -117,7 +117,7 @@ char* getMoveNotation(Board* board, Move move) {
 	MakeMove(board, move);
 	moveCount = generateMoves(board, moves, false);
 	bool isCheck = isCheckPos(board);
-	RevokeMove(board, move);
+	UnmakeMove(board, move);
 
 	if (isCheck) {
 		if (moveCount == 0) {
@@ -135,7 +135,7 @@ char* getMoveNotation(Board* board, Move move) {
 	return string;
 }
 
-
+// Get a move from algebraic chess notation
 Move getMoveFromNotation(Board* board, char* notation) {
 	char typeChar = notation[0];
 	PieceType type = Pawn;
@@ -181,8 +181,7 @@ Move getMoveFromNotation(Board* board, char* notation) {
 		}
 		free(moves);
 		return 0;
-	}
-		
+		}
 	}
 
 	int ptr = (int)strlen(notation);
@@ -312,8 +311,6 @@ int getFENFromBoard(Board* board, char* FEN) {
 	return length;
 }
 
-
-
 void LoadBoardFromFEN(Board* board, char* FENString) {
 	board->zobristHash = 0;
 
@@ -332,28 +329,6 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 			board->square[pointer] = piece;
 			int colorIndex = isWhite(piece) ? WhiteIndex : BlackIndex;
 			PieceType type = getPieceType(piece);
-			//switch (type)
-			//{
-			//case Pawn:
-			//	addPieceListAtSquare(&(board->Pawns[colorIndex]), pointer);
-			//	break;
-			//case Knight:
-			//	addPieceListAtSquare(&(board->Knights[colorIndex]), pointer);
-			//	break;
-			//case Bishop:
-			//	addPieceListAtSquare(&(board->Bishops[colorIndex]), pointer);
-			//	break;
-			//case Rook:
-			//	addPieceListAtSquare(&(board->Rooks[colorIndex]), pointer);
-			//	break;
-			//case Queen:
-			//	addPieceListAtSquare(&(board->Queens[colorIndex]), pointer);
-			//	break;
-			//case King:
-			//	board->kingSquare[colorIndex] = pointer;
-			//default:
-			//	break;
-			//}
 			
 			makePieceAtSquare(board, pointer, type, colorIndex);
 
@@ -415,6 +390,5 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 	board->currentGameState.halfmoveClock = (Uint8)halfMove;
 	board->fullmoveClock = (Uint16)fullMove;
 	
-
 	board->gameStateHistoryCount = 0;
 }

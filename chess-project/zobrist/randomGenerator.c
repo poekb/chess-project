@@ -1,7 +1,7 @@
 #include "randomGenerator.h"
 #include <stdint.h>
 
-// Mersenne Twister
+// Mersenne Twister:
 // https://en.wikipedia.org/wiki/Mersenne_Twister#cite_note-3
 
 #define w 64
@@ -41,9 +41,8 @@ Uint64 randomUint64(MtState* state)
     Uint64* state_array = &(state->state_array[0]);
 
     int k = state->state_index;      // point to current state location
-    // 0 <= state_index <= n-1   always
 
-    int j = k - (n - 1);               // point to state n-1 iterations before
+    int j = k - (n - 1);             // point to state n-1 iterations before
     if (j < 0) j += n;               // modulo n circular indexing
 
     Uint64 x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
@@ -51,7 +50,7 @@ Uint64 randomUint64(MtState* state)
     Uint64 xA = x >> 1;
     if (x & 0x0000000000000001UL) xA ^= a;
 
-    j = k - (n - m);                   // point to state n-m iterations before
+    j = k - (n - m);                 // point to state n-m iterations before
     if (j < 0) j += n;               // modulo n circular indexing
 
     x = state_array[j] ^ xA;         // compute next value in the state
@@ -60,7 +59,7 @@ Uint64 randomUint64(MtState* state)
     if (k >= n) k = 0;               // modulo n circular indexing
     state->state_index = k;
 
-    Uint64 y = x ^ (x >> u);       // tempering 
+    Uint64 y = x ^ (x >> u);         // tempering 
     y = y ^ ((y << s) & b);
     y = y ^ ((y << t) & c);
     Uint64 z = y ^ (y >> l);

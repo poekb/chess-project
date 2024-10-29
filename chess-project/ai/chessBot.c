@@ -4,23 +4,15 @@
 #include <stdlib.h>
 
 #include "../game/notations.h"
+#include "transpositionTable.h"
 
 Board* board;
 
 int n;
-
 int searchAttacks(int alpha, int beta);
 
-void mesureBot(Board* boardIn, int depth) {
-	board = boardIn;
-
-	search(depth, 0, -999999999, 999999999);
-
-	printf("Iterations: %d\n", n);
-}
-
 int searchAttacks(int alpha, int beta) {
-	n++;
+
 	int eval = evalBoard(board);
 	if (eval >= beta)
 		return beta;
@@ -38,7 +30,7 @@ int searchAttacks(int alpha, int beta) {
 
 		int eval = -searchAttacks(-beta, -alpha);
 
-		RevokeMove(board, attackMoves[i]);
+		UnmakeMove(board, attackMoves[i]);
 		if (eval >= beta) {
 			free(attackMoves);
 			return beta;
@@ -63,10 +55,23 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		}
 	}
 
-	if (depth == distFromRoot) {
+	int transposEval = getTransposition(board->zobristHash, distFromRoot, depth, alpha, beta);
+	if (transposEval != TranspositionNotFound) {
+		n++;
+		if (isMateEval(transposEval) && distFromRoot == 0) { // mating sequenc already found
+			if (transposEval > bestEval) {
+				bestMove = getBestMoveFromTranspos(board->zobristHash);
+				bestEval = transposEval;
+			}
+		}
+		return transposEval;
+	}
+
+	if (depth == 0) {
 		//return evalBoard(board);
 		return searchAttacks(alpha, beta);
 	}
+
 	Move* moves = malloc(sizeof(Move) * 100);
 	if (moves == NULL) return 0;
 	int moveCount = generateMoves(board, moves, false);
@@ -77,7 +82,9 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
 		{
 			free(moves);
-			return -1000000 + distFromRoot; // higher eval for closest mate
+
+			int mateScore = MateScore - distFromRoot; // higher eval for closest mate
+			return -mateScore; 
 		}
  
 		free(moves);
@@ -87,22 +94,28 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 
 	orderMoves(board, moves, moveCount);
 
+	Move bestMoveThisPos = 0;
+
+	Uint8 transEvalType = TranspositionUpper;
+
 	for (int i = 0; i < moveCount; i++) {
 		MakeMove(board, moves[i]);
 
-		int eval = -search(depth, distFromRoot + 1,  -beta, -alpha);
+		int eval = -search(depth - 1, distFromRoot + 1,  -beta, -alpha);
 
-		RevokeMove(board, moves[i]);
+		UnmakeMove(board, moves[i]);
 
 		if (eval >= beta) {
+			insertTransposition(board->zobristHash, beta, distFromRoot, depth, TranspositionLower, moves[i]);
 			free(moves);
 			return beta;
 		}
 
 		
 		if (eval > alpha) {
+			bestMoveThisPos = moves[i];
 			alpha = eval;
-
+			transEvalType = TranspositionExact;
 			if (distFromRoot == 0) {
 				
 				bestMove = moves[i];
@@ -111,20 +124,48 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		}
 		
 	}
+
+	insertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
+
 	free(moves);
 
 	return alpha;
 }
 
 Move findBestMove(Board* boardIn) {
+
 	n = 0;
 	bestMove = 0;
+	Uint64 oldTick = SDL_GetTicks64();
 
-	search(6, 0, -999999999, 999999999);
+	int maxTime = 1000;
+	int depth = 1;
+	int eval = 0;
+	while ((SDL_GetTicks64() - oldTick) < maxTime) {
+		eval = search(depth, 0, -MateScore, MateScore);
+		depth++;
+		if (isMateEval(eval) && eval > 0)
+			break;
 
-	printf("Positions evaluated: %10d\n", n);
+	}
+	
+
+
+	Uint64 tick = SDL_GetTicks64();
+
+	printf("Transpositions found: %10d\n", n);
+	printf("Eval: %10d in %d ms\nWith depth of %d\n", eval, (int)(tick - oldTick), depth - 1);
+	oldTick = tick;
 
 	return bestMove;
+}
+
+
+bool isMateEval(int eval) {
+
+	if (abs(eval) > MateScore + 1) return false;
+
+	return (abs(eval) > MateScore - 999);
 }
 
 

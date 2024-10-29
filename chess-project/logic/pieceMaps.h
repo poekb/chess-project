@@ -10,6 +10,9 @@ int getMapValue(int map[], int rank, int file, bool color);
 #ifndef MAP
 #define MAP
 
+// These values are from:
+// https://github.com/SebLague/Chess-Coding-Adventure/blob/Chess-V1-Unity/Assets/Scripts/Core/PieceSquareTable.cs
+
 #define PAWN_VALUE 100
 #define KNIGHT_VALUE 300
 #define BISHOP_VALUE 320

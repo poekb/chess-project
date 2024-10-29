@@ -4,6 +4,8 @@
 #include "../core/board.h"
 #include "../moveGeneration/moveGenerator.h"
 
+#define MateScore 100000000
+
 typedef struct EvalCase {
 	int value;
 	Pos from;
@@ -13,3 +15,5 @@ void mesureBot(Board* boardIn, int depth);
 
 int search(int depth, int distFromRoot, int alpha, int beta);
 Move findBestMove(Board* board);
+
+bool isMateEval(int eval);

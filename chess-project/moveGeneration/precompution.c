@@ -3,7 +3,6 @@
 // Direction N, S, E, W, NW, SE, NE, SW
 int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 
-
 Uint8 NumSquaresFromEdge[64][8];
 
 int allKnightJumps[8] = { 15, 17, -17, -15, 10, -6, 6, -10 };

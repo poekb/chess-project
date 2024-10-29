@@ -50,21 +50,16 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		}
 	}
 	
-
-
 	bool turn = board->isWhitesMove;
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
 
 	Uint64 underAttack = generateUnderAttackBitmap(board);
 	board->underAttackMap = underAttack;
-	//displayBitboard(renderer, underAttack, (SDL_Color) { 100, 0, 0, 200 });
 
 	Uint8 king = board->kingSquare[colorIndex];
 
 	checkersBitBoard = UINT64_MAX;
-
-	// TODO: optimize with bitmaps
 
 	for (int i = 0; i < knightMovesCount[king]; i++) {
 		if (board->square[knightMoves[king][i]] == makePieceIsWhite(Knight, !turn)) {
@@ -72,7 +67,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			break;
 		}
 	}
-	//highlightCells(renderer, blackPawnAttacks[king], blackPawnAttacksCount[king], (SDL_Color) { 0, 0, 200, 200 });
+
 	for (int i = 0; i < (turn ? whitePawnAttacksCount[king] : blackPawnAttacksCount[king]); i++) {
 
 		Uint8 target = turn ? whitePawnAttacks[king][i] : blackPawnAttacks[king][i];
@@ -81,8 +76,6 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			break;
 		}
 	}
-
-	//displayBitboard(renderer, checkersBitBoard, (SDL_Color) { 0, 200, 0, 100 });
 
 	// Sliders
 	pinnedPieces = 0;
@@ -200,7 +193,6 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			}
 		}
 	}
-
 
 	// Queens
 	PieceList* Queens = &(board->Queens[colorIndex]);

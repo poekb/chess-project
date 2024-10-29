@@ -11,10 +11,10 @@
 
 
 void rendererInit(SDL_Renderer* renderer);
-void rederer_cleanUp();
+void redererCleanup();
 void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY);
 void renderPieces(SDL_Renderer* renderer, Piece board[64]);
-void renderDynamic(SDL_Renderer* renderer);
+void renderStatic(SDL_Renderer* renderer);
 void highlightCell(SDL_Renderer* renderer, Uint8 pos, SDL_Color color);
 
 void highlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color);
