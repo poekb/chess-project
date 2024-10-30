@@ -1,6 +1,8 @@
 #include "precompution.h"
 #include "../logic/evaluator.h"
-// Direction N, S, E, W, NW, SE, NE, SW
+
+// These values are ofsets in the 1D representation of the board
+// Direction Up, Down, Right, Left, Upper left, Lower right, Upper right, Lower left
 int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 
 Uint8 NumSquaresFromEdge[64][8];
@@ -32,10 +34,9 @@ Uint8 blackPawnAttacks[64][2];
 Uint8 blackPawnAttacksCount[64];
 
 
-Uint8 Uint8Min(Uint8 a, Uint8 b) {
-	return a < b ? a : b;
-}
+Uint8 Uint8Min(Uint8 a, Uint8 b);
 
+// Generate values that are used for the move generation and are static
 void preCompute() {
 	
 	for (int x = 0; x < 8; x++) {
@@ -142,4 +143,8 @@ void preCompute() {
 
 		}
 	}
+}
+
+Uint8 Uint8Min(Uint8 a, Uint8 b) {
+	return a < b ? a : b;
 }

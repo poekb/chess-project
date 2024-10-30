@@ -3,6 +3,7 @@
 #include "gameHandler.h"
 #include "notations.h"
 
+// Generate PGN string of the game
 char* getPGN(Board* board) {
 
 	int moveCount = 0;
@@ -57,6 +58,7 @@ char* getPGN(Board* board) {
 	return pgn;
 }
 
+// Load game from PGN string
 void loadGameFromPGN(Board* board, char* PGN) {
 	int offset = 0;
 

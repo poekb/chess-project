@@ -18,6 +18,8 @@ int countMoves(Board* board, int depth);
 void freeMoveHistory();
 void freeMoveFuture();
 
+// These values are static:
+
 Uint8 selectedPos = -1;
 Uint8 howerPos = -1;
 
@@ -34,8 +36,11 @@ Board* board;
 MoveList* moveHistory = NULL;
 MoveList* moveFuture = NULL;
 
+// Perft test for validating move generation
+// Unused in the final app
 void perftTest(int depth);
 
+// The main update loop of the program
 void updateLoop() {
 
     recalcUIData();
@@ -130,6 +135,7 @@ bool prevEnabled = false;
 
 bool gameLoadEnabled = true;
 
+// Make a move and store it in move history
 void stashMove(Move move) {
 
     MakeMove(board,move);
@@ -150,6 +156,7 @@ void stashMove(Move move) {
     freeMoveFuture();
 }
 
+// Load move from move future
 void nextMove() {
 
     MakeMove(board, moveFuture->move);
@@ -164,6 +171,7 @@ void nextMove() {
     }
 }
 
+// Load history from move history and store the revoked move in move future
 void prevMove() {
 
     UnmakeMove(board, moveHistory->move);
@@ -178,12 +186,14 @@ void prevMove() {
     }
 }
 
+// Go back to the starting position of the game, but store the moves made
 void firstMove() {
     while (prevEnabled) {
         prevMove();
     }
 }
 
+// Go to the last future move
 void lastMove() {
     while (nextEnabled) {
         nextMove();
@@ -197,6 +207,7 @@ void freeMoveHistory() {
         free(current);
     }
 }
+
 void freeMoveFuture() {
     while (moveFuture != NULL) {
         MoveList* current = moveFuture;
@@ -205,6 +216,7 @@ void freeMoveFuture() {
     }
 }
 
+//
 void UpdateBoard(Board* board) {
 
     renderStatic(renderer);
@@ -318,6 +330,7 @@ void loadFEN(char* fenStr) {
     perftTest(5);
 }
 
+// For move generator validation
 void perftTest(int depth) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {
@@ -325,7 +338,6 @@ void perftTest(int depth) {
         printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
     }
 }
-
 int countMoves(Board* board, int depth) {
     if (depth == 0) return 1;
 
@@ -348,7 +360,7 @@ int countMoves(Board* board, int depth) {
     return max(sum, 0);
 }
 
-
+// Check if the move is part of the valid moves
 int hasMove(Uint8 start, Uint8 target) {
     for (int i = 0; i < moveCount; i++) {
         Uint8 s = getStart(validMoves[i]);
@@ -362,6 +374,7 @@ int hasMove(Uint8 start, Uint8 target) {
     return -1;
 }
 
+// Return the next move in move future, this is important for PGN generation
 Move getNextMove() {
     return moveFuture->move;
 }

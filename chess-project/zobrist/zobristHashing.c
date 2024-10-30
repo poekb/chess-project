@@ -16,6 +16,7 @@ void logUint64(Uint64 num) {
 	putchar('\n');
 }
 
+// Fill up the zobrist hash values with random 64 bit values
 void initZobrist() {
 	
 	Uint64 seed = 0x18D6025F63DE8E0C;

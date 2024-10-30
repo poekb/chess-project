@@ -3,12 +3,12 @@
 
 TTF_Font* Font;
 
-void textRend_init() {
+void textRendererInit() {
     TTF_Init();
     Font = TTF_OpenFont("C:/Windows/Fonts/ARLRDBD.TTF", 30);
 }
 
-void textRend_clean() {
+void textRendererCleanup() {
     TTF_CloseFont(Font);
 
     TTF_Quit();
@@ -35,7 +35,7 @@ void renderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color 
     SDL_DestroyTexture(text_texture);
 }
 
-void render_text(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos_y, SDL_Color color) {
+void renderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos_y, SDL_Color color) {
 
     TTF_SetFontSize(Font, size);
 
@@ -56,9 +56,9 @@ void render_text(SDL_Renderer* renderer, char* text, int size, int pos_x, int po
     SDL_DestroyTexture(text_texture);
 }
 
-void render_char(SDL_Renderer* renderer, char c, int size, int pos_x, int pos_y, SDL_Color color) {
+void renderChar(SDL_Renderer* renderer, char c, int size, int pos_x, int pos_y, SDL_Color color) {
     char text[2] = { c,'\0' };
 
-    render_text(renderer, text, size, pos_x, pos_y, color);
+    renderText(renderer, text, size, pos_x, pos_y, color);
 
 }

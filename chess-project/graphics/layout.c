@@ -148,15 +148,15 @@ ButtonData loadButton = {
     &loadPGNRect
 };
 
-
+// The array of button settings
 #define ButtonCount 11
 ButtonData* buttons[ButtonCount] = {
     &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton, &saveButton, &loadButton
 };
 
-UIData UI = { 0 };
-
+// Calculate the positions of 
 void recalcUIData() {
+    UIData UI = { 0 };
 
     SDL_GetWindowSize(window, &UI.windowWidth, &UI.windowHeight);
 

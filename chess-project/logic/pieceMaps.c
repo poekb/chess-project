@@ -1,5 +1,6 @@
 #include "pieceMaps.h"
 
+// Gets the offset value for a piece at a specified cell 
 int getPositionValue(Board* board, PieceType type, Uint8 square) {
 	bool color = board->isWhitesMove;
 
@@ -21,6 +22,8 @@ int getPositionValue(Board* board, PieceType type, Uint8 square) {
 }
 
 int getMapValue(int map[], int rank, int file, bool color) {
+
+	// Changes the perspective of the board for black
 	if (!color) {
 		rank = 7 - rank;
 	}

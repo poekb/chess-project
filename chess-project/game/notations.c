@@ -164,7 +164,6 @@ Move getMoveFromNotation(Board* board, char* notation) {
 	case 'O':
 	case '0': {
 		//castling
-
 		bool queenSide = (notation[3] == '-');
 		board->currentGameState.castleRights;
 		for (int i = 0; i < moveCount; i++) {
@@ -208,9 +207,7 @@ Move getMoveFromNotation(Board* board, char* notation) {
 		}
 		if (notation[--ptr] == '=') ptr--;
 	}
-	//printf("%c\n", notation[ptr]);
 	Uint8 targetRank = 8 - (notation[ptr--] - '0');
-	//printf("%c\n", notation[ptr]);
 	Uint8 targetFile = notation[ptr--] - 'a';
 
 	Uint8 targetSquare = targetRank * 8 + targetFile;
@@ -243,7 +240,6 @@ Move getMoveFromNotation(Board* board, char* notation) {
 			&& (!startFilePresent || (moveStartFile == startFile))
 			&& (((promotion == 0) && !isPromotion(move)) || ((move >> 12) == promotion))
 			) {
-			//printf("%d %d\n", target, targetSquare);
 			free(moves);
 			return move;
 		}
@@ -252,6 +248,7 @@ Move getMoveFromNotation(Board* board, char* notation) {
 	return 0;
 }
 
+// Get FEN from a position
 int getFENFromBoard(Board* board, char* FEN) {
 	int length = 0;	
 
@@ -311,6 +308,7 @@ int getFENFromBoard(Board* board, char* FEN) {
 	return length;
 }
 
+// Load a position from a FEN string
 void LoadBoardFromFEN(Board* board, char* FENString) {
 	board->zobristHash = 0;
 

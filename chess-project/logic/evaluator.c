@@ -4,6 +4,7 @@
 int getMaterial(Board* board, int index);
 Uint8 flip(Uint8 pos, bool isWhite);
 
+// Summarize material for a side
 int getMaterial(Board* board, int index) {
 	int material = 0;
 	material += board->Pawns[index].count * PAWN_VALUE;
@@ -14,10 +15,12 @@ int getMaterial(Board* board, int index) {
 	return material;
 }
 
+// Change the perspective of the board by color
 Uint8 flip(Uint8 pos, bool isWhite) {
 	return isWhite? pos : (7 - pos / 8) * 8 + pos % 8;
 }
 
+// Summarize positional offset scores for pieces
 int getPositionScore(Board* board, bool isWhite) {
 	int index = isWhite ? WhiteIndex : BlackIndex;
 	int value = 0;
@@ -41,6 +44,7 @@ int getPositionScore(Board* board, bool isWhite) {
 	return value;
 }
 
+// Evaluate the score for a board, in perspective of the current side
 int evalBoard(Board* board) {
 
 	int whiteValue = getMaterial(board, WhiteIndex);

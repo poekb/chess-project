@@ -18,8 +18,6 @@
 #define c 0xFFF7EEE000000000UL
 #define f 6364136223846793005UL
 
-
-
 void initializeState(MtState* state, Uint64 seed)
 {
     Uint64* state_array = &(state->state_array[0]);
@@ -34,7 +32,6 @@ void initializeState(MtState* state, Uint64 seed)
 
     state->state_index = 0;
 }
-
 
 Uint64 randomUint64(MtState* state)
 {
