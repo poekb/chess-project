@@ -5,7 +5,7 @@ int partition(int low, int high);
 void quickSort(int low, int high);
 int valueMove(Board* board, Move move);
 
-int moveValues[200];
+int moveValues[218];
 Move* moves;
 
 void orderMoves(Board* board, Move* movesIn, int moveCount) {

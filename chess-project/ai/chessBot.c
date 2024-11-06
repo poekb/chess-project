@@ -136,7 +136,7 @@ Move findBestMove(Board* boardIn) {
 	bestMove = 0;
 	Uint64 oldTick = SDL_GetTicks64();
 
-	int maxTime = 1500;
+	int maxTime = 500;
 	int depth = 1;
 	int eval = 0;
 	while ((SDL_GetTicks64() - oldTick) < maxTime) {

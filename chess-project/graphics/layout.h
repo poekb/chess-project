@@ -1,4 +1,5 @@
 #include "../global.h"
+#include "../core/board.h"
 
 typedef struct ButtonData {
     char text[50];
@@ -11,9 +12,13 @@ typedef struct ButtonData {
     SDL_Rect* rect;
 } ButtonData;
 
+extern ButtonData toggleBotButton;
+
 void renderButtons();
 void renderButton(ButtonData* button);
 void recalcUIData();
 void testButonClicks();
 void testButton(ButtonData* button);
-SDL_Color HexToRGBA(int hex);
+void renderWinner(Board* board);
+
+SDL_Color HexToRGBA(Uint32 hex);

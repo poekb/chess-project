@@ -14,8 +14,13 @@ typedef struct MoveList {
 }MoveList;
 
 #endif
+
+void toggleBot();
+
 void stashMove(Move move);
 void loadFEN(char* fenStr);
+
+void updateHasGameEnded();
 
 void nextMove();
 void prevMove();

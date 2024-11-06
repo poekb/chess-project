@@ -389,4 +389,8 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 	board->fullmoveClock = (Uint16)fullMove;
 	
 	board->gameStateHistoryCount = 0;
+
+	board->hasGameEnded = false;
+	board->winnerWhite = false;
+	board->winnerBlack = false;
 }

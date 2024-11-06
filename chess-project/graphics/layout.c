@@ -24,6 +24,9 @@ SDL_Rect savePGNRect;
 SDL_Rect loadPGNRect;
 
 SDL_Rect resetRect;
+SDL_Rect toggleBotButtonRect;
+SDL_Rect winnerRect;
+
 
 // Data for every button (the unique colors may be unecassary because they are all the same anyway)
 
@@ -148,15 +151,28 @@ ButtonData loadButton = {
     &loadPGNRect
 };
 
+bool botAvailable = true;
+
+ButtonData toggleBotButton = {
+    "Start Bot",
+    &botAvailable,
+    &toggleBot,
+    0xF0DADAFF,
+    0x303040FF,
+    0x101020FF,
+    0x505060FF,
+    &toggleBotButtonRect
+};
 
 // The array of button settings
-#define ButtonCount 11
+#define ButtonCount 12
 ButtonData* buttons[ButtonCount] = {
     &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, 
     &pasteFENButton, &pastePGNButton, 
     &copyFENButton, &copyPGNButton, 
     &resetButton, 
-    &saveButton, &loadButton
+    &saveButton, &loadButton,
+    &toggleBotButton
 };
 
 // Calculate the positions of 
@@ -204,6 +220,15 @@ void recalcUIData() {
     firstMoveRect = defaultMoveButtonRect;
     firstMoveRect.x += moveButtonOffsetValue * 3;
 
+    
+
+    toggleBotButtonRect = (SDL_Rect){
+        gapLeft + boardSize - moveButtonSize + moveButtonOffsetValue * 3,
+        boardY - (gapTop - moveButtonSize) / 2 - moveButtonSize,
+        moveButtonSize - moveButtonOffsetValue * 3,
+        moveButtonSize
+    };
+
     SDL_Rect defaultMenuButtonRect = (SDL_Rect){
         windowWidth - gapLeft + moveButtonSize - gapRight,
         boardY,
@@ -218,19 +243,48 @@ void recalcUIData() {
     pastePGNRect.y += menuButtonOffsetValue;
 
     copyFENRect = defaultMenuButtonRect;
-    copyFENRect.y += menuButtonOffsetValue * 2;
+    copyFENRect.y += (int)(menuButtonOffsetValue * 2.5);
 
     copyPGNRect = defaultMenuButtonRect;
-    copyPGNRect.y += menuButtonOffsetValue * 3;
+    copyPGNRect.y += (int)(menuButtonOffsetValue * 3.5);
 
     savePGNRect = defaultMenuButtonRect;
-    savePGNRect.y += menuButtonOffsetValue * 4;
+    savePGNRect.y += menuButtonOffsetValue * 5;
 
     loadPGNRect = defaultMenuButtonRect;
-    loadPGNRect.y += menuButtonOffsetValue * 5;
+    loadPGNRect.y += menuButtonOffsetValue * 6;
 
-    resetRect = defaultMenuButtonRect;
-    resetRect.y += menuButtonOffsetValue * 6;
+    resetRect = defaultMoveButtonRect;
+    resetRect.x = defaultMenuButtonRect.x;
+    resetRect.w = defaultMenuButtonRect.w;
+
+    winnerRect = (SDL_Rect){
+        windowWidth - gapLeft + moveButtonSize - gapRight,
+        boardY + boardSize - gapRight / 6,
+        gapRight - moveButtonSize,
+        gapRight / 6,
+    };
+
+}
+
+void renderWinner(Board* board) {
+
+    if (board->hasGameEnded) {
+        if (board->winnerWhite) {
+            renderTextbox(renderer, "White Wins", winnerRect, HexToRGBA(COLOR_WHITE), HexToRGBA(COLOR_BACKGROUND));
+
+        }
+        else if (board->winnerBlack) {
+            renderTextbox(renderer, "Black Wins", winnerRect, HexToRGBA(COLOR_BLACK), HexToRGBA(COLOR_BACKGROUND));
+
+        }
+        else {
+            renderTextbox(renderer, "Draw", winnerRect, HexToRGBA(0x101020FF), HexToRGBA(0xF0DADAFF));
+        }
+    }
+    else {
+        renderTextbox(renderer, " ", winnerRect, HexToRGBA(COLOR_BACKGROUND), HexToRGBA(COLOR_BACKGROUND));
+    }
 }
 
 void renderButtons() {
@@ -269,6 +323,6 @@ void testButton(ButtonData* button) {
         (*button->callBack)();
 }
 
-SDL_Color HexToRGBA(int hex) {
+SDL_Color HexToRGBA(Uint32 hex) {
     return (SDL_Color) { hex >> 24, hex >> 16 & 0xFF, hex >> 8 & 0xFF, hex & 0xFF };
 }

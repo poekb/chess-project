@@ -22,6 +22,7 @@ char* getPGN(Board* board) {
 	int offset = sprintf(pgn, "[FEN \"%s\"]\n\n", startFEN);
 
 	if (moveCount == 0) {
+		offset += sprintf(&pgn[offset], "*");
 		return pgn;
 	}
 
@@ -50,7 +51,22 @@ char* getPGN(Board* board) {
 		nextMove();
 		free(whiteMove);
 	}
-	
+	updateHasGameEnded();
+
+	if (board->hasGameEnded) {
+		if (board->winnerWhite) {
+			offset += sprintf(&pgn[offset], "1-0");
+		}
+		else if (board->winnerBlack) {
+			offset += sprintf(&pgn[offset], "0-1");
+		}
+		else {
+			offset += sprintf(&pgn[offset], "1/2-1/2");
+		}
+	}
+	else {
+		offset += sprintf(&pgn[offset],"*");
+	}
 
 	pgn[offset] = '\0';
 

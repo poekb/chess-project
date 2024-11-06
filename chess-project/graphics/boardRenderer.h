@@ -4,10 +4,10 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
-#define COLOR_BLACK (SDL_Color){ 0x5A, 0x40, 0x30, 0xFF }
-#define COLOR_WHITE (SDL_Color){ 0xFF, 0xF0, 0xD0, 0xFF }
-#define COLOR_HIGH (SDL_Color){ 0x70, 0x70, 0xF0, 0xA0 }
-#define COLOR_BACKGROUND (SDL_Color){ 0x1A, 0x1A, 0x20, 0xFF }
+#define COLOR_BLACK 0x5A4030FF
+#define COLOR_WHITE 0xFFF0D0FF
+#define COLOR_HIGH 0x7070F0A0
+#define COLOR_BACKGROUND 0x1A1A20FF
 
 
 void rendererInit(SDL_Renderer* renderer);

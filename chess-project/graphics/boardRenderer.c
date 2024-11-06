@@ -1,6 +1,6 @@
 ﻿#include "svgLoader.h"
 #include "textRenderer.h"
-
+#include "layout.h"
 #include "boardRenderer.h"
 
 SDL_Texture* staticImgBuffer; // the background for the board
@@ -48,16 +48,16 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
 
     cellSize = (double)boardSize / 8;
 
-    setDrawColor(renderer, COLOR_BLACK);
+    setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
     SDL_RenderClear(renderer);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
             SDL_Rect rect = getCellRectRaw(i, j);
             if (i % 2 == j % 2)
-                setDrawColor(renderer, COLOR_WHITE);
+                setDrawColor(renderer, HexToRGBA(COLOR_WHITE));
             else
-                setDrawColor(renderer, COLOR_BLACK);
+                setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
 
             SDL_RenderFillRect(renderer, &rect);
 
@@ -74,7 +74,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
             (int)fontSize, 
             (int)(fontSize / 4), 
             (int)(fontSize / 4) + (int)((double)i * cellSize), 
-            i % 2 == 0 ? COLOR_BLACK : COLOR_WHITE);
+            i % 2 == 0 ? HexToRGBA(COLOR_BLACK) : HexToRGBA(COLOR_WHITE));
     }
 
     for (int i = 0; i < 8; i++) {
@@ -82,7 +82,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
             (int)fontSize, 
             (int)((double)i * cellSize + cellSize - fontSize),
             (int)(boardSize - fontSize - fontSize / 4),
-            i % 2 != 0 ? COLOR_BLACK : COLOR_WHITE);
+            i % 2 != 0 ? HexToRGBA(COLOR_BLACK) : HexToRGBA(COLOR_WHITE));
     }
 
     SDL_RenderPresent(renderer);
@@ -94,8 +94,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
 Uint8 getCell(int x, int y) {
     int cellX = (int)((x - offsetX) / cellSize);
     int cellY = (int)((y - offsetY) / cellSize);
-
-    if (cellX >= 0 && cellX < 8 && cellY >= 0 && cellY < 8) {
+    if (x >= offsetX && cellX < 8 && y >= offsetY && cellY < 8) {
         return cellX + 8 * cellY;
     }
     return -1;
@@ -134,12 +133,12 @@ void renderPieces(SDL_Renderer* renderer, Piece board[64]) {
 // Loading in the static board background
 void renderStatic(SDL_Renderer* renderer) {
     SDL_SetRenderTarget(renderer, NULL);
-    setDrawColor(renderer, COLOR_BACKGROUND);
+    setDrawColor(renderer, HexToRGBA(COLOR_BACKGROUND));
     SDL_RenderClear(renderer);
 
     SDL_RenderCopy(renderer, staticImgBuffer, NULL, &((SDL_Rect) {offsetX,offsetY, boardSize, boardSize}));
 
-    setDrawColor(renderer, COLOR_BLACK);
+    setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
 }
 
 // Highlight a square with set color
@@ -174,7 +173,7 @@ void sdlInit(int width, int height, SDL_Window** pwindow, SDL_Renderer** prender
         exit(1);
     }
 
-    SDL_Window* window = SDL_CreateWindow("SDL sakk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("SDL chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     if (window == NULL) {
         SDL_Log("Unable to open window: %s", SDL_GetError());
         exit(1);

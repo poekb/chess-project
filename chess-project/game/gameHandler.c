@@ -58,12 +58,7 @@ void updateLoop() {
         switch (event.type) {
         case SDL_KEYDOWN:
 
-            bot = !bot;
-            if (bot) {
-                Move bestMove = findBestMove(board);
-                if (bestMove != 0)
-                    stashMove(bestMove);
-            }
+            
             renderStatic(renderer);
             UpdateBoard(board);
 
@@ -132,6 +127,19 @@ void updateLoop() {
     free(transpositionTable);
 }
 
+void toggleBot() {
+    bot = !bot;
+    strcpy(toggleBotButton.text, bot ? "Stop Bot" : "Start Bot");
+    renderButtons();
+    SDL_RenderPresent(renderer);
+
+    if (bot) {
+        Move bestMove = findBestMove(board);
+        if (bestMove != 0)
+            stashMove(bestMove);
+    }
+}
+
 bool nextEnabled = false;
 bool prevEnabled = false;
 
@@ -155,7 +163,28 @@ void stashMove(Move move) {
     nextEnabled = false;
     prevEnabled = true;
 
+    updateHasGameEnded();
+    
     freeMoveFuture();
+}
+
+void updateHasGameEnded() {
+    moveCount = generateMoves(board, validMoves, false);
+
+    if (moveCount == 0) {
+        // Game ended
+        board->hasGameEnded = true;
+
+        if (isCheckPos(board)) {
+            bool whiteWins = !board->isWhitesMove;
+            board->winnerWhite = whiteWins;
+            board->winnerBlack = !whiteWins;
+        }
+        else {
+            board->winnerWhite = false;
+            board->winnerBlack = false;
+        }
+    }
 }
 
 // Load move from move future
@@ -171,6 +200,8 @@ void nextMove() {
     if (moveFuture == NULL) {
         nextEnabled = false;
     }
+
+    updateHasGameEnded();
 }
 
 // Load history from move history and store the revoked move in move future
@@ -182,6 +213,8 @@ void prevMove() {
     current->next = moveFuture;
     moveFuture = current;
     nextEnabled = true;
+
+    board->hasGameEnded = false;
 
     if (moveHistory == NULL) {
         prevEnabled = false;
@@ -249,6 +282,9 @@ void UpdateBoard(Board* board) {
     }
 
     renderPieces(renderer, board->square);
+
+    renderWinner(board);
+
     SDL_RenderPresent(renderer);
 }
 
