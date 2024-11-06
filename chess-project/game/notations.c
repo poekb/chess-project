@@ -114,10 +114,10 @@ char* getMoveNotation(Board* board, Move move) {
 		}
 	}
 
-	MakeMove(board, move);
+	makeMove(board, move);
 	moveCount = generateMoves(board, moves, false);
 	bool isCheck = isCheckPos(board);
-	UnmakeMove(board, move);
+	unmakeMove(board, move);
 
 	if (isCheck) {
 		if (moveCount == 0) {

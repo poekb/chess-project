@@ -5,7 +5,7 @@ TTF_Font* Font;
 
 void textRendererInit() {
     TTF_Init();
-    Font = TTF_OpenFont("C:/Windows/Fonts/ARLRDBD.TTF", 30);
+    Font = TTF_OpenFont("assets/font.TTF", 30);
 }
 
 void textRendererCleanup() {

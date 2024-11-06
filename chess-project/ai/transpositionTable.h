@@ -5,7 +5,7 @@
 #define TranspositionExact 0
 #define TranspositionUpper 1
 #define TranspositionLower 2
-#define TranspositionNotFound 1234567
+#define TranspositionNotFound MateScore + 999
 typedef struct Transposition {
 	Uint64 zobrist;
 	int eval;

@@ -10,7 +10,7 @@ void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool tur
 void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target, Uint8 colorIndex, bool isWhite);
 
 
-void MakeMove(Board* board, Move move) {
+void makeMove(Board* board, Move move) {
 
 	//Get data from move
 	Uint8 start = getStart(move);
@@ -115,7 +115,7 @@ void MakeMove(Board* board, Move move) {
 }
 
 
-void UnmakeMove(Board* board, Move move) {
+void unmakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
 		board->fullmoveClock--;
 	board->isWhitesMove = !board->isWhitesMove;

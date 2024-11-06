@@ -1,14 +1,9 @@
 #include "move.h"
 
-const Uint16 TargetMask = 0b0000000000111111;
-const Uint16 StartMask =  0b0000111111000000;
+#define TargetMask 0b0000000000111111
+#define StartMask  0b0000111111000000
 
-const Uint16 FlagMask =   0b1111000000000000;
-
-const Uint16 NoFlag = 0b0000;
-const Uint16 EnPassantCaptureFlag = 0b0001;
-const Uint16 CastleFlag = 0b0010;
-const Uint16 PawnTwoUpFlag = 0b0011;
+#define FlagMask   0b1111000000000000
 
 Uint8 getTarget(Move move) {
 	return move & TargetMask;

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-//#include "debugmalloc.h" //memory leak detections
+#include "debugmalloc.h" //memory leak detections
 
 #ifndef GLOBAL
 #define GLOBAL

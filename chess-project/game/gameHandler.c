@@ -128,6 +128,8 @@ void updateLoop() {
         moveHistory = moveHistory->next;
         free(current);
     }
+
+    free(transpositionTable);
 }
 
 bool nextEnabled = false;
@@ -138,7 +140,7 @@ bool gameLoadEnabled = true;
 // Make a move and store it in move history
 void stashMove(Move move) {
 
-    MakeMove(board,move);
+    makeMove(board,move);
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
         SDL_Log("Unable to allocate memory");
@@ -159,7 +161,7 @@ void stashMove(Move move) {
 // Load move from move future
 void nextMove() {
 
-    MakeMove(board, moveFuture->move);
+    makeMove(board, moveFuture->move);
     MoveList* current = moveFuture;
     moveFuture = moveFuture->next;
     current->next = moveHistory;
@@ -174,7 +176,7 @@ void nextMove() {
 // Load history from move history and store the revoked move in move future
 void prevMove() {
 
-    UnmakeMove(board, moveHistory->move);
+    unmakeMove(board, moveHistory->move);
     MoveList* current = moveHistory;
     moveHistory = moveHistory->next;
     current->next = moveFuture;
@@ -284,6 +286,9 @@ void savePGN() {
     char* PGN = getPGN(board);
 
     FILE* fptr = fopen("game.pgn", "w");
+
+    fprintf(fptr, "%s\n", PGN);
+
     fclose(fptr);
     free(PGN);
 }
@@ -334,7 +339,7 @@ void loadFEN(char* fenStr) {
 void perftTest(int depth) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {
-        printf("Num of possiblemoves (%d): %10d ", i, countMoves(board, i));
+        printf("Num of possible moves (%d): %10d ", i, countMoves(board, i));
         printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
     }
 }
@@ -347,14 +352,14 @@ int countMoves(Board* board, int depth) {
     int moveCount = generateMoves(board, moves, false);
 
     for (int i = 0; i < moveCount; i++) {
-        MakeMove(board, moves[i]);
+        makeMove(board, moves[i]);
         
         int count = countMoves(board, depth - 1);
         if (isPromotion(moves[i]))
             sum += count;
         else
             sum += count;
-        UnmakeMove(board, moves[i]);
+        unmakeMove(board, moves[i]);
     }
     free(moves);
     return max(sum, 0);

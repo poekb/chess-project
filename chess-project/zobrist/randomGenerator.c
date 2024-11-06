@@ -24,7 +24,7 @@ void initializeState(MtState* state, Uint64 seed)
 
     state_array[0] = seed;                          // suggested initial seed = 19650218UL
 
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i < transpositionCount; i++)
     {
         seed = f * (seed ^ (seed >> (w - 2))) + i;    // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
         state_array[i] = seed;
@@ -39,21 +39,21 @@ Uint64 randomUint64(MtState* state)
 
     int k = state->state_index;      // point to current state location
 
-    int j = k - (n - 1);             // point to state n-1 iterations before
-    if (j < 0) j += n;               // modulo n circular indexing
+    int j = k - (transpositionCount - 1);             // point to state transpositionCount-1 iterations before
+    if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
 
     Uint64 x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
 
     Uint64 xA = x >> 1;
     if (x & 0x0000000000000001UL) xA ^= a;
 
-    j = k - (n - m);                 // point to state n-m iterations before
-    if (j < 0) j += n;               // modulo n circular indexing
+    j = k - (transpositionCount - m);                 // point to state transpositionCount-m iterations before
+    if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
 
     x = state_array[j] ^ xA;         // compute next value in the state
     state_array[k++] = x;            // update new state value
 
-    if (k >= n) k = 0;               // modulo n circular indexing
+    if (k >= transpositionCount) k = 0;               // modulo transpositionCount circular indexing
     state->state_index = k;
 
     Uint64 y = x ^ (x >> u);         // tempering 

@@ -5,10 +5,10 @@
 
 typedef Uint16 Move;
 
-extern const Uint16 NoFlag;
-extern const Uint16 EnPassantCaptureFlag;
-extern const Uint16 CastleFlag;
-extern const Uint16 PawnTwoUpFlag;
+#define NoFlag 0b0000
+#define EnPassantCaptureFlag 0b0001
+#define CastleFlag 0b0010
+#define PawnTwoUpFlag 0b0011
 
 #define PromoteToQueenFlag 0b0100
 #define PromoteToKnightFlag 0b0101

@@ -16,7 +16,6 @@ typedef struct Board {
 	// Square index of white and black king
 	Uint8 kingSquare[2];
 
-
 	// Piece lists
 	PieceList Rooks[2];
 	PieceList Bishops[2];
@@ -37,8 +36,8 @@ typedef struct Board {
 	Uint16 fullmoveClock;
 } Board;
 
-void MakeMove(Board* board, Move move);
-void UnmakeMove(Board* board, Move move);
+void makeMove(Board* board, Move move);
+void unmakeMove(Board* board, Move move);
 
 void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
 

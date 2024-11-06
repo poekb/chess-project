@@ -22,10 +22,9 @@ void SVG_init(SDL_Renderer *renderer) {
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
 	for (int i = 0; i < 12; i++) {
-		char fileString[] = "assets/00.svg";
+		char fileString[20];
 		
-		fileString[7] = PIECE_FILES[i % 6];
-		fileString[8] = i < 6 ? 'l' : 'd';
+		sprintf(fileString, "assets/%c%c.svg", PIECE_FILES[i % 6], i < 6 ? 'l' : 'd');
 
 		SDL_RWops* rw = SDL_RWFromFile(fileString, "r");
 		SDL_Surface* surface = IMG_Load_RW(rw, true);
