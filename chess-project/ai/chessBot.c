@@ -163,5 +163,3 @@ bool isMateEval(int eval) {
 
 	return (abs(eval) > MateScore - 999);
 }
-
-

@@ -135,8 +135,6 @@ void unmakeMove(Board* board, Move move) {
 	bool doublePawn = isPawnTwoUp(move);
 	bool promotion = isPromotion(move);
 
-
-
 	movePiece(board, target, start, type, turn);
 
 	if (promotion) {

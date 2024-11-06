@@ -196,17 +196,19 @@ void recalcUIData() {
 
     renderBoard(renderer, boardSize, gapLeft, boardY);
 
-    int moveButtonSize = (int)(gapTop * MOVE_BUTTON_SIZE);
+    int moveButtonSize = min((int)(gapTop * MOVE_BUTTON_SIZE), gapRight / 8);
 
     // Calculating the positions of the buttons ?? Somehow make this cleaner ??
 
+    int moveGap = min((gapTop - moveButtonSize) / 2, moveButtonSize / 4);
+
     SDL_Rect defaultMoveButtonRect = (SDL_Rect){
         gapLeft + boardSize - moveButtonSize,
-        boardY + boardSize + (gapTop - moveButtonSize) / 2,
+        boardY + boardSize + moveGap,
         moveButtonSize,
         moveButtonSize
     };
-    int moveButtonOffsetValue = -moveButtonSize - (gapTop - moveButtonSize) / 2;
+    int moveButtonOffsetValue = -moveButtonSize - moveGap;
 
     lastMoveRect = defaultMoveButtonRect;
 
@@ -224,7 +226,7 @@ void recalcUIData() {
 
     toggleBotButtonRect = (SDL_Rect){
         gapLeft + boardSize - moveButtonSize + moveButtonOffsetValue * 3,
-        boardY - (gapTop - moveButtonSize) / 2 - moveButtonSize,
+        boardY - moveGap - moveButtonSize,
         moveButtonSize - moveButtonOffsetValue * 3,
         moveButtonSize
     };

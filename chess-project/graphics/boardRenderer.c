@@ -60,8 +60,6 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
                 setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
 
             SDL_RenderFillRect(renderer, &rect);
-
-
         }
     }
 
@@ -164,6 +162,66 @@ void displayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color) {
         if ((bitboard & ((Uint64)1 << i)) != 0)
             highlightCell(renderer, i, color);
     }
+}
+
+void displayPromotionSelect(SDL_Renderer* renderer, Move move, bool isWhite) {
+
+    Uint8 targetSquare = getTarget(move);
+    Uint8 column = targetSquare % 8;
+    setDrawColor(renderer, HexToRGBA(0x707070B0));
+
+
+    for (int i = 0; i < 4; i++) {
+        SDL_Rect rect = getCellRect(column, isWhite ? i : 7 - i);
+        SDL_RenderFillRect(renderer, &rect);
+        PieceType type;
+        switch (i) {
+        case 0:
+            type = Queen;
+            break;
+        case 1:
+            type = Rook;
+            break;
+        case 2:
+            type = Bishop;
+            break;
+        case 3:
+            type = Knight;
+            break;
+        }
+
+        SVG_renderPiece(renderer, makePieceIsWhite(type, isWhite), rect);
+    }
+}
+
+PieceType getPromotionPieceTypeByCell(Move move,Uint8 cell, bool isWhite) {
+    Uint8 targetSquare = getTarget(move);
+    Uint8 column = targetSquare % 8;
+    Uint8 x = cell % 8;
+    Uint8 y = cell / 8;
+
+    if (column != x)
+        return None;
+
+    PieceType type;
+    switch (isWhite ? y : 7 - y) {
+    case 0:
+        type = Queen;
+        break;
+    case 1:
+        type = Rook;
+        break;
+    case 2:
+        type = Bishop;
+        break;
+    case 3:
+        type = Knight;
+        break;
+    default:
+        type = None;
+        break;
+    }
+    return type;
 }
 
 // Initialize SDL

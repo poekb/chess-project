@@ -29,6 +29,9 @@ int moveCount = 0;
 
 bool bot = false;
 
+bool isPromotingPiece;
+Move promotingPieceMove;
+
 Sint32 mouseX, mouseY;
 
 char startFEN[100] = DefaultBoardFEN;
@@ -73,19 +76,65 @@ void updateLoop() {
             break;
         case SDL_MOUSEBUTTONDOWN: {
 
+            if (isPromotingPiece) {
+                if (howerPos != -1) {
+                    PieceType type = getPromotionPieceTypeByCell(promotingPieceMove, howerPos, board->isWhitesMove);
+
+                    if (type != None) {
+                        Uint16 flag = 0;
+                        switch (type)
+                        {
+                        case Queen:
+                            flag = PromoteToQueenFlag;
+                            break;
+                        case Rook:
+                            flag = PromoteToRookFlag;
+                            break;
+                        case Bishop:
+                            flag = PromoteToBishopFlag;
+                            break;
+                        case Knight:
+                            flag = PromoteToKnightFlag;
+                            break;
+                        }
+
+                        promotingPieceMove &= 0b0000111111111111;
+                        promotingPieceMove |= (flag << 12);
+
+                        stashMove(promotingPieceMove);
+                        isPromotingPiece = false;
+
+                        renderStatic(renderer);
+                        renderPieces(renderer, board->square);
+                        UpdateBoard(board);
+                    }
+                }
+                isPromotingPiece = false;
+                break;
+            }
+
             testButonClicks();
 
             int moveIndex = hasMove(selectedPos, howerPos);
             if (selectedPos != -1 && (moveIndex != -1)) {
                 move = validMoves[moveIndex];
-                stashMove(move);
+
+                if (isPromotion(move)) {
+                    isPromotingPiece = true;
+                    promotingPieceMove = move;
+                }
+                else {
+                    stashMove(move);
+                }
+
 
                 renderStatic(renderer);
                 renderPieces(renderer, board->square);
 
-                UpdateBoard(board);
 
                 if (bot) {
+                    UpdateBoard(board);
+
                     Move bestMove = findBestMove(board);
                     if(bestMove != 0)
                         stashMove(bestMove);
@@ -142,7 +191,6 @@ void toggleBot() {
 
 bool nextEnabled = false;
 bool prevEnabled = false;
-
 bool gameLoadEnabled = true;
 
 // Make a move and store it in move history
@@ -174,7 +222,7 @@ void updateHasGameEnded() {
     if (moveCount == 0) {
         // Game ended
         board->hasGameEnded = true;
-
+        board->underAttackMap = generateUnderAttackBitmap(board);
         if (isCheckPos(board)) {
             bool whiteWins = !board->isWhitesMove;
             board->winnerWhite = whiteWins;
@@ -285,7 +333,12 @@ void UpdateBoard(Board* board) {
 
     renderWinner(board);
 
+
+    if (isPromotingPiece)
+        displayPromotionSelect(renderer, promotingPieceMove, board->isWhitesMove);
+
     SDL_RenderPresent(renderer);
+
 }
 
 void resetBoard() {

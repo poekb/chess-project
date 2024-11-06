@@ -1,5 +1,6 @@
 #include "../global.h"
 #include "../core/piece.h"
+#include "../core/move.h"
 
 #include <SDL_ttf.h>
 #include <SDL_image.h>
@@ -19,6 +20,9 @@ void highlightCell(SDL_Renderer* renderer, Uint8 pos, SDL_Color color);
 
 void highlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color);
 void displayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color);
+
+void displayPromotionSelect(SDL_Renderer* renderer, Move move, bool isWhite);
+PieceType getPromotionPieceTypeByCell(Move move, Uint8 cell, bool isWhite);
 
 Uint8 getCell(int x, int y);
 
