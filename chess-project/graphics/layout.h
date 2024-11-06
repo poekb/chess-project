@@ -1,17 +1,5 @@
 #include "../global.h"
 
-#ifndef UIDEFS
-#define UIDEFS
-
-typedef struct UIData {
-    int windowWidth;
-    int windowHeight;
-    int boardSize;
-    int gapTop;
-    int gapRight;
-    int gapLeft;
-} UIData;
-
 typedef struct ButtonData {
     char text[50];
     bool* enabled;
@@ -23,9 +11,9 @@ typedef struct ButtonData {
     SDL_Rect* rect;
 } ButtonData;
 
-#endif
-
 void renderButtons();
+void renderButton(ButtonData* button);
 void recalcUIData();
-void testButonClick();
+void testButonClicks();
+void testButton(ButtonData* button);
 SDL_Color HexToRGBA(int hex);

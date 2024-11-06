@@ -78,7 +78,7 @@ void updateLoop() {
             break;
         case SDL_MOUSEBUTTONDOWN: {
 
-            testButonClick();
+            testButonClicks();
 
             int moveIndex = hasMove(selectedPos, howerPos);
             if (selectedPos != -1 && (moveIndex != -1)) {

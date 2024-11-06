@@ -148,141 +148,126 @@ ButtonData loadButton = {
     &loadPGNRect
 };
 
+
 // The array of button settings
 #define ButtonCount 11
 ButtonData* buttons[ButtonCount] = {
-    &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, &pasteFENButton, &pastePGNButton, &copyFENButton, &copyPGNButton, &resetButton, &saveButton, &loadButton
+    &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, 
+    &pasteFENButton, &pastePGNButton, 
+    &copyFENButton, &copyPGNButton, 
+    &resetButton, 
+    &saveButton, &loadButton
 };
 
 // Calculate the positions of 
 void recalcUIData() {
-    UIData UI = { 0 };
+    int windowWidth;
+    int windowHeight;
 
-    SDL_GetWindowSize(window, &UI.windowWidth, &UI.windowHeight);
+    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
-    UI.gapTop = (int)(UI.windowHeight * GAP_TOP);
-    UI.gapLeft = (int)(UI.windowWidth * GAP_LEFT);
+    int gapTop = (int)(windowHeight * GAP_TOP);
+    int gapLeft = (int)(windowWidth * GAP_LEFT);
 
-    UI.gapRight = (int)(UI.windowWidth * GAP_RIGHT);
+    int gapRight = (int)(windowWidth * GAP_RIGHT);
 
-    UI.boardSize = min(
-        UI.windowHeight - 2 * UI.gapTop,
-        UI.windowWidth - UI.gapLeft - UI.gapRight
+    int boardSize = min(
+        windowHeight - 2 * gapTop,
+        windowWidth - gapLeft - gapRight
     );
 
-    int boardY = (UI.windowHeight - UI.boardSize) / 2;
+    int boardY = (windowHeight - boardSize) / 2;
 
-    renderBoard(renderer, UI.boardSize, UI.gapLeft, boardY);
+    renderBoard(renderer, boardSize, gapLeft, boardY);
 
-    int moveButtonSize = (int)(UI.gapTop * MOVE_BUTTON_SIZE);
+    int moveButtonSize = (int)(gapTop * MOVE_BUTTON_SIZE);
 
     // Calculating the positions of the buttons ?? Somehow make this cleaner ??
-    lastMoveRect = (SDL_Rect){
-        UI.gapLeft + UI.boardSize - moveButtonSize,
-        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
+
+    SDL_Rect defaultMoveButtonRect = (SDL_Rect){
+        gapLeft + boardSize - moveButtonSize,
+        boardY + boardSize + (gapTop - moveButtonSize) / 2,
         moveButtonSize,
         moveButtonSize
     };
+    int moveButtonOffsetValue = -moveButtonSize - (gapTop - moveButtonSize) / 2;
 
-    nextMoveRect = (SDL_Rect){
-        UI.gapLeft + UI.boardSize - 2 * moveButtonSize - (UI.gapTop - moveButtonSize) / 2,
-        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
-        moveButtonSize,
-        moveButtonSize
-    };
+    lastMoveRect = defaultMoveButtonRect;
 
-    prevMoveRect = (SDL_Rect){
-        UI.gapLeft + UI.boardSize - 3 * moveButtonSize - 2 * (UI.gapTop - moveButtonSize) / 2,
-        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
-        moveButtonSize,
-        moveButtonSize
-    };
+    nextMoveRect = defaultMoveButtonRect;
+    nextMoveRect.x += moveButtonOffsetValue;
 
-    firstMoveRect = (SDL_Rect){
-        UI.gapLeft + UI.boardSize - 4 * moveButtonSize - 3 * (UI.gapTop - moveButtonSize) / 2,
-        boardY + UI.boardSize + (UI.gapTop - moveButtonSize) / 2,
-        moveButtonSize,
-        moveButtonSize
-    };
 
-    pasteFENRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
+    prevMoveRect = defaultMoveButtonRect;
+    prevMoveRect.x += moveButtonOffsetValue * 2;
+
+    firstMoveRect = defaultMoveButtonRect;
+    firstMoveRect.x += moveButtonOffsetValue * 3;
+
+    SDL_Rect defaultMenuButtonRect = (SDL_Rect){
+        windowWidth - gapLeft + moveButtonSize - gapRight,
         boardY,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
+        gapRight - moveButtonSize,
+        gapRight / 8
     };
+    int menuButtonOffsetValue = gapRight / 6;
 
-    pastePGNRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.gapRight / 6 * 1,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    pasteFENRect = defaultMenuButtonRect;
 
-    copyFENRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.gapRight / 6 * 2,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    pastePGNRect = defaultMenuButtonRect;
+    pastePGNRect.y += menuButtonOffsetValue;
 
-    copyPGNRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.gapRight / 6 * 3,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    copyFENRect = defaultMenuButtonRect;
+    copyFENRect.y += menuButtonOffsetValue * 2;
 
-    savePGNRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.gapRight / 6 * 4,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    copyPGNRect = defaultMenuButtonRect;
+    copyPGNRect.y += menuButtonOffsetValue * 3;
 
-    loadPGNRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.gapRight / 6 * 5,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    savePGNRect = defaultMenuButtonRect;
+    savePGNRect.y += menuButtonOffsetValue * 4;
 
-    resetRect = (SDL_Rect){
-        UI.windowWidth - UI.gapLeft + moveButtonSize - UI.gapRight,
-        boardY + UI.boardSize - UI.gapRight / 8,
-        UI.gapRight - moveButtonSize,
-        UI.gapRight / 8
-    };
+    loadPGNRect = defaultMenuButtonRect;
+    loadPGNRect.y += menuButtonOffsetValue * 5;
+
+    resetRect = defaultMenuButtonRect;
+    resetRect.y += menuButtonOffsetValue * 6;
 }
 
 void renderButtons() {
     for (int i = 0; i < ButtonCount; i++) {
         ButtonData* button = buttons[i];
 
-        bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
-
-        SDL_Color color = HexToRGBA(button->defaultColor);
-        if (!(*button->enabled)) {
-            color = HexToRGBA(button->disabledColor);
-        }
-        else if (hower) {
-            color = HexToRGBA(button->howerColor);
-        }
-
-        renderTextbox(renderer, button->text, *(button->rect), color, HexToRGBA(button->textColor));
+        renderButton(button);
     }
 }
 
-void testButonClick() {
+void renderButton(ButtonData* button) {
+    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
+
+    SDL_Color color = HexToRGBA(button->defaultColor);
+    if (!(*button->enabled)) {
+        color = HexToRGBA(button->disabledColor);
+    }
+    else if (hower) {
+        color = HexToRGBA(button->howerColor);
+    }
+
+    renderTextbox(renderer, button->text, *(button->rect), color, HexToRGBA(button->textColor));
+}
+
+void testButonClicks() {
     for (int i = 0; i < ButtonCount; i++) {
         ButtonData* button = buttons[i];
 
-        bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
-        if (hower && (*button->enabled))
-            (*button->callBack)();
+        testButton(button);
     }
 }
 
+void testButton(ButtonData* button) {
+    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
+    if (hower && (*button->enabled))
+        (*button->callBack)();
+}
 
 SDL_Color HexToRGBA(int hex) {
     return (SDL_Color) { hex >> 24, hex >> 16 & 0xFF, hex >> 8 & 0xFF, hex & 0xFF };
