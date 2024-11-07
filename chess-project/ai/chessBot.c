@@ -11,8 +11,12 @@ Board* board;
 int transpositionCount;
 int searchAttacks(int alpha, int beta);
 
-int searchAttacks(int alpha, int beta) {
+bool botQuit = true;
 
+int searchAttacks(int alpha, int beta) {
+	if (botQuit) {
+		return 0;
+	}
 	int eval = evalBoard(board);
 	if (eval >= beta)
 		return beta;
@@ -43,12 +47,17 @@ int searchAttacks(int alpha, int beta) {
 }
 
 Move bestMove;
+
+Move bestMoveThisIter;
 Move bestEval;
 
 int search(int depth, int distFromRoot, int alpha, int beta) {
+	if (botQuit) {
+		return 0;
+	}
 
 	if (board->currentGameState.halfmoveClock >= 4) {
-		
+
 		for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
 			if (board->zobristHistory[i] == board->zobristHash)
 				return 0; // Evaluate as draw if it is a repetition
@@ -58,12 +67,12 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	int transposEval = getTransposition(board->zobristHash, distFromRoot, depth, alpha, beta);
 	if (transposEval != TranspositionNotFound) {
 		transpositionCount++;
-		if (isMateEval(transposEval) && distFromRoot == 0) { // mating sequence already found
-			if (transposEval > bestEval) {
-				bestMove = getBestMoveFromTranspos(board->zobristHash);
-				bestEval = transposEval;
-			}
+		if (distFromRoot == 0) {
+		
+			bestMoveThisIter = getBestMoveFromTranspos(board->zobristHash);
+			bestEval = transposEval;
 		}
+
 		return transposEval;
 	}
 
@@ -76,17 +85,13 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	int moveCount = generateMoves(board, moves, false);
 
 	if (moveCount == 0) {
-				
-		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
-		{
-			free(moves);
-
-			int mateScore = MateScore - distFromRoot; // higher eval for closest mate
-			return - mateScore;
-		}
- 
 		free(moves);
 
+		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
+		{
+			int mateScore = MateScore - distFromRoot; // higher eval for closest mate
+			return -mateScore;
+		}
 		return 0;
 	}
 
@@ -99,7 +104,7 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	for (int i = 0; i < moveCount; i++) {
 		makeMove(board, moves[i]);
 
-		int eval = -search(depth - 1, distFromRoot + 1,  -beta, -alpha);
+		int eval = -search(depth - 1, distFromRoot + 1, -beta, -alpha);
 
 		unmakeMove(board, moves[i]);
 
@@ -109,23 +114,25 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 			return beta;
 		}
 
-		
+		if (botQuit) {
+			free(moves);
+			return 0;
+		}
+
 		if (eval > alpha) {
 			bestMoveThisPos = moves[i];
 			alpha = eval;
 			transEvalType = TranspositionExact;
 			if (distFromRoot == 0) {
-				
-				bestMove = moves[i];
+				bestMoveThisIter = moves[i];
 				bestEval = eval;
 			}
 		}
-		
+
 	}
-
-	insertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
-
 	free(moves);
+	
+	insertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
 
 	return alpha;
 }
@@ -134,28 +141,43 @@ Move findBestMove(Board* boardIn) {
 
 	transpositionCount = 0;
 	bestMove = 0;
-	Uint64 oldTick = SDL_GetTicks64();
+	bestMoveThisIter = 0;
 
-	int maxTime = 500;
 	int depth = 1;
 	int eval = 0;
-	while ((SDL_GetTicks64() - oldTick) < maxTime) {
+	while (!botQuit) {
+		bestMoveThisIter = 0;
 		eval = search(depth, 0, -MateScore, MateScore);
+
+		if (botQuit)
+			break;
 		depth++;
+
+		bestMove = bestMoveThisIter;
+		bestEval = eval;
 		if (isMateEval(eval) && eval > 0)
 			break;
-
 	}
-
-	Uint64 tick = SDL_GetTicks64();
-
-	printf("Transpositions found: %10d\n", transpositionCount);
-	printf("Eval: %10d in %d ms\nWith depth of %d\n", eval, (int)(tick - oldTick), depth - 1);
-	oldTick = tick;
+	printf("depth: %d\n", depth);
+	printf("Eval: %10d \n", bestEval);
 
 	return bestMove;
 }
 
+Move startBot(Board* board) {
+	botQuit = false;
+
+	SDL_Thread* botThread = SDL_CreateThread(findBestMove, "bot", board);
+
+	SDL_Delay(2000);
+	botQuit = true;
+	SDL_WaitThread(botThread, 0);
+
+	char* note = getMoveNotation(board, bestMove);
+	free(note);
+
+	return bestMove;
+}
 
 bool isMateEval(int eval) {
 

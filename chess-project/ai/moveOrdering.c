@@ -79,6 +79,3 @@ void quickSort(int low, int high) {
 		quickSort(pi + 1, high);
 	}
 }
-
-
-

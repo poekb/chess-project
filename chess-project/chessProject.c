@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
     // Start the main update loop
     updateLoop();
     
-    // Cleanups
     redererCleanup();
     SDL_Quit();
 

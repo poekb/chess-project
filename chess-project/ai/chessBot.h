@@ -6,14 +6,9 @@
 
 #define MateScore 100000000
 
-typedef struct EvalCase {
-	int value;
-	Pos from;
-	Pos to;
-}EvalCase;
 void mesureBot(Board* boardIn, int depth);
 
 int search(int depth, int distFromRoot, int alpha, int beta);
 Move findBestMove(Board* board);
-
+Move startBot(Board* board);
 bool isMateEval(int eval);

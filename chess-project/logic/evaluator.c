@@ -65,7 +65,6 @@ int evalBoard(Board* board) {
 	whiteValue += getPositionScore(board, true);
 	blackValue += getPositionScore(board, false);
 
-
 	int value = whiteValue - blackValue;
 
 	int perspective = board->isWhitesMove ? 1 : -1;

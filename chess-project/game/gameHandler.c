@@ -107,6 +107,16 @@ void updateLoop() {
                         renderStatic(renderer);
                         renderPieces(renderer, board->square);
                         UpdateBoard(board);
+
+                        if (bot) {
+                            UpdateBoard(board);
+
+                            Move bestMove = startBot(board);
+                            if (bestMove != 0)
+                                stashMove(bestMove);
+
+                            UpdateBoard(board);
+                        }
                     }
                 }
                 isPromotingPiece = false;
@@ -127,15 +137,13 @@ void updateLoop() {
                     stashMove(move);
                 }
 
-
                 renderStatic(renderer);
                 renderPieces(renderer, board->square);
 
-
-                if (bot) {
+                if (bot && !isPromotion(move)) {
                     UpdateBoard(board);
 
-                    Move bestMove = findBestMove(board);
+                    Move bestMove = startBot(board);
                     if(bestMove != 0)
                         stashMove(bestMove);
                 }
@@ -183,7 +191,7 @@ void toggleBot() {
     SDL_RenderPresent(renderer);
 
     if (bot) {
-        Move bestMove = findBestMove(board);
+        Move bestMove = startBot(board);
         if (bestMove != 0)
             stashMove(bestMove);
     }
@@ -338,7 +346,6 @@ void UpdateBoard(Board* board) {
         displayPromotionSelect(renderer, promotingPieceMove, board->isWhitesMove);
 
     SDL_RenderPresent(renderer);
-
 }
 
 void resetBoard() {
