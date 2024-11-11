@@ -19,5 +19,6 @@ extern Transposition* transpositionTable;
 void initTranspositionTable();
 void insertTransposition(Uint64 zobrist, int eval, Uint8 distFromRoot, Uint8 depth, Uint8 type, Move bestMove);
 int getTransposition(Uint64 zobrist, Uint8 distFromRoot, Uint8 depth, int alpha, int beta);
+int getRawTransposition(Uint64 zobrist);
 
 Move getBestMoveFromTranspos(Uint64 zobrist);

@@ -5,6 +5,7 @@
 
 #include "../game/notations.h"
 #include "transpositionTable.h"
+#include "../core/board.h"
 
 Board* board;
 
@@ -49,31 +50,49 @@ int searchAttacks(int alpha, int beta) {
 Move bestMove;
 
 Move bestMoveThisIter;
-Move bestEval;
+int bestEval;
 
 int search(int depth, int distFromRoot, int alpha, int beta) {
 	if (botQuit) {
 		return 0;
 	}
 
-	if (board->currentGameState.halfmoveClock >= 4) {
-
+	if (board->currentGameState.halfmoveClock >= (distFromRoot == 0) ? 6 : 4 ) {
+		int count = 0;
 		for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
 			if (board->zobristHistory[i] == board->zobristHash)
-				return 0; // Evaluate as draw if it is a repetition
+			{
+				count++;
+				if(count > (distFromRoot == 0) ? 1 : 0)
+					return 0; // Evaluate as draw if it is a repetition
+			}
 		}
 	}
 
 	int transposEval = getTransposition(board->zobristHash, distFromRoot, depth, alpha, beta);
 	if (transposEval != TranspositionNotFound) {
 		transpositionCount++;
-		if (distFromRoot == 0) {
-		
-			bestMoveThisIter = getBestMoveFromTranspos(board->zobristHash);
-			bestEval = transposEval;
-		}
 
-		return transposEval;
+		Move transposMove = getBestMoveFromTranspos(board->zobristHash);
+		bool isRepetition = false;
+
+		if (board->currentGameState.halfmoveClock >= 3) {
+			Uint64 zobrist = zobistOfMove(board, transposMove);
+			for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
+				if (board->zobristHistory[i] == zobrist)
+					isRepetition = true; // Evaluate as draw if it is a repetition
+			}
+		}
+		if (!isRepetition) {
+			if (distFromRoot == 0) {
+				bestMoveThisIter = transposMove;
+				char* moveNote = getMoveNotation(board, bestMoveThisIter);
+				printf("%s\n", moveNote);
+				free(moveNote);
+				//bestEval = transposEval;
+			}
+			return transposEval;
+		}
 	}
 
 	if (depth == 0) {
@@ -125,7 +144,6 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 			transEvalType = TranspositionExact;
 			if (distFromRoot == 0) {
 				bestMoveThisIter = moves[i];
-				bestEval = eval;
 			}
 		}
 
@@ -154,12 +172,14 @@ Move findBestMove(Board* boardIn) {
 		depth++;
 
 		bestMove = bestMoveThisIter;
+		//printf(" - Eval: %10d\n", bestEval);
+
 		bestEval = eval;
 		if (isMateEval(eval) && eval > 0)
 			break;
 	}
 	printf("depth: %d\n", depth);
-	printf("Eval: %10d \n", bestEval);
+	printf("Eval: %10d\n", bestEval);
 
 	return bestMove;
 }

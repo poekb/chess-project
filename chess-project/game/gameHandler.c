@@ -205,6 +205,7 @@ bool gameLoadEnabled = true;
 void stashMove(Move move) {
 
     makeMove(board,move);
+
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
         SDL_Log("Unable to allocate memory");

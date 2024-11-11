@@ -1,14 +1,18 @@
 #include "moveOrdering.h"
 #include "../logic/pieceMaps.h"
-
+#include "../core/board.h"
+#include "transpositionTable.h"
+#include "chessBot.h"
 int partition(int low, int high);
 void quickSort(int low, int high);
 int valueMove(Board* board, Move move);
 
 int moveValues[218];
 Move* moves;
+int boardEval;
 
 void orderMoves(Board* board, Move* movesIn, int moveCount) {
+	boardEval = -evalBoard(board);
 	moves = movesIn;
 	for (int i = 0; i < moveCount; i++) {
 		moveValues[i] = -valueMove(board, moves[i]);
@@ -18,6 +22,13 @@ void orderMoves(Board* board, Move* movesIn, int moveCount) {
 }
 
 int valueMove(Board* board, Move move) {
+
+	Uint64 zobrist = zobistOfMove(board, move);
+
+	int transposeval = getRawTransposition(zobrist);
+	if (transposeval != TranspositionNotFound) {
+		return -(transposeval - boardEval);
+	}
 
 	Uint8 targetSquare = getTarget(move);
 	Uint8 startSquare = getStart(move);

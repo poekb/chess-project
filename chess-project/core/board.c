@@ -114,6 +114,99 @@ void makeMove(Board* board, Move move) {
 
 }
 
+Uint64 zobistOfMove(Board* board, Move move) {
+	//Get data from move
+	Uint8 start = getStart(move);
+	Uint8 target = getTarget(move);
+
+	Piece piece = board->square[start];
+	bool turn = isWhite(piece);
+	int colorIndex = turn ? WhiteIndex : BlackIndex;
+	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
+	PieceType type = getPieceType(piece);
+
+
+	bool enpassantCapture = isEnPassantCapture(move);
+	bool castle = isCastle(move);
+	bool doublePawn = isPawnTwoUp(move);
+	bool promotion = isPromotion(move);
+
+	Uint64 zobrist = board->zobristHash;
+
+	GameState gamestate = board->currentGameState;
+	zobrist ^= zobristCastlingRights[gamestate.castleRights];
+
+	
+	if (gamestate.enpassantFile != (Uint8)-1)
+		zobrist ^= zobristEnpassant[gamestate.enpassantFile];
+
+	gamestate.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
+
+	// There is a capture
+	if (gamestate.capturedPiece != None || enpassantCapture) {
+		Uint8 capture = enpassantCapture ? (start / 8) * 8 + target % 8 : target;
+		zobrist ^= zobristPieceHashes[capture][(gamestate.capturedPiece - 1) + enemyIndex * 6];
+	}
+	else if (doublePawn) {
+		gamestate.enpassantFile = start % 8;
+		zobrist ^= zobristEnpassant[gamestate.enpassantFile];
+	}
+
+	zobrist ^= zobristPieceHashes[start][(type - 1) + colorIndex * 6];
+	zobrist ^= zobristPieceHashes[target][(type - 1) + colorIndex * 6];
+
+	// Handle castles
+	if (castle) {
+		if (target % 8 == 6) {
+			// Kingside
+			zobrist ^= zobristPieceHashes[target + 1][(Rook - 1) + colorIndex * 6];
+			zobrist ^= zobristPieceHashes[target - 1][(Rook - 1) + colorIndex * 6];
+		}
+		else if (target % 8 == 2) {
+			// Queenside
+			zobrist ^= zobristPieceHashes[target - 2][(Rook - 1) + colorIndex * 6];
+			zobrist ^= zobristPieceHashes[target + 1][(Rook - 1) + colorIndex * 6];
+		}
+
+		//gamestate.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
+	}
+
+	if(type == King)
+		gamestate.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
+
+	if (start == 0 || target == 0)
+		gamestate.castleRights &= ClearBlackQueenSide;
+	else if (start == 7 || target == 7)
+		gamestate.castleRights &= ClearBlackKingSide;
+	else if (start == 56 || target == 56)
+		gamestate.castleRights &= ClearWhiteQueenSide;
+	else if (start == 63 || target == 63)
+		gamestate.castleRights &= ClearWhiteKingSide;
+
+	zobrist ^= zobristCastlingRights[gamestate.castleRights];
+
+	if (promotion) {
+		PieceType promoteType = Knight;
+		switch (move >> 12) {
+		case PromoteToQueenFlag:
+			promoteType = Queen;
+			break;
+		case PromoteToBishopFlag:
+			promoteType = Bishop;
+			break;
+		case PromoteToRookFlag:
+			promoteType = Rook;
+			break;
+		}
+		zobrist ^= zobristPieceHashes[target][(Pawn - 1) + colorIndex * 6];
+		zobrist ^= zobristPieceHashes[target][(promoteType - 1) + colorIndex * 6];
+	}
+
+	zobrist ^= zobristBlacksTurn;
+
+	return zobrist;
+}
+
 
 void unmakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
@@ -177,6 +270,8 @@ void unmakeMove(Board* board, Move move) {
 	board->currentGameState = board->gameStateHistory[--board->gameStateHistoryCount];
 	board->zobristHash = board->zobristHistory[board->gameStateHistoryCount];
 }
+
+
 
 void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target,Uint8 colorIndex, bool isWhite) {
 	board->square[square] = makePieceIsWhite(target, isWhite);

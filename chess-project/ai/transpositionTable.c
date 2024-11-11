@@ -50,6 +50,14 @@ int getTransposition(Uint64 zobrist, Uint8 distFromRoot, Uint8 depth, int alpha,
 	return TranspositionNotFound;
 }
 
+int getRawTransposition(Uint64 zobrist) {
+	Uint32 index = (Uint32)zobrist & indexMask;
+	if (transpositionTable[index].zobrist == zobrist) {
+		return transpositionTable[index].eval;
+	}
+	return TranspositionNotFound;
+}
+
 int correctMateEvalIn(int eval, int distFromRoot) {
 	if (isMateEval(eval)) {
 
