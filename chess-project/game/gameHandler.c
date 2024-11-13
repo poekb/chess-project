@@ -1,53 +1,75 @@
+
+
 #include "../ai/chessBot.h"
 #include "../ai/transpositionTable.h"
-#include "../core/board.h"
 #include "../graphics/boardRenderer.h"
 #include "../graphics/layout.h"
 #include "../graphics/textRenderer.h"
-#include "../moveGeneration/moveGenerator.h"
-#include "gameHandler.h"
 #include "notations.h"
 #include "pgn.h"
+#include "gameHandler.h"
 
 void recalcUIData();
 
-void UpdateBoard(Board* board);
-int hasMove(Uint8 start, Uint8 target);
+void UpdateBoard(Board* board, GameData* gameState);
+int hasMove(Uint8 start, Uint8 target, GameData* gameState);
 int countMoves(Board* board, int depth);
 
-void freeMoveHistory();
-void freeMoveFuture();
+void freeMoveHistory(GameData* gameData);
+void freeMoveFuture(GameData* gameData);
 
-// These values are static:
+bool* nextEnabled;
+bool* prevEnabled;
+bool* gameLoadEnabled;
+Sint32 mouseX;
+Sint32 mouseY;
 
-Uint8 selectedPos = -1;
-Uint8 howerPos = -1;
-
-Move validMoves[100];
-Move move;
-int moveCount = 0;
-
-bool bot = false;
-
-bool isPromotingPiece;
-Move promotingPieceMove;
-
-Sint32 mouseX, mouseY;
-
-char startFEN[100] = DefaultBoardFEN;
-Board* board;
-MoveList* moveHistory = NULL;
-MoveList* moveFuture = NULL;
+GameData* displayedGameData;
 
 // Perft test for validating move generation
 // Unused in the final app
-void perftTest(int depth);
+void perftTest(int depth, GameData* gameData);
 
 // The main update loop of the program
 void updateLoop() {
 
+    GameData* gameData = malloc(sizeof(GameData));
+    if (gameData == NULL) {
+        printf("Failed memory allocation!\n");
+        exit(1);
+    }
+
+    gameData->selectedPos = -1;
+    gameData->howerPos = -1;
+    gameData->moveCount = 0;
+    gameData->bot = false;
+    strncpy_s(gameData->startFEN, sizeof(gameData->startFEN), DefaultBoardFEN, sizeof(gameData->startFEN) - 1);
+    gameData->startFEN[sizeof(gameData->startFEN) - 1] = '\0';
+
+    gameData->moveHistory = NULL;
+    gameData->moveFuture = NULL;
+
+    gameData->isPromotingPiece = false;
+
+    gameData->nextEnabled = false;
+    gameData->prevEnabled = false;
+    gameData->gameLoadEnabled = true;
+    nextEnabled = &gameData->nextEnabled;
+    prevEnabled = &gameData->prevEnabled;
+    gameLoadEnabled = &gameData->gameLoadEnabled;
+
+
+    gameData->board = (Board*)malloc(sizeof(Board));
+    if (gameData->board == NULL) {
+        printf("Failed memory allocation!\n");
+        exit(1);
+    }
+
+
+    displayedGameData = gameData;
+
     recalcUIData();
-    loadFEN(startFEN);
+    loadFEN(gameData->startFEN, gameData);
     initTranspositionTable();
 
     // ############################
@@ -63,22 +85,22 @@ void updateLoop() {
 
             
             renderStatic(renderer);
-            UpdateBoard(board);
+            UpdateBoard(gameData->board, gameData);
 
             break;
         case SDL_MOUSEMOTION:
             mouseX = event.motion.x;
             mouseY = event.motion.y;
-            howerPos = getCell(event.motion.x, event.motion.y);
+            gameData->howerPos = getCell(event.motion.x, event.motion.y);
 
-            UpdateBoard(board);
+            UpdateBoard(gameData->board, gameData);
 
             break;
         case SDL_MOUSEBUTTONDOWN: {
 
-            if (isPromotingPiece) {
-                if (howerPos != -1) {
-                    PieceType type = getPromotionPieceTypeByCell(promotingPieceMove, howerPos, board->isWhitesMove);
+            if (gameData->isPromotingPiece) {
+                if (gameData->howerPos != -1) {
+                    PieceType type = getPromotionPieceTypeByCell(gameData->promotingPieceMove, gameData->howerPos, gameData->board->isWhitesMove);
 
                     if (type != None) {
                         Uint16 flag = 0;
@@ -98,68 +120,68 @@ void updateLoop() {
                             break;
                         }
 
-                        promotingPieceMove &= 0b0000111111111111;
-                        promotingPieceMove |= (flag << 12);
+                        gameData->promotingPieceMove &= 0b0000111111111111;
+                        gameData->promotingPieceMove |= (flag << 12);
 
-                        stashMove(promotingPieceMove);
-                        isPromotingPiece = false;
+                        stashMove(gameData->promotingPieceMove, gameData);
+                        gameData->isPromotingPiece = false;
 
                         renderStatic(renderer);
-                        renderPieces(renderer, board->square);
-                        UpdateBoard(board);
+                        renderPieces(renderer, gameData->board->square);
+                        UpdateBoard(gameData->board, gameData);
 
-                        if (bot) {
-                            UpdateBoard(board);
+                        if (gameData->bot) {
+                            UpdateBoard(gameData->board, gameData);
 
-                            Move bestMove = startBot(board);
+                            Move bestMove = startBot(gameData->board);
                             if (bestMove != 0)
-                                stashMove(bestMove);
+                                stashMove(bestMove, gameData);
 
-                            UpdateBoard(board);
+                            UpdateBoard(gameData->board, gameData);
                         }
                     }
                 }
-                isPromotingPiece = false;
+                gameData->isPromotingPiece = false;
                 break;
             }
 
             testButonClicks();
 
-            int moveIndex = hasMove(selectedPos, howerPos);
-            if (selectedPos != -1 && (moveIndex != -1)) {
-                move = validMoves[moveIndex];
+            int moveIndex = hasMove(gameData->selectedPos, gameData->howerPos, gameData);
+            if (gameData->selectedPos != -1 && (moveIndex != -1)) {
+                gameData->move = gameData->validMoves[moveIndex];
 
-                if (isPromotion(move)) {
-                    isPromotingPiece = true;
-                    promotingPieceMove = move;
+                if (isPromotion(gameData->move)) {
+                    gameData->isPromotingPiece = true;
+                    gameData->promotingPieceMove = gameData->move;
                 }
                 else {
-                    stashMove(move);
+                    stashMove(gameData->move, gameData);
                 }
 
                 renderStatic(renderer);
-                renderPieces(renderer, board->square);
+                renderPieces(renderer, gameData->board->square);
 
-                if (bot && !isPromotion(move)) {
-                    UpdateBoard(board);
+                if (gameData->bot && !isPromotion(gameData->move)) {
+                    UpdateBoard(gameData->board, gameData);
 
-                    Move bestMove = startBot(board);
+                    Move bestMove = startBot(gameData->board);
                     if(bestMove != 0)
-                        stashMove(bestMove);
+                        stashMove(bestMove, gameData);
                 }
 
-                selectedPos = -1;
+                gameData->selectedPos = -1;
             }
             else {
-                selectedPos = howerPos;
+                gameData->selectedPos = gameData->howerPos;
             }
-            UpdateBoard(board);
+            UpdateBoard(gameData->board, gameData);
 
             break;
         }
         case SDL_WINDOWEVENT: {
             recalcUIData();
-            UpdateBoard(board);
+            UpdateBoard(gameData->board, gameData);
 
             break;
         }
@@ -169,42 +191,39 @@ void updateLoop() {
         }
     }
 
-    free(board);
-    while (moveFuture != NULL) {
-        MoveList* current = moveFuture;
-        moveFuture = moveFuture->next;
+    free(gameData->board);
+    while (gameData->moveFuture != NULL) {
+        MoveList* current = gameData->moveFuture;
+        gameData->moveFuture = gameData->moveFuture->next;
         free(current);
     }
-    while (moveHistory != NULL) {
-        MoveList* current = moveHistory;
-        moveHistory = moveHistory->next;
+    while (gameData->moveHistory != NULL) {
+        MoveList* current = gameData->moveHistory;
+        gameData->moveHistory = gameData->moveHistory->next;
         free(current);
     }
 
     free(transpositionTable);
+    free(gameData);
 }
 
 void toggleBot() {
-    bot = !bot;
-    strcpy(toggleBotButton.text, bot ? "Stop Bot" : "Start Bot");
+    
+    displayedGameData->bot = !displayedGameData->bot;
+    strcpy(toggleBotButton.text, displayedGameData->bot ? "Stop Bot" : "Start Bot");
     renderButtons();
     SDL_RenderPresent(renderer);
-
-    if (bot) {
-        Move bestMove = startBot(board);
+    if (displayedGameData->bot) {
+        Move bestMove = startBot(displayedGameData->board);
         if (bestMove != 0)
-            stashMove(bestMove);
+            stashMove(bestMove, displayedGameData);
     }
 }
 
-bool nextEnabled = false;
-bool prevEnabled = false;
-bool gameLoadEnabled = true;
-
 // Make a move and store it in move history
-void stashMove(Move move) {
+void stashMove(Move move, GameData* gameState) {
 
-    makeMove(board,move);
+    makeMove(gameState->board,move);
 
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
@@ -213,33 +232,33 @@ void stashMove(Move move) {
     }
     moveList->move = move;
 
-    moveList->next = moveHistory;
+    moveList->next = gameState->moveHistory;
 
-    moveHistory = moveList;
+    gameState->moveHistory = moveList;
 
-    nextEnabled = false;
-    prevEnabled = true;
+    gameState->nextEnabled = false;
+    gameState->prevEnabled = true;
 
-    updateHasGameEnded();
+    updateHasGameEnded(gameState);
     
-    freeMoveFuture();
+    freeMoveFuture(gameState);
 }
 
-void updateHasGameEnded() {
-    moveCount = generateMoves(board, validMoves, false);
+void updateHasGameEnded(GameData* gameState) {
+    gameState->moveCount = generateMoves(gameState->board, gameState->validMoves, false);
 
-    if (moveCount == 0) {
-        // Game ended
-        board->hasGameEnded = true;
-        board->underAttackMap = generateUnderAttackBitmap(board);
-        if (isCheckPos(board)) {
-            bool whiteWins = !board->isWhitesMove;
-            board->winnerWhite = whiteWins;
-            board->winnerBlack = !whiteWins;
+    if (gameState->moveCount == 0) {
+        // GameState ended
+        gameState->board->hasGameEnded = true;
+        gameState->board->underAttackMap = generateUnderAttackBitmap(gameState->board);
+        if (isCheckPos(gameState->board)) {
+            bool whiteWins = !gameState->board->isWhitesMove;
+            gameState->board->winnerWhite = whiteWins;
+            gameState->board->winnerBlack = !whiteWins;
         }
         else {
-            board->winnerWhite = false;
-            board->winnerBlack = false;
+            gameState->board->winnerWhite = false;
+            gameState->board->winnerBlack = false;
         }
     }
 }
@@ -247,93 +266,92 @@ void updateHasGameEnded() {
 // Load move from move future
 void nextMove() {
 
-    makeMove(board, moveFuture->move);
-    MoveList* current = moveFuture;
-    moveFuture = moveFuture->next;
-    current->next = moveHistory;
-    moveHistory = current;
-    prevEnabled = true;
+    makeMove(displayedGameData->board, displayedGameData->moveFuture->move);
+    MoveList* current = displayedGameData->moveFuture;
+    displayedGameData->moveFuture = displayedGameData->moveFuture->next;
+    current->next = displayedGameData->moveHistory;
+    displayedGameData->moveHistory = current;
+    displayedGameData->prevEnabled = true;
 
-    if (moveFuture == NULL) {
-        nextEnabled = false;
+    if (displayedGameData->moveFuture == NULL) {
+        displayedGameData->nextEnabled = false;
     }
 
-    updateHasGameEnded();
+    updateHasGameEnded(displayedGameData);
 }
 
 // Load history from move history and store the revoked move in move future
 void prevMove() {
 
-    unmakeMove(board, moveHistory->move);
-    MoveList* current = moveHistory;
-    moveHistory = moveHistory->next;
-    current->next = moveFuture;
-    moveFuture = current;
-    nextEnabled = true;
+    unmakeMove(displayedGameData->board, displayedGameData->moveHistory->move);
+    MoveList* current = displayedGameData->moveHistory;
+    displayedGameData->moveHistory = displayedGameData->moveHistory->next;
+    current->next = displayedGameData->moveFuture;
+    displayedGameData->moveFuture = current;
+    displayedGameData->nextEnabled = true;
 
-    board->hasGameEnded = false;
+    displayedGameData->board->hasGameEnded = false;
 
-    if (moveHistory == NULL) {
-        prevEnabled = false;
+    if (displayedGameData->moveHistory == NULL) {
+        displayedGameData->prevEnabled = false;
     }
 }
 
 // Go back to the starting position of the game, but store the moves made
 void firstMove() {
-    while (prevEnabled) {
+    while (displayedGameData->prevEnabled) {
         prevMove();
     }
 }
 
 // Go to the last future move
 void lastMove() {
-    while (nextEnabled) {
+    while (displayedGameData->nextEnabled) {
         nextMove();
     }
 }
 
-void freeMoveHistory() {
-    while (moveHistory != NULL) {
-        MoveList* current = moveHistory;
-        moveHistory = moveHistory->next;
+void freeMoveHistory(GameData* gameData) {
+    while (gameData->moveHistory != NULL) {
+        MoveList* current = gameData->moveHistory;
+        gameData->moveHistory = gameData->moveHistory->next;
         free(current);
     }
 }
 
-void freeMoveFuture() {
-    while (moveFuture != NULL) {
-        MoveList* current = moveFuture;
-        moveFuture = moveFuture->next;
+void freeMoveFuture(GameData* gameData) {
+    while (gameData->moveFuture != NULL) {
+        MoveList* current = gameData->moveFuture;
+        gameData->moveFuture = gameData->moveFuture->next;
         free(current);
     }
 }
 
-//
-void UpdateBoard(Board* board) {
+void UpdateBoard(Board* board, GameData* gameState) {
 
     renderStatic(renderer);
 
     renderButtons();
 
-    if (prevEnabled) {
-        highlightCell(renderer, getStart(moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
-        highlightCell(renderer, getTarget(moveHistory->move), (SDL_Color) { 130, 230, 130, 200 });
+    if (gameState->prevEnabled) {
+        highlightCell(renderer, getStart(gameState->moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
+        highlightCell(renderer, getTarget(gameState->moveHistory->move), (SDL_Color) { 130, 230, 130, 200 });
     }
 
-    if (selectedPos != -1) {
-        highlightCell(renderer, selectedPos, (SDL_Color) { 100, 100, 200, 150 });
+    if (gameState->selectedPos != -1) {
+        highlightCell(renderer, gameState->selectedPos, (SDL_Color) { 100, 100, 200, 150 });
     }
 
-    if ((howerPos != -1))
-        highlightCell(renderer, howerPos, (SDL_Color) { 100, 100, 200, 150 });
+    if ((gameState->howerPos != -1))
+        highlightCell(renderer, gameState->howerPos, (SDL_Color) { 100, 100, 200, 150 });
 
-    moveCount = generateMoves(board, validMoves, false);
+    gameState->moveCount = generateMoves(board, gameState->validMoves, false);
 
-    for (int i = 0; i < moveCount; i++) {
-        Uint8 start = getStart(validMoves[i]);
-        Uint8 target = getTarget(validMoves[i]);
+    for (int i = 0; i < gameState->moveCount; i++) {
+        Uint8 start = getStart(gameState->validMoves[i]);
+        Uint8 target = getTarget(gameState->validMoves[i]);
 
-        if (start == selectedPos) {
+        if (start == gameState->selectedPos) {
             highlightCell(renderer, target, (SDL_Color) { 100, 100, 200, 150 });
         }
     }
@@ -343,44 +361,44 @@ void UpdateBoard(Board* board) {
     renderWinner(board);
 
 
-    if (isPromotingPiece)
-        displayPromotionSelect(renderer, promotingPieceMove, board->isWhitesMove);
+    if (gameState->isPromotingPiece)
+        displayPromotionSelect(renderer, gameState->promotingPieceMove, board->isWhitesMove);
 
     SDL_RenderPresent(renderer);
 }
 
 void resetBoard() {
-    loadFEN(DefaultBoardFEN);
+    loadFEN(DefaultBoardFEN, displayedGameData);
 }
 
 void pasteFEN() {
     char* clipBoard = SDL_GetClipboardText();
 
-    loadFEN(clipBoard);
+    loadFEN(clipBoard, displayedGameData);
     SDL_free(clipBoard);
 }
 
 void pastePGN() {
     char* clipBoard = SDL_GetClipboardText();
 
-    loadGameFromPGN(board, clipBoard);
+    loadGameFromPGN(displayedGameData->board, clipBoard, displayedGameData);
     SDL_free(clipBoard);
 }
 
 void copyFEN() {
     char FEN[100];
-    getFENFromBoard(board, FEN);
+    getFENFromBoard(displayedGameData->board, FEN);
     SDL_SetClipboardText(FEN);
 }
 
 void copyPGN() {
-    char* PGN = getPGN(board);
+    char* PGN = getPGN(displayedGameData->board, displayedGameData);
     SDL_SetClipboardText(PGN);
     free(PGN);
 }
 
 void savePGN() {
-    char* PGN = getPGN(board);
+    char* PGN = getPGN(displayedGameData->board, displayedGameData);
 
     FILE* fptr = fopen("game.pgn", "w");
 
@@ -405,38 +423,38 @@ void loadPGN() {
     fread(PGN, sizeof(char), size, fptr);
     fclose(fptr);
 
-    loadGameFromPGN(board, PGN);
+    loadGameFromPGN(displayedGameData->board, PGN, displayedGameData);
     free(PGN);
 }
 
-void loadFEN(char* fenStr) {
-    memcpy(startFEN, fenStr, min(strlen(fenStr) + 1,100));
-    startFEN[99] = '\0';
+void loadFEN(char* fenStr, GameData* gameState) {
+    memcpy(gameState->startFEN, fenStr, min(strlen(fenStr) + 1,100));
+    gameState->startFEN[99] = '\0';
 
-    freeMoveFuture();
-    freeMoveHistory();
-    prevEnabled = false;
-    nextEnabled = false;
+    freeMoveFuture(gameState);
+    freeMoveHistory(gameState);
+    gameState->prevEnabled = false;
+    gameState->nextEnabled = false;
 
-    if (board != NULL) free(board);
+    if (gameState->board != NULL) free(gameState->board);
 
-    board = calloc(1, sizeof(Board));
-    if (board == NULL) {
+    gameState->board = calloc(1, sizeof(Board));
+    if (gameState->board == NULL) {
         SDL_Log("Unable to allocate memory");
         exit(1);
     }
 
-    LoadBoardFromFEN(board, fenStr);
+    LoadBoardFromFEN(gameState->board, fenStr);
 
     // Optional perft test for validating the move generator:
-    perftTest(5);
+    perftTest(5, gameState);
 }
 
 // For move generator validation
-void perftTest(int depth) {
+void perftTest(int depth, GameData* gameState) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {
-        printf("Num of possible moves (%d): %10d ", i, countMoves(board, i));
+        printf("Num of possible moves (%d): %10d ", i, countMoves(gameState->board, i));
         printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
     }
 }
@@ -463,10 +481,10 @@ int countMoves(Board* board, int depth) {
 }
 
 // Check if the move is part of the valid moves
-int hasMove(Uint8 start, Uint8 target) {
-    for (int i = 0; i < moveCount; i++) {
-        Uint8 s = getStart(validMoves[i]);
-        Uint8 t = getTarget(validMoves[i]);
+int hasMove(Uint8 start, Uint8 target, GameData* gameState) {
+    for (int i = 0; i < gameState->moveCount; i++) {
+        Uint8 s = getStart(gameState->validMoves[i]);
+        Uint8 t = getTarget(gameState->validMoves[i]);
 
         if (s == start && t == target) {
 
@@ -477,6 +495,6 @@ int hasMove(Uint8 start, Uint8 target) {
 }
 
 // Return the next move in move future, this is important for PGN generation
-Move getNextMove() {
-    return moveFuture->move;
+Move getNextMove(GameData* gameState) {
+    return gameState->moveFuture->move;
 }

@@ -3,7 +3,7 @@
 
 typedef struct ButtonData {
     char text[50];
-    bool* enabled;
+    bool** enabled;
     void(*callBack)();
     int textColor;
     int defaultColor;

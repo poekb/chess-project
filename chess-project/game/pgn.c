@@ -1,13 +1,12 @@
 #include "pgn.h"
 
-#include "gameHandler.h"
 #include "notations.h"
 
 // Generate PGN string of the game
-char* getPGN(Board* board) {
+char* getPGN(Board* board, GameData* gameState) {
 
 	int moveCount = 0;
-	while (prevEnabled) {
+	while (gameState->prevEnabled) {
 		prevMove();
 		moveCount++;
 	}
@@ -19,7 +18,7 @@ char* getPGN(Board* board) {
 		exit(1);
 	}
 
-	int offset = sprintf(pgn, "[FEN \"%s\"]\n\n", startFEN);
+	int offset = sprintf(pgn, "[FEN \"%s\"]\n\n", gameState->startFEN);
 
 	if (moveCount == 0) {
 		offset += sprintf(&pgn[offset], "*");
@@ -27,31 +26,31 @@ char* getPGN(Board* board) {
 	}
 
 	if (!board->isWhitesMove) {
-		char* blackMove = getMoveNotation(board, getNextMove());
+		char* blackMove = getMoveNotation(board, getNextMove(gameState));
 		offset += sprintf_s(&pgn[offset], 24, "%d... %s ", board->fullmoveClock, blackMove);
-		nextMove();
+		nextMove(gameState);
 		free(blackMove);
 		moveCount--;
 	}
 
 	while (moveCount >= 2) {
-		char* whiteMove = getMoveNotation(board, getNextMove());
-		nextMove();
-		char* blackMove = getMoveNotation(board, getNextMove());
+		char* whiteMove = getMoveNotation(board, getNextMove(gameState));
+		nextMove(gameState);
+		char* blackMove = getMoveNotation(board, getNextMove(gameState));
 		offset += sprintf_s(&pgn[offset], 24, "%d. %s %s ", board->fullmoveClock, whiteMove, blackMove);
-		nextMove();
+		nextMove(gameState);
 		free(whiteMove);
 		free(blackMove);
 		moveCount -= 2;
 	}
 
 	if (moveCount == 1) {
-		char* whiteMove = getMoveNotation(board, getNextMove());
+		char* whiteMove = getMoveNotation(board, getNextMove(gameState));
 		offset += sprintf_s(&pgn[offset], 24, "%d. %s ", board->fullmoveClock, whiteMove);
-		nextMove();
+		nextMove(gameState);
 		free(whiteMove);
 	}
-	updateHasGameEnded();
+	updateHasGameEnded(gameState);
 
 	if (board->hasGameEnded) {
 		if (board->winnerWhite) {
@@ -75,7 +74,7 @@ char* getPGN(Board* board) {
 }
 
 // Load game from PGN string
-void loadGameFromPGN(Board* board, char* PGN) {
+void loadGameFromPGN(Board* board, char* PGN, GameData* gameState) {
 	int offset = 0;
 
 	char tagLine[200] = "";
@@ -92,7 +91,7 @@ void loadGameFromPGN(Board* board, char* PGN) {
 
 	}
 
-	loadFEN(FENString);
+	loadFEN(FENString, gameState);
 
 	int startOffset = offset;
 	// clean up comments:
@@ -173,7 +172,7 @@ void loadGameFromPGN(Board* board, char* PGN) {
 				Move move = getMoveFromNotation(board, &PGN[noteStart]);
 				
 				if (move != 0) 
-					stashMove(move);
+					stashMove(move, gameState);
 				
 			}
 			break;

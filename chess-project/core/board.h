@@ -34,10 +34,10 @@ typedef struct Board {
 	Uint64 underAttackMap;
 
 	Uint16 fullmoveClock;
-
 	bool hasGameEnded;
-	bool winnerWhite;
+    bool winnerWhite;
 	bool winnerBlack;
+
 } Board;
 
 void makeMove(Board* board, Move move);
@@ -48,5 +48,7 @@ void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIn
 Uint64 zobistOfMove(Board* board, Move move);
 
 bool isCheckPos(Board* board);
+
+
 
 #endif

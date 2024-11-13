@@ -151,11 +151,10 @@ ButtonData loadButton = {
     &loadPGNRect
 };
 
-bool botAvailable = true;
 
 ButtonData toggleBotButton = {
     "Start Bot",
-    &botAvailable,
+    NULL,
     &toggleBot,
     0xF0DADAFF,
     0x303040FF,
@@ -301,7 +300,7 @@ void renderButton(ButtonData* button) {
     bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
 
     SDL_Color color = HexToRGBA(button->defaultColor);
-    if (!(*button->enabled)) {
+    if (!((button->enabled == NULL) || **button->enabled)) {
         color = HexToRGBA(button->disabledColor);
     }
     else if (hower) {
@@ -321,7 +320,7 @@ void testButonClicks() {
 
 void testButton(ButtonData* button) {
     bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
-    if (hower && (*button->enabled))
+    if (hower && ((button->enabled == NULL) || (**button->enabled)))
         (*button->callBack)();
 }
 

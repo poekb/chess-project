@@ -86,10 +86,6 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		if (!isRepetition) {
 			if (distFromRoot == 0) {
 				bestMoveThisIter = transposMove;
-				char* moveNote = getMoveNotation(board, bestMoveThisIter);
-				printf("%s\n", moveNote);
-				free(moveNote);
-				//bestEval = transposEval;
 			}
 			return transposEval;
 		}
@@ -156,7 +152,7 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 }
 
 Move findBestMove(Board* boardIn) {
-
+	board = boardIn;
 	transpositionCount = 0;
 	bestMove = 0;
 	bestMoveThisIter = 0;
@@ -172,7 +168,6 @@ Move findBestMove(Board* boardIn) {
 		depth++;
 
 		bestMove = bestMoveThisIter;
-		//printf(" - Eval: %10d\n", bestEval);
 
 		bestEval = eval;
 		if (isMateEval(eval) && eval > 0)
