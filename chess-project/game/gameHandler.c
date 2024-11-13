@@ -11,8 +11,8 @@
 
 void recalcUIData();
 
-void UpdateBoard(Board* board, GameData* gameState);
-int hasMove(Uint8 start, Uint8 target, GameData* gameState);
+void UpdateBoard(Board* board, GameData* gameData);
+int hasMove(Uint8 start, Uint8 target, GameData* gameData);
 int countMoves(Board* board, int depth);
 
 void freeMoveHistory(GameData* gameData);
@@ -221,9 +221,9 @@ void toggleBot() {
 }
 
 // Make a move and store it in move history
-void stashMove(Move move, GameData* gameState) {
+void stashMove(Move move, GameData* gameData) {
 
-    makeMove(gameState->board,move);
+    makeMove(gameData->board,move);
 
     MoveList* moveList = malloc(sizeof(MoveList));
     if (moveList == NULL) {
@@ -232,33 +232,33 @@ void stashMove(Move move, GameData* gameState) {
     }
     moveList->move = move;
 
-    moveList->next = gameState->moveHistory;
+    moveList->next = gameData->moveHistory;
 
-    gameState->moveHistory = moveList;
+    gameData->moveHistory = moveList;
 
-    gameState->nextEnabled = false;
-    gameState->prevEnabled = true;
+    gameData->nextEnabled = false;
+    gameData->prevEnabled = true;
 
-    updateHasGameEnded(gameState);
+    updateHasGameEnded(gameData);
     
-    freeMoveFuture(gameState);
+    freeMoveFuture(gameData);
 }
 
-void updateHasGameEnded(GameData* gameState) {
-    gameState->moveCount = generateMoves(gameState->board, gameState->validMoves, false);
+void updateHasGameEnded(GameData* gameData) {
+    gameData->moveCount = generateMoves(gameData->board, gameData->validMoves, false);
 
-    if (gameState->moveCount == 0) {
-        // GameState ended
-        gameState->board->hasGameEnded = true;
-        gameState->board->underAttackMap = generateUnderAttackBitmap(gameState->board);
-        if (isCheckPos(gameState->board)) {
-            bool whiteWins = !gameState->board->isWhitesMove;
-            gameState->board->winnerWhite = whiteWins;
-            gameState->board->winnerBlack = !whiteWins;
+    if (gameData->moveCount == 0) {
+        // Game ended
+        gameData->board->hasGameEnded = true;
+        gameData->board->underAttackMap = generateUnderAttackBitmap(gameData->board);
+        if (isCheckPos(gameData->board)) {
+            bool whiteWins = !gameData->board->isWhitesMove;
+            gameData->board->winnerWhite = whiteWins;
+            gameData->board->winnerBlack = !whiteWins;
         }
         else {
-            gameState->board->winnerWhite = false;
-            gameState->board->winnerBlack = false;
+            gameData->board->winnerWhite = false;
+            gameData->board->winnerBlack = false;
         }
     }
 }
@@ -327,31 +327,31 @@ void freeMoveFuture(GameData* gameData) {
     }
 }
 
-void UpdateBoard(Board* board, GameData* gameState) {
+void UpdateBoard(Board* board, GameData* gameData) {
 
     renderStatic(renderer);
 
     renderButtons();
 
-    if (gameState->prevEnabled) {
-        highlightCell(renderer, getStart(gameState->moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
-        highlightCell(renderer, getTarget(gameState->moveHistory->move), (SDL_Color) { 130, 230, 130, 200 });
+    if (gameData->prevEnabled) {
+        highlightCell(renderer, getStart(gameData->moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
+        highlightCell(renderer, getTarget(gameData->moveHistory->move), (SDL_Color) { 130, 230, 130, 200 });
     }
 
-    if (gameState->selectedPos != -1) {
-        highlightCell(renderer, gameState->selectedPos, (SDL_Color) { 100, 100, 200, 150 });
+    if (gameData->selectedPos != -1) {
+        highlightCell(renderer, gameData->selectedPos, (SDL_Color) { 100, 100, 200, 150 });
     }
 
-    if ((gameState->howerPos != -1))
-        highlightCell(renderer, gameState->howerPos, (SDL_Color) { 100, 100, 200, 150 });
+    if ((gameData->howerPos != -1))
+        highlightCell(renderer, gameData->howerPos, (SDL_Color) { 100, 100, 200, 150 });
 
-    gameState->moveCount = generateMoves(board, gameState->validMoves, false);
+    gameData->moveCount = generateMoves(board, gameData->validMoves, false);
 
-    for (int i = 0; i < gameState->moveCount; i++) {
-        Uint8 start = getStart(gameState->validMoves[i]);
-        Uint8 target = getTarget(gameState->validMoves[i]);
+    for (int i = 0; i < gameData->moveCount; i++) {
+        Uint8 start = getStart(gameData->validMoves[i]);
+        Uint8 target = getTarget(gameData->validMoves[i]);
 
-        if (start == gameState->selectedPos) {
+        if (start == gameData->selectedPos) {
             highlightCell(renderer, target, (SDL_Color) { 100, 100, 200, 150 });
         }
     }
@@ -361,8 +361,8 @@ void UpdateBoard(Board* board, GameData* gameState) {
     renderWinner(board);
 
 
-    if (gameState->isPromotingPiece)
-        displayPromotionSelect(renderer, gameState->promotingPieceMove, board->isWhitesMove);
+    if (gameData->isPromotingPiece)
+        displayPromotionSelect(renderer, gameData->promotingPieceMove, board->isWhitesMove);
 
     SDL_RenderPresent(renderer);
 }
@@ -427,34 +427,34 @@ void loadPGN() {
     free(PGN);
 }
 
-void loadFEN(char* fenStr, GameData* gameState) {
-    memcpy(gameState->startFEN, fenStr, min(strlen(fenStr) + 1,100));
-    gameState->startFEN[99] = '\0';
+void loadFEN(char* fenStr, GameData* gameData) {
+    memcpy(gameData->startFEN, fenStr, min(strlen(fenStr) + 1,100));
+    gameData->startFEN[99] = '\0';
 
-    freeMoveFuture(gameState);
-    freeMoveHistory(gameState);
-    gameState->prevEnabled = false;
-    gameState->nextEnabled = false;
+    freeMoveFuture(gameData);
+    freeMoveHistory(gameData);
+    gameData->prevEnabled = false;
+    gameData->nextEnabled = false;
 
-    if (gameState->board != NULL) free(gameState->board);
+    if (gameData->board != NULL) free(gameData->board);
 
-    gameState->board = calloc(1, sizeof(Board));
-    if (gameState->board == NULL) {
+    gameData->board = calloc(1, sizeof(Board));
+    if (gameData->board == NULL) {
         SDL_Log("Unable to allocate memory");
         exit(1);
     }
 
-    LoadBoardFromFEN(gameState->board, fenStr);
+    LoadBoardFromFEN(gameData->board, fenStr);
 
     // Optional perft test for validating the move generator:
-    perftTest(5, gameState);
+    perftTest(5, gameData);
 }
 
 // For move generator validation
-void perftTest(int depth, GameData* gameState) {
+void perftTest(int depth, GameData* gameData) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {
-        printf("Num of possible moves (%d): %10d ", i, countMoves(gameState->board, i));
+        printf("Num of possible moves (%d): %10d ", i, countMoves(gameData->board, i));
         printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
     }
 }
@@ -481,10 +481,10 @@ int countMoves(Board* board, int depth) {
 }
 
 // Check if the move is part of the valid moves
-int hasMove(Uint8 start, Uint8 target, GameData* gameState) {
-    for (int i = 0; i < gameState->moveCount; i++) {
-        Uint8 s = getStart(gameState->validMoves[i]);
-        Uint8 t = getTarget(gameState->validMoves[i]);
+int hasMove(Uint8 start, Uint8 target, GameData* gameData) {
+    for (int i = 0; i < gameData->moveCount; i++) {
+        Uint8 s = getStart(gameData->validMoves[i]);
+        Uint8 t = getTarget(gameData->validMoves[i]);
 
         if (s == start && t == target) {
 
@@ -495,6 +495,6 @@ int hasMove(Uint8 start, Uint8 target, GameData* gameState) {
 }
 
 // Return the next move in move future, this is important for PGN generation
-Move getNextMove(GameData* gameState) {
-    return gameState->moveFuture->move;
+Move getNextMove(GameData* gameData) {
+    return gameData->moveFuture->move;
 }

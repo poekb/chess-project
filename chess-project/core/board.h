@@ -49,6 +49,4 @@ Uint64 zobistOfMove(Board* board, Move move);
 
 bool isCheckPos(Board* board);
 
-
-
 #endif

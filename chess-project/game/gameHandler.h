@@ -3,14 +3,10 @@
 #include "../core/board.h"
 #include "../moveGeneration/moveGenerator.h"
 
-
-
 #ifndef GAME
 #define GAME
 
 #define DefaultBoardFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-
 
 typedef struct MoveList {
     Move move;
@@ -40,6 +36,7 @@ typedef struct GameData {
     bool gameLoadEnabled;
 } GameData;
 
+
 void updateLoop();
 
 void toggleBot();
@@ -60,8 +57,6 @@ void copyFEN();
 void copyPGN();
 void savePGN();
 void loadPGN();
-
-
 
 void resetBoard();
 
