@@ -3,28 +3,28 @@
 const int typeMask = 0b0111;
 const int colourMask = 0b1000;
 
-Piece makePiece(PieceType type, Uint8 color) {
+Piece MakePiece(PieceType type, Uint8 color) {
 	return type | color;
 }
-Piece makePieceIsWhite(PieceType type, bool isWhite) {
-	return makePiece(type, isWhite ? White : Black);
+Piece MakePieceIsWhite(PieceType type, bool IsWhite) {
+	return MakePiece(type, IsWhite ? White : Black);
 }
 
-bool isColour(Piece piece, Uint8 color) {
+bool IsColour(Piece piece, Uint8 color) {
 	return (piece & colourMask) == color;
 }
 
-bool isWhite(Piece piece) {
-	return isColour(piece, White);
+bool IsWhite(Piece piece) {
+	return IsColour(piece, White);
 }
 
-PieceType getPieceType(Piece piece) {
+PieceType GetPieceType(Piece piece) {
 	return typeMask & piece;
 }
 
-Piece pieceFromChar(char c) {
-	bool isWhite = isupper(c);
-	if (isWhite) c += 'a' - 'A';
+Piece PieceFromChar(char c) {
+	bool IsWhite = isupper(c);
+	if (IsWhite) c += 'a' - 'A';
 	PieceType type = None;
 	switch (c)
 	{
@@ -36,11 +36,11 @@ Piece pieceFromChar(char c) {
 	case 'k': type = King; break;
 	default: break;
 	}
-	return makePieceIsWhite(type, isWhite);
+	return MakePieceIsWhite(type, IsWhite);
 }
 
-char charFromPiece(Piece piece) {
-	PieceType type = getPieceType(piece);
+char CharFromPiece(Piece piece) {
+	PieceType type = GetPieceType(piece);
 	char c = ' ';
 	switch (type)
 	{
@@ -53,9 +53,9 @@ char charFromPiece(Piece piece) {
 	default: break;
 	}
 
-	return isWhite(piece) ? toupper(c) : c;
+	return IsWhite(piece) ? toupper(c) : c;
 }
 
-Uint8 getCode(Piece piece) {
+Uint8 GetCode(Piece piece) {
 	return piece - ((piece > 8) ? 1 : 3);
 }

@@ -3,7 +3,7 @@
 #include "../zobrist/zobristHashing.h"
 
 // Get algebraic chess notation out of move
-char* getMoveNotation(Board* board, Move move) {
+char* GetMoveNotation(Board* board, Move move) {
 	
 	char* string = malloc(sizeof(char) * 10);
 	if (string == NULL) {
@@ -15,14 +15,14 @@ char* getMoveNotation(Board* board, Move move) {
 
 	Move* moves = malloc(sizeof(Move) * 100);
 	if (moves == NULL) return 0;
-	int moveCount = generateMoves(board, moves, false);
+	int moveCount = GenerateMoves(board, moves, false);
 
-	Uint8 start = getStart(move);
-	Uint8 target = getTarget(move);
+	Uint8 start = GetStart(move);
+	Uint8 target = GetTarget(move);
 
-	PieceType type = getPieceType(board->square[start]);
+	PieceType type = GetPieceType(board->square[start]);
 
-	if (isCastle(move)) {
+	if (IsCastle(move)) {
 
 		string[length++] = '0';
 		string[length++] = '-';
@@ -56,7 +56,7 @@ char* getMoveNotation(Board* board, Move move) {
 		break;
 	}
 
-	bool capture = board->square[target] != None || isEnPassantCapture(move);
+	bool capture = board->square[target] != None || IsEnPassantCapture(move);
 
 	bool multiple = (capture) && (type == Pawn);
 	bool sameFile = false;
@@ -64,9 +64,9 @@ char* getMoveNotation(Board* board, Move move) {
 
 	for (int i = 0; i < moveCount; i++) {
 		if (move == moves[i]) continue;
-		Uint8 curStart = getStart(moves[i]);
+		Uint8 curStart = GetStart(moves[i]);
 
-		if (target != getTarget(moves[i]) || getPieceType(board->square[curStart]) != type)
+		if (target != GetTarget(moves[i]) || GetPieceType(board->square[curStart]) != type)
 			continue;
 		multiple = true;
 		if (start % 8 == curStart % 8)
@@ -97,7 +97,7 @@ char* getMoveNotation(Board* board, Move move) {
 	string[length++] = (target % 8) + 'a';
 	string[length++] = '8' - (target / 8);
 
-	if (isPromotion(move)) {
+	if (IsPromotion(move)) {
 		string[length++] = '='; // Optional some engines don't use this
 
 		if (move >> 12 == PromoteToQueenFlag) {
@@ -114,10 +114,10 @@ char* getMoveNotation(Board* board, Move move) {
 		}
 	}
 
-	makeMove(board, move);
-	moveCount = generateMoves(board, moves, false);
-	bool isCheck = isCheckPos(board);
-	unmakeMove(board, move);
+	MakeMove(board, move);
+	moveCount = GenerateMoves(board, moves, false);
+	bool isCheck = IsCheckPos(board);
+	UnmakeMove(board, move);
 
 	if (isCheck) {
 		if (moveCount == 0) {
@@ -136,13 +136,13 @@ char* getMoveNotation(Board* board, Move move) {
 }
 
 // Get a move from algebraic chess notation
-Move getMoveFromNotation(Board* board, char* notation) {
+Move GetMoveFromNotation(Board* board, char* notation) {
 	char typeChar = notation[0];
 	PieceType type = Pawn;
 
 	Move* moves = malloc(sizeof(Move) * 100);
 	if (moves == NULL) return 0;
-	int moveCount = generateMoves(board, moves, false);
+	int moveCount = GenerateMoves(board, moves, false);
 
 	switch (typeChar)
 	{
@@ -168,8 +168,8 @@ Move getMoveFromNotation(Board* board, char* notation) {
 		board->currentGameState.castleRights;
 		for (int i = 0; i < moveCount; i++) {
 			Move move = moves[i];
-			if (isCastle(move)) {
-				Uint8 target = getTarget(move);
+			if (IsCastle(move)) {
+				Uint8 target = GetTarget(move);
 				Uint8 targetFile = target % 8;
 
 				if (targetFile == (queenSide ? 2 : 6)) {
@@ -228,17 +228,17 @@ Move getMoveFromNotation(Board* board, char* notation) {
 
 	for (int i = 0; i < moveCount; i++) {
 		Move move = moves[i];
-		Uint8 target = getTarget(move);
-		Uint8 moveStart = getStart(move);
+		Uint8 target = GetTarget(move);
+		Uint8 moveStart = GetStart(move);
 		Uint8 moveStartRank = moveStart / 8;
 		Uint8 moveStartFile = moveStart % 8;
 
 		
 
-		if ((target == targetSquare) && (getPieceType(board->square[moveStart]) == type)
+		if ((target == targetSquare) && (GetPieceType(board->square[moveStart]) == type)
 			&& (!startRankPresent || (moveStartRank == startRank))
 			&& (!startFilePresent || (moveStartFile == startFile))
-			&& (((promotion == 0) && !isPromotion(move)) || ((move >> 12) == promotion))
+			&& (((promotion == 0) && !IsPromotion(move)) || ((move >> 12) == promotion))
 			) {
 			free(moves);
 			return move;
@@ -249,7 +249,7 @@ Move getMoveFromNotation(Board* board, char* notation) {
 }
 
 // Get FEN from a position
-int getFENFromBoard(Board* board, char* FEN) {
+int GetFENFromBoard(Board* board, char* FEN) {
 	int length = 0;	
 
 	for (int i = 0; i < 8; i++) {
@@ -263,7 +263,7 @@ int getFENFromBoard(Board* board, char* FEN) {
 				if (sum != 0)
 					FEN[length++] = ('0' + sum);
 				sum = 0;
-				FEN[length++] = charFromPiece(piece);
+				FEN[length++] = CharFromPiece(piece);
 			}
 			
 		}
@@ -322,12 +322,12 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 			pointer++;
 		}
 		else if (c != '/') {
-			Piece piece = pieceFromChar(c);
+			Piece piece = PieceFromChar(c);
 			board->square[pointer] = piece;
-			int colorIndex = isWhite(piece) ? WhiteIndex : BlackIndex;
-			PieceType type = getPieceType(piece);
+			int colorIndex = IsWhite(piece) ? WhiteIndex : BlackIndex;
+			PieceType type = GetPieceType(piece);
 			
-			makePieceAtSquare(board, pointer, type, colorIndex);
+			MakePieceAtSquare(board, pointer, type, colorIndex);
 
 			pointer++;
 		}

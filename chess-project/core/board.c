@@ -4,31 +4,31 @@
 const int WhiteIndex = 0;
 const int BlackIndex = 1;
 
-void removePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
+void RemovePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
 
-void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn);
-void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target, Uint8 colorIndex, bool isWhite);
+void MovePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn);
+void PromotePiece(Board* board, Uint8 square, PieceType source, PieceType target, Uint8 colorIndex, bool IsWhite);
 
 /*
 	Make a move on the board
 	Also handle zobrist hash, and gamestate changes
 */
-void makeMove(Board* board, Move move) {
+void MakeMove(Board* board, Move move) {
 
-	Uint8 start = getStart(move);
-	Uint8 target = getTarget(move);
+	Uint8 start = GetStart(move);
+	Uint8 target = GetTarget(move);
 
 	Piece piece = board->square[start];
-	bool turn = isWhite(piece);
+	bool turn = IsWhite(piece);
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
-	PieceType type = getPieceType(piece);
+	PieceType type = GetPieceType(piece);
 
 
-	bool enpassantCapture = isEnPassantCapture(move);
-	bool castle = isCastle(move);
-	bool doublePawn = isPawnTwoUp(move);
-	bool promotion = isPromotion(move);
+	bool enpassantCapture = IsEnPassantCapture(move);
+	bool castle = IsCastle(move);
+	bool doublePawn = IsPawnTwoUp(move);
+	bool promotion = IsPromotion(move);
 
 	board->zobristHistory[board->gameStateHistoryCount] = board->zobristHash;
 
@@ -39,7 +39,7 @@ void makeMove(Board* board, Move move) {
 		board->zobristHash ^= zobristEnpassant[board->currentGameState.enpassantFile];
 
 	board->currentGameState.enpassantFile = -1;
-	board->currentGameState.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
+	board->currentGameState.capturedPiece = enpassantCapture ? Pawn : GetPieceType(board->square[target]);
 
 	board->currentGameState.halfmoveClock++;
 
@@ -53,21 +53,21 @@ void makeMove(Board* board, Move move) {
 		if (enpassantCapture)
 			board->square[capture] = None;
 
-		removePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
+		RemovePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
 	}
 	else if (doublePawn) {
 		board->currentGameState.enpassantFile = start % 8;
 		board->zobristHash ^= zobristEnpassant[board->currentGameState.enpassantFile];
 	}
-	movePiece(board, start, target, type, turn);
+	MovePiece(board, start, target, type, turn);
 
 	// Handle castles
 	if (castle) {
 		if (board->kingSquare[colorIndex] % 8 == 6) {
-			movePiece(board, target + 1, target - 1, Rook, turn); // Kingside
+			MovePiece(board, target + 1, target - 1, Rook, turn); // Kingside
 		}
 		else if (board->kingSquare[colorIndex] % 8 == 2) {
-			movePiece(board, target - 2, target + 1, Rook, turn); // Queenside
+			MovePiece(board, target - 2, target + 1, Rook, turn); // Queenside
 		}
 
 		board->currentGameState.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
@@ -87,16 +87,16 @@ void makeMove(Board* board, Move move) {
 	if (promotion) {
 		switch (move >> 12) {
 		case PromoteToQueenFlag:
-			promotePiece(board, target, Pawn, Queen, colorIndex, turn);
+			PromotePiece(board, target, Pawn, Queen, colorIndex, turn);
 			break;
 		case PromoteToBishopFlag:
-			promotePiece(board, target, Pawn, Bishop, colorIndex, turn);
+			PromotePiece(board, target, Pawn, Bishop, colorIndex, turn);
 			break;
 		case PromoteToRookFlag:
-			promotePiece(board, target, Pawn, Rook, colorIndex, turn);
+			PromotePiece(board, target, Pawn, Rook, colorIndex, turn);
 			break;
 		case PromoteToKnightFlag:
-			promotePiece(board, target, Pawn, Knight, colorIndex, turn);
+			PromotePiece(board, target, Pawn, Knight, colorIndex, turn);
 			break;
 		}
 	}
@@ -111,22 +111,22 @@ void makeMove(Board* board, Move move) {
 }
 
 // Only get the zobrist hash from the resulting position of a move
-Uint64 zobistOfMove(Board* board, Move move) {
+Uint64 ZobistOfMove(Board* board, Move move) {
 	//Get data from move
-	Uint8 start = getStart(move);
-	Uint8 target = getTarget(move);
+	Uint8 start = GetStart(move);
+	Uint8 target = GetTarget(move);
 
 	Piece piece = board->square[start];
-	bool turn = isWhite(piece);
+	bool turn = IsWhite(piece);
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
-	PieceType type = getPieceType(piece);
+	PieceType type = GetPieceType(piece);
 
 
-	bool enpassantCapture = isEnPassantCapture(move);
-	bool castle = isCastle(move);
-	bool doublePawn = isPawnTwoUp(move);
-	bool promotion = isPromotion(move);
+	bool enpassantCapture = IsEnPassantCapture(move);
+	bool castle = IsCastle(move);
+	bool doublePawn = IsPawnTwoUp(move);
+	bool promotion = IsPromotion(move);
 
 	Uint64 zobrist = board->zobristHash;
 
@@ -137,7 +137,7 @@ Uint64 zobistOfMove(Board* board, Move move) {
 	if (gamestate.enpassantFile != (Uint8)-1)
 		zobrist ^= zobristEnpassant[gamestate.enpassantFile];
 
-	gamestate.capturedPiece = enpassantCapture ? Pawn : getPieceType(board->square[target]);
+	gamestate.capturedPiece = enpassantCapture ? Pawn : GetPieceType(board->square[target]);
 
 	// There is a capture
 	if (gamestate.capturedPiece != None || enpassantCapture) {
@@ -202,43 +202,43 @@ Uint64 zobistOfMove(Board* board, Move move) {
 }
 
 /*
-	Complete inverse of the makeMove function
+	Complete inverse of the MakeMove function
 	Calling them one after the other should not make a meaningful change
 */ 
-void unmakeMove(Board* board, Move move) {
+void UnmakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
 		board->fullmoveClock--;
 	board->isWhitesMove = !board->isWhitesMove;
 
-	Uint8 start = getStart(move);
-	Uint8 target = getTarget(move);
+	Uint8 start = GetStart(move);
+	Uint8 target = GetTarget(move);
 
 	Piece piece = board->square[target];
 	bool turn = board->isWhitesMove;
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
-	PieceType type = getPieceType(piece);
+	PieceType type = GetPieceType(piece);
 
-	bool enpassantCapture = isEnPassantCapture(move);
-	bool castle = isCastle(move);
-	bool doublePawn = isPawnTwoUp(move);
-	bool promotion = isPromotion(move);
+	bool enpassantCapture = IsEnPassantCapture(move);
+	bool castle = IsCastle(move);
+	bool doublePawn = IsPawnTwoUp(move);
+	bool promotion = IsPromotion(move);
 
-	movePiece(board, target, start, type, turn);
+	MovePiece(board, target, start, type, turn);
 
 	if (promotion) {
 		switch (move >> 12) {
 		case PromoteToQueenFlag:
-			promotePiece(board, start, Queen, Pawn, colorIndex, turn);
+			PromotePiece(board, start, Queen, Pawn, colorIndex, turn);
 			break;
 		case PromoteToBishopFlag:
-			promotePiece(board, start, Bishop, Pawn, colorIndex, turn);
+			PromotePiece(board, start, Bishop, Pawn, colorIndex, turn);
 			break;
 		case PromoteToRookFlag:
-			promotePiece(board, start, Rook, Pawn, colorIndex, turn);
+			PromotePiece(board, start, Rook, Pawn, colorIndex, turn);
 			break;
 		case PromoteToKnightFlag:
-			promotePiece(board, start, Knight, Pawn, colorIndex, turn);
+			PromotePiece(board, start, Knight, Pawn, colorIndex, turn);
 			break;
 
 		}
@@ -248,17 +248,17 @@ void unmakeMove(Board* board, Move move) {
 	if (board->currentGameState.capturedPiece != None || enpassantCapture) {
 		Uint8 capture = enpassantCapture ? (start / 8) * 8 + target % 8 : target;
 
-		board->square[capture] = makePieceIsWhite(board->currentGameState.capturedPiece, !turn);
+		board->square[capture] = MakePieceIsWhite(board->currentGameState.capturedPiece, !turn);
 
-		makePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
+		MakePieceAtSquare(board, capture, board->currentGameState.capturedPiece, enemyIndex);
 	}
 
 	if (castle) {
 		if (target % 8 == 6) {
-			movePiece(board, target - 1, target + 1, Rook, turn); // Kingside
+			MovePiece(board, target - 1, target + 1, Rook, turn); // Kingside
 		}
 		else if (target % 8 == 2) {
-			movePiece(board, target + 1, target - 2, Rook, turn); // Queenside
+			MovePiece(board, target + 1, target - 2, Rook, turn); // Queenside
 		}
 	}
 	board->currentGameState = board->gameStateHistory[--board->gameStateHistoryCount];
@@ -267,53 +267,53 @@ void unmakeMove(Board* board, Move move) {
 
 
 
-void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target,Uint8 colorIndex, bool isWhite) {
-	board->square[square] = makePieceIsWhite(target, isWhite);
-	removePieceAtSquare(board, square, source, colorIndex);
-	makePieceAtSquare(board, square, target, colorIndex);
+void PromotePiece(Board* board, Uint8 square, PieceType source, PieceType target,Uint8 colorIndex, bool IsWhite) {
+	board->square[square] = MakePieceIsWhite(target, IsWhite);
+	RemovePieceAtSquare(board, square, source, colorIndex);
+	MakePieceAtSquare(board, square, target, colorIndex);
 }
 
-void removePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
+void RemovePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
 	switch (type)
 	{
 	case Pawn:
-		removePieceListAtSquare(&(board->Pawns[colorIndex]), square);
+		RemovePieceListAtSquare(&(board->Pawns[colorIndex]), square);
 		break;
 	case Knight:
-		removePieceListAtSquare(&(board->Knights[colorIndex]), square);
+		RemovePieceListAtSquare(&(board->Knights[colorIndex]), square);
 		break;
 	case Bishop:
-		removePieceListAtSquare(&(board->Bishops[colorIndex]), square);
+		RemovePieceListAtSquare(&(board->Bishops[colorIndex]), square);
 		break;
 	case Rook:
-		removePieceListAtSquare(&(board->Rooks[colorIndex]), square);
+		RemovePieceListAtSquare(&(board->Rooks[colorIndex]), square);
 		break;
 	case Queen:
-		removePieceListAtSquare(&(board->Queens[colorIndex]), square);
+		RemovePieceListAtSquare(&(board->Queens[colorIndex]), square);
 		break;
 	}
 
 	board->zobristHash ^= zobristPieceHashes[square][(type - 1) + colorIndex * 6];
 }
 
-void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
+void MakePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex) {
 	
 	switch (type)
 	{
 	case Pawn:
-		addPieceListAtSquare(&(board->Pawns[colorIndex]), square);
+		AddPieceListAtSquare(&(board->Pawns[colorIndex]), square);
 		break;
 	case Knight:
-		addPieceListAtSquare(&(board->Knights[colorIndex]), square);
+		AddPieceListAtSquare(&(board->Knights[colorIndex]), square);
 		break;
 	case Bishop:
-		addPieceListAtSquare(&(board->Bishops[colorIndex]), square);
+		AddPieceListAtSquare(&(board->Bishops[colorIndex]), square);
 		break;
 	case Rook:
-		addPieceListAtSquare(&(board->Rooks[colorIndex]), square);
+		AddPieceListAtSquare(&(board->Rooks[colorIndex]), square);
 		break;
 	case Queen:
-		addPieceListAtSquare(&(board->Queens[colorIndex]), square);
+		AddPieceListAtSquare(&(board->Queens[colorIndex]), square);
 		break;
 	case King:
 		board->kingSquare[colorIndex] = square;
@@ -323,24 +323,24 @@ void makePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIn
 	board->zobristHash ^= zobristPieceHashes[square][(type - 1) + colorIndex * 6];
 }
 
-void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn) {
+void MovePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn) {
 	Uint8 colorIndex = turn ? WhiteIndex : BlackIndex;
 	switch (type)
 	{
 	case Pawn:
-		movePieceList(&(board->Pawns[colorIndex]), start, target);
+		MovePieceList(&(board->Pawns[colorIndex]), start, target);
 		break;
 	case Knight:
-		movePieceList(&(board->Knights[colorIndex]), start, target);
+		MovePieceList(&(board->Knights[colorIndex]), start, target);
 		break;
 	case Bishop:
-		movePieceList(&(board->Bishops[colorIndex]), start, target);
+		MovePieceList(&(board->Bishops[colorIndex]), start, target);
 		break;
 	case Rook:
-		movePieceList(&(board->Rooks[colorIndex]), start, target);
+		MovePieceList(&(board->Rooks[colorIndex]), start, target);
 		break;
 	case Queen:
-		movePieceList(&(board->Queens[colorIndex]), start, target);
+		MovePieceList(&(board->Queens[colorIndex]), start, target);
 		break;
 	case King:
 		board->kingSquare[colorIndex] = target;
@@ -356,6 +356,6 @@ void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool tur
 	board->square[start] = None;
 }
 
-bool isCheckPos(Board* board) {
+bool IsCheckPos(Board* board) {
 	return ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0);
 }

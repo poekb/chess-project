@@ -10,7 +10,7 @@
 Board* board;
 
 int transpositionCount;
-int searchAttacks(int alpha, int beta);
+int SearchAttacks(int alpha, int beta);
 
 bool botQuit = true;
 
@@ -23,10 +23,10 @@ Move bestMoveThisIter;
 int bestEval;
 
 /*
-	Main search function
+	Main Search function
 	Implements the minimax algorith with alpha-beta pruning
 */
-int search(int depth, int distFromRoot, int alpha, int beta) {
+int Search(int depth, int distFromRoot, int alpha, int beta) {
 	if (botQuit) {
 		return 0;
 	}
@@ -43,15 +43,15 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		}
 	}
 
-	int transposEval = getTransposition(board->zobristHash, distFromRoot, depth, alpha, beta);
+	int transposEval = GetTransposition(board->zobristHash, distFromRoot, depth, alpha, beta);
 	if (transposEval != TranspositionNotFound) {
 		transpositionCount++;
 
-		Move transposMove = getBestMoveFromTranspos(board->zobristHash);
+		Move transposMove = GetBestMoveFromTranspos(board->zobristHash);
 		bool isRepetition = false;
 
 		if (board->currentGameState.halfmoveClock >= 3) {
-			Uint64 zobrist = zobistOfMove(board, transposMove);
+			Uint64 zobrist = ZobistOfMove(board, transposMove);
 			for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
 				if (board->zobristHistory[i] == zobrist)
 					isRepetition = true; // Evaluate as draw if it is a repetition
@@ -66,10 +66,10 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	}
 
 	if (depth == 0) {
-		return searchAttacks(alpha, beta);
+		return SearchAttacks(alpha, beta);
 	}
 
-	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], false);
+	int moveCount = GenerateMoves(board, &movesBuffer[movesBufferOffset], false);
 
 	if (moveCount == 0) {
 
@@ -81,7 +81,7 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		return 0;
 	}
 
-	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
+	OrderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
 
 
 	Move bestMoveThisPos = 0;
@@ -89,16 +89,16 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	Uint8 transEvalType = TranspositionUpper;
 
 	for (int i = 0; i < moveCount; i++) {
-		makeMove(board, movesBuffer[movesBufferOffset + i]);
+		MakeMove(board, movesBuffer[movesBufferOffset + i]);
 
 		movesBufferOffset += moveCount;
-		int eval = -search(depth - 1, distFromRoot + 1, -beta, -alpha);
+		int eval = -Search(depth - 1, distFromRoot + 1, -beta, -alpha);
 		movesBufferOffset -= moveCount;
 
-		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
+		UnmakeMove(board, movesBuffer[movesBufferOffset + i]);
 
 		if (eval >= beta) {
-			insertTransposition(board->zobristHash, beta, distFromRoot, depth, TranspositionLower, movesBuffer[movesBufferOffset + i]);
+			InsertTransposition(board->zobristHash, beta, distFromRoot, depth, TranspositionLower, movesBuffer[movesBufferOffset + i]);
 			return beta;
 		}
 
@@ -117,13 +117,13 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 
 	}
 
-	insertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
+	InsertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
 
 	return alpha;
 }
 
 // Search with iterative deepening (can be terminated, by setting the botQuit global value to true)
-Move findBestMove(Board* boardIn) {
+Move FindBestMove(Board* boardIn) {
 	board = boardIn;
 	transpositionCount = 0;
 	bestMove = 0;
@@ -133,7 +133,7 @@ Move findBestMove(Board* boardIn) {
 	int eval = 0;
 	while (!botQuit && depth < 20) {
 		bestMoveThisIter = 0;
-		eval = search(depth, 0, -MateScore, MateScore);
+		eval = Search(depth, 0, -MateScore, MateScore);
 
 		if (botQuit)
 			break;
@@ -141,7 +141,7 @@ Move findBestMove(Board* boardIn) {
 
 		bestMove = bestMoveThisIter;
 		bestEval = eval;
-		if (isMateEval(eval) && eval > 0)
+		if (IsMateEval(eval) && eval > 0)
 			break;
 	}
 	printf("depth: %d\n", depth);
@@ -150,47 +150,47 @@ Move findBestMove(Board* boardIn) {
 	return bestMove;
 }
 
-//Start the search and terminate it after given time 
-Move startBot(Board* board) {
+//Start the Search and terminate it after given time 
+Move StartBot(Board* board) {
 	botQuit = false;
 
-	SDL_Thread* botThread = SDL_CreateThread(findBestMove, "bot", board);
+	SDL_Thread* botThread = SDL_CreateThread(FindBestMove, "bot", board);
 
 	SDL_Delay(2000);
 	botQuit = true;
 	SDL_WaitThread(botThread, 0);
 
-	char* note = getMoveNotation(board, bestMove);
+	char* note = GetMoveNotation(board, bestMove);
 	free(note);
 
 	return bestMove;
 }
 
 /*
-	Secondary search function
+	Secondary Search function
 	Only searches capture moves
 */
-int searchAttacks(int alpha, int beta) {
+int SearchAttacks(int alpha, int beta) {
 	if (botQuit) {
 		return 0;
 	}
-	int eval = evalBoard(board);
+	int eval = EvalBoard(board);
 	if (eval >= beta)
 		return beta;
 	alpha = max(alpha, eval);
 
-	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], true);
-	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
+	int moveCount = GenerateMoves(board, &movesBuffer[movesBufferOffset], true);
+	OrderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
 
 	for (int i = 0; i < moveCount; i++) {
 
-		makeMove(board, movesBuffer[movesBufferOffset + i]);
+		MakeMove(board, movesBuffer[movesBufferOffset + i]);
 
 		movesBufferOffset += moveCount;
-		int eval = -searchAttacks(-beta, -alpha);
+		int eval = -SearchAttacks(-beta, -alpha);
 		movesBufferOffset -= moveCount;
 
-		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
+		UnmakeMove(board, movesBuffer[movesBufferOffset + i]);
 		if (eval >= beta) {
 			return beta;
 		}
@@ -199,7 +199,7 @@ int searchAttacks(int alpha, int beta) {
 	return alpha;
 }
 
-bool isMateEval(int eval) {
+bool IsMateEval(int eval) {
 
 	if (abs(eval) > MateScore + 1) return false;
 

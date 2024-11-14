@@ -3,19 +3,19 @@
 
 TTF_Font* Font;
 
-void textRendererInit() {
+void TextRendererInit() {
     TTF_Init();
     Font = TTF_OpenFont("assets/font.TTF", 30);
 }
 
-void textRendererCleanup() {
+void TextRendererCleanup() {
     TTF_CloseFont(Font);
 
     TTF_Quit();
 }
 
-void renderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color bgColor, SDL_Color textColor) {
-    setDrawColor(renderer, bgColor);
+void RenderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color bgColor, SDL_Color textColor) {
+    SetDrawColor(renderer, bgColor);
     SDL_RenderFillRect(renderer, &rect);
 
     TTF_SetFontSize(Font, rect.h/3*2);
@@ -35,7 +35,7 @@ void renderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color 
     SDL_DestroyTexture(text_texture);
 }
 
-void renderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos_y, SDL_Color color) {
+void RenderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos_y, SDL_Color color) {
 
     TTF_SetFontSize(Font, size);
 
@@ -56,9 +56,8 @@ void renderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos
     SDL_DestroyTexture(text_texture);
 }
 
-void renderChar(SDL_Renderer* renderer, char c, int size, int pos_x, int pos_y, SDL_Color color) {
+void RenderChar(SDL_Renderer* renderer, char c, int size, int pos_x, int pos_y, SDL_Color color) {
     char text[2] = { c,'\0' };
 
-    renderText(renderer, text, size, pos_x, pos_y, color);
-
+    RenderText(renderer, text, size, pos_x, pos_y, color);
 }

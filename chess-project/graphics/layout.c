@@ -32,7 +32,7 @@ SDL_Rect winnerRect;
 ButtonData nextMoveButton = {
     ">",
     &nextEnabled,
-    &nextMove,
+    &NextMove,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -43,7 +43,7 @@ ButtonData nextMoveButton = {
 ButtonData prevMoveButton = {
     "<",
     &prevEnabled,
-    &prevMove,
+    &PrevMove,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -54,7 +54,7 @@ ButtonData prevMoveButton = {
 ButtonData lastMoveButton = {
     ">>",
     &nextEnabled,
-    &lastMove,
+    &LastMove,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -65,7 +65,7 @@ ButtonData lastMoveButton = {
 ButtonData firstMoveButton = {
     "<<",
     &prevEnabled,
-    &firstMove,
+    &FirstMove,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -76,7 +76,7 @@ ButtonData firstMoveButton = {
 ButtonData pasteFENButton = {
     "Paste FEN",
     &gameLoadEnabled,
-    &pasteFEN,
+    &PasteFEN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -87,7 +87,7 @@ ButtonData pasteFENButton = {
 ButtonData pastePGNButton = {
     "Paste PGN",
     &gameLoadEnabled,
-    &pastePGN,
+    &PastePGN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -98,7 +98,7 @@ ButtonData pastePGNButton = {
 ButtonData copyFENButton = {
     "Copy FEN",
     &gameLoadEnabled,
-    &copyFEN,
+    &CopyFEN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -109,7 +109,7 @@ ButtonData copyFENButton = {
 ButtonData copyPGNButton = {
     "Copy PGN",
     &gameLoadEnabled,
-    &copyPGN,
+    &CopyPGN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -120,7 +120,7 @@ ButtonData copyPGNButton = {
 ButtonData resetButton = {
     "Reset Board",
     &gameLoadEnabled,
-    &resetBoard,
+    &ResetBoard,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -131,7 +131,7 @@ ButtonData resetButton = {
 ButtonData saveButton = {
     "Save PGN",
     &gameLoadEnabled,
-    &savePGN,
+    &SavePGN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -142,7 +142,7 @@ ButtonData saveButton = {
 ButtonData loadButton = {
     "Load PGN",
     &gameLoadEnabled,
-    &loadPGN,
+    &LoadPGN,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -154,7 +154,7 @@ ButtonData loadButton = {
 ButtonData toggleBotButton = {
     "Start Bot",
     NULL,
-    &toggleBot,
+    &ToggleBot,
     0xF0DADAFF,
     0x303040FF,
     0x101020FF,
@@ -174,7 +174,7 @@ ButtonData* buttons[ButtonCount] = {
 };
 
 // Calculate the positions of UI elements
-void recalcUIData() {
+void RecalcUIData() {
     int windowWidth;
     int windowHeight;
 
@@ -192,7 +192,7 @@ void recalcUIData() {
 
     int boardY = (windowHeight - boardSize) / 2;
 
-    renderBoard(renderer, boardSize, gapLeft, boardY);
+    RenderBoard(renderer, boardSize, gapLeft, boardY);
 
     int moveButtonSize = min((int)(gapTop * MOVE_BUTTON_SIZE), gapRight / 8);
 
@@ -266,35 +266,35 @@ void recalcUIData() {
 }
 
 // Display who won or draw
-void renderWinner(Board* board) {
+void RenderWinner(Board* board) {
 
     if (board->hasGameEnded) {
         if (board->winnerWhite) {
-            renderTextbox(renderer, "White Wins", winnerRect, HexToRGBA(COLOR_WHITE), HexToRGBA(COLOR_BACKGROUND));
+            RenderTextbox(renderer, "White Wins", winnerRect, HexToRGBA(COLOR_WHITE), HexToRGBA(COLOR_BACKGROUND));
 
         }
         else if (board->winnerBlack) {
-            renderTextbox(renderer, "Black Wins", winnerRect, HexToRGBA(COLOR_BLACK), HexToRGBA(COLOR_BACKGROUND));
+            RenderTextbox(renderer, "Black Wins", winnerRect, HexToRGBA(COLOR_BLACK), HexToRGBA(COLOR_BACKGROUND));
 
         }
         else {
-            renderTextbox(renderer, "Draw", winnerRect, HexToRGBA(0x101020FF), HexToRGBA(0xF0DADAFF));
+            RenderTextbox(renderer, "Draw", winnerRect, HexToRGBA(0x101020FF), HexToRGBA(0xF0DADAFF));
         }
     }
     else {
-        renderTextbox(renderer, " ", winnerRect, HexToRGBA(COLOR_BACKGROUND), HexToRGBA(COLOR_BACKGROUND));
+        RenderTextbox(renderer, " ", winnerRect, HexToRGBA(COLOR_BACKGROUND), HexToRGBA(COLOR_BACKGROUND));
     }
 }
 
-void renderButtons() {
+void RenderButtons() {
     for (int i = 0; i < ButtonCount; i++) {
         ButtonData* button = buttons[i];
 
-        renderButton(button);
+        RenderButton(button);
     }
 }
 
-void renderButton(ButtonData* button) {
+void RenderButton(ButtonData* button) {
     bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
 
     SDL_Color color = HexToRGBA(button->defaultColor);
@@ -305,18 +305,18 @@ void renderButton(ButtonData* button) {
         color = HexToRGBA(button->howerColor);
     }
 
-    renderTextbox(renderer, button->text, *(button->rect), color, HexToRGBA(button->textColor));
+    RenderTextbox(renderer, button->text, *(button->rect), color, HexToRGBA(button->textColor));
 }
 
-void testButonClicks() {
+void TestButonClicks() {
     for (int i = 0; i < ButtonCount; i++) {
         ButtonData* button = buttons[i];
 
-        testButton(button);
+        TestButton(button);
     }
 }
 
-void testButton(ButtonData* button) {
+void TestButton(ButtonData* button) {
     bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
     if (hower && ((button->enabled == NULL) || (**button->enabled)))
         (*button->callBack)();

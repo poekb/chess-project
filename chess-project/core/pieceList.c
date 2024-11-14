@@ -1,11 +1,11 @@
 #include "pieceList.h"
 
-void initPieceList(PieceList* pieceList) {
+void InitPieceList(PieceList* pieceList) {
 	pieceList->count = 0;
 }
 
 // Add a piece to a piecelist
-void addPieceListAtSquare(PieceList* pieceList, Uint8 square) {
+void AddPieceListAtSquare(PieceList* pieceList, Uint8 square) {
 	pieceList->map[square] = pieceList->count;
 	pieceList->list[pieceList->count] = square;
 
@@ -13,7 +13,7 @@ void addPieceListAtSquare(PieceList* pieceList, Uint8 square) {
 }
 
 // Remove a piece from a piecelist
-void removePieceListAtSquare(PieceList* pieceList, Uint8 square) {
+void RemovePieceListAtSquare(PieceList* pieceList, Uint8 square) {
 	Uint8 pieceIndex = pieceList->map[square];
 	pieceList->list[pieceIndex] = pieceList->list[pieceList->count - 1];
 	pieceList->map[pieceList->list[pieceIndex]] = pieceIndex;
@@ -22,7 +22,7 @@ void removePieceListAtSquare(PieceList* pieceList, Uint8 square) {
 }
 
 // Move a piece in a piecelist
-void movePieceList(PieceList* pieceList, Uint8 startSquare, Uint8 targetSquare) {
+void MovePieceList(PieceList* pieceList, Uint8 startSquare, Uint8 targetSquare) {
 	Uint8 pieceIndex = pieceList->map[startSquare];
 	pieceList->list[pieceIndex] = targetSquare;
 	pieceList->map[targetSquare] = pieceIndex;

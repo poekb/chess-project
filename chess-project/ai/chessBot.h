@@ -6,7 +6,7 @@
 
 #define MateScore 100000000
 
-int search(int depth, int distFromRoot, int alpha, int beta);
-Move findBestMove(Board* board);
-Move startBot(Board* board);
-bool isMateEval(int eval);
+int Search(int depth, int distFromRoot, int alpha, int beta);
+Move FindBestMove(Board* board);
+Move StartBot(Board* board);
+bool IsMateEval(int eval);

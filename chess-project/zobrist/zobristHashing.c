@@ -9,7 +9,7 @@ Uint64 zobristCastlingRights[16];
 
 Uint64 zobristEnpassant[8];
 
-void logUint64(Uint64 num) {
+void LogUint64(Uint64 num) {
 	for (int i = 0; i < 64; i++) {
 		putchar(((num >> i) & 1ul) == 0 ? '0' : '1');
 	}
@@ -17,27 +17,27 @@ void logUint64(Uint64 num) {
 }
 
 // Fill up the zobrist hash values with random Uint64s
-void initZobrist() {
+void InitZobrist() {
 	
 	Uint64 seed = 0x18D6025F63DE8E0C;
 
 	MtState mtState;
 
-	initializeState(&mtState, seed);
+	InitializeState(&mtState, seed);
 	
 	for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 12; j++) {
-			zobristPieceHashes[i][j] = randomUint64(&mtState);
+			zobristPieceHashes[i][j] = RandomUint64(&mtState);
 		}
 	}
-	zobristBlacksTurn = randomUint64(&mtState);
+	zobristBlacksTurn = RandomUint64(&mtState);
 
 
 	for (int i = 0; i < 16; i++) {
-		zobristCastlingRights[i] = randomUint64(&mtState);
+		zobristCastlingRights[i] = RandomUint64(&mtState);
 	}
 
 	for (int i = 0; i < 8; i++) {
-		zobristEnpassant[i] = randomUint64(&mtState);
+		zobristEnpassant[i] = RandomUint64(&mtState);
 	}
 }

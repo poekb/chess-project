@@ -23,5 +23,5 @@ typedef struct GameState {
 
 #endif
 
-bool hasKingsideCastleRight(GameState gameState, bool white);
-bool hasQueensideCastleRight(GameState gameState, bool white);
+bool HasKingsideCastleRight(GameState gameState, bool white);
+bool HasQueensideCastleRight(GameState gameState, bool white);

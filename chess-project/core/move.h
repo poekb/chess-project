@@ -17,15 +17,15 @@ typedef Uint16 Move;
 
 #endif
 
-Uint8 getTarget(Move move);
-Uint8 getStart(Move move);
+Uint8 GetTarget(Move move);
+Uint8 GetStart(Move move);
 
-Move getMove(Uint8 startSquare, Uint8 targetSquare);
+Move GetMove(Uint8 startSquare, Uint8 targetSquare);
 
-bool isEnPassantCapture(Move move);
+bool IsEnPassantCapture(Move move);
 
-bool isCastle(Move move);
+bool IsCastle(Move move);
 
-bool isPawnTwoUp(Move move);
+bool IsPawnTwoUp(Move move);
 
-bool isPromotion(Move move);
+bool IsPromotion(Move move);

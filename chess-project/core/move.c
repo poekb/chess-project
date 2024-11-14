@@ -5,30 +5,30 @@
 
 #define FlagMask   0b1111000000000000
 
-Uint8 getTarget(Move move) {
+Uint8 GetTarget(Move move) {
 	return move & TargetMask;
 }
 
-Uint8 getStart(Move move) {
+Uint8 GetStart(Move move) {
 	return (move & StartMask) >> 6;
 }
 
-Move getMove(Uint8 startSquare, Uint8 targetSquare) {
+Move GetMove(Uint8 startSquare, Uint8 targetSquare) {
 	return (Uint16)startSquare << 6 | targetSquare;
 }
 
-bool isEnPassantCapture(Move move) {
+bool IsEnPassantCapture(Move move) {
 	return (move >> 12) == EnPassantCaptureFlag;
 }
 
-bool isCastle(Move move) {
+bool IsCastle(Move move) {
 	return (move >> 12) == CastleFlag;
 }
 
-bool isPawnTwoUp(Move move) {
+bool IsPawnTwoUp(Move move) {
 	return (move >> 12) == PawnTwoUpFlag;
 }
 
-bool isPromotion(Move move) {
+bool IsPromotion(Move move) {
 	return (move >> 12) >= PromoteToQueenFlag;
 }

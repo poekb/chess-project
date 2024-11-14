@@ -38,15 +38,15 @@ typedef Uint8 PieceType;
 #define BlackQueen 13
 #define BlackKing 14
 
-Piece makePiece(PieceType type, Uint8 color);
-Piece makePieceIsWhite(PieceType type, bool isWhite);
-Piece pieceFromChar(char c);
-char charFromPiece(Piece piece);
+Piece MakePiece(PieceType type, Uint8 color);
+Piece MakePieceIsWhite(PieceType type, bool IsWhite);
+Piece PieceFromChar(char c);
+char CharFromPiece(Piece piece);
 
-bool isColour(Piece piece, Uint8 color);
+bool IsColour(Piece piece, Uint8 color);
 
-bool isWhite(Piece piece);
+bool IsWhite(Piece piece);
 
-PieceType getPieceType(Piece piece);
+PieceType GetPieceType(Piece piece);
 
 

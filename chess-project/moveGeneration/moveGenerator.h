@@ -2,6 +2,6 @@
 
 #include "../core/move.h"
 
-int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn);
+int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn);
 
-Uint64 generateUnderAttackBitmap(Board* board);
+Uint64 GenerateUnderAttackBitmap(Board* board);

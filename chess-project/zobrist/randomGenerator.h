@@ -8,5 +8,5 @@ typedef struct MtState
     int state_index;                 // index into state vector array, 0 <= state_index <= transpositionCount-1   always
 } MtState;
 
-void initializeState(MtState* state, Uint64 seed);
-Uint64 randomUint64(MtState* state);
+void InitializeState(MtState* state, Uint64 seed);
+Uint64 RandomUint64(MtState* state);

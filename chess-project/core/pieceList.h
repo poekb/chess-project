@@ -9,10 +9,10 @@ typedef struct PieceList {
 	Uint8 map[64];
 } PieceList;
 
-void initPieceList(PieceList* pieceList);
+void InitPieceList(PieceList* pieceList);
 
-void addPieceListAtSquare(PieceList* piecelist, Uint8 square);
-void removePieceListAtSquare(PieceList* pieceList, Uint8 square);
-void movePieceList(PieceList* pieceList, Uint8 startSquare, Uint8 targetSquare);
+void AddPieceListAtSquare(PieceList* piecelist, Uint8 square);
+void RemovePieceListAtSquare(PieceList* pieceList, Uint8 square);
+void MovePieceList(PieceList* pieceList, Uint8 startSquare, Uint8 targetSquare);
 
 #endif

@@ -7,26 +7,26 @@ Transposition* transpositionTable;
 
 Uint32 indexMask;
 
-int correctMateEvalIn(int eval, int distFromRoot);
-int correctMateEvalOut(int eval, int distFromRoot);
+int CorrectMateEvalIn(int eval, int distFromRoot);
+int CorrectMateEvalOut(int eval, int distFromRoot);
 
 // Initialize the transposition table based on the set size
-void initTranspositionTable() {
+void InitTranspositionTable() {
 
 	transpositionTable = calloc(0b1ul << Size, sizeof(Transposition));
 	indexMask = ((Uint32) - 1) >> (32 - Size);
 }
 
 // Return the best move from an allready evaluated position
-Move getBestMoveFromTranspos(Uint64 zobrist) {
+Move GetBestMoveFromTranspos(Uint64 zobrist) {
 	Uint32 index = (Uint32)zobrist & indexMask;
 	return transpositionTable[index].bestMove;
 }
 
 // Insert transposition, accounting for depth, and the alpha-beta pruning
-void insertTransposition(Uint64 zobrist, int eval,Uint8 distFromRoot, Uint8 depth, Uint8 type, Move bestMove){
+void InsertTransposition(Uint64 zobrist, int eval,Uint8 distFromRoot, Uint8 depth, Uint8 type, Move bestMove){
 	Uint32 index = (Uint32)zobrist & indexMask;
-	transpositionTable[index].eval = correctMateEvalIn(eval, distFromRoot);
+	transpositionTable[index].eval = CorrectMateEvalIn(eval, distFromRoot);
 	transpositionTable[index].bestMove = bestMove;
 	transpositionTable[index].zobrist = zobrist;
 	transpositionTable[index].depth = depth;
@@ -34,11 +34,11 @@ void insertTransposition(Uint64 zobrist, int eval,Uint8 distFromRoot, Uint8 dept
 }
 
 // Return a saved value, accounting for depth, and the alpha-beta pruning
-int getTransposition(Uint64 zobrist, Uint8 distFromRoot, Uint8 depth, int alpha, int beta) {
+int GetTransposition(Uint64 zobrist, Uint8 distFromRoot, Uint8 depth, int alpha, int beta) {
 	Uint32 index = (Uint32)zobrist & indexMask;
 	if (transpositionTable[index].zobrist == zobrist && depth <= transpositionTable[index].depth)
 	{
-		int eval = correctMateEvalOut(transpositionTable[index].eval, distFromRoot);
+		int eval = CorrectMateEvalOut(transpositionTable[index].eval, distFromRoot);
 
 		if (transpositionTable[index].type == TranspositionExact)
 			return eval;
@@ -54,7 +54,7 @@ int getTransposition(Uint64 zobrist, Uint8 distFromRoot, Uint8 depth, int alpha,
 }
 
 // Return the transposition data for a zobrist hash
-int getRawTransposition(Uint64 zobrist) {
+int GetRawTransposition(Uint64 zobrist) {
 	Uint32 index = (Uint32)zobrist & indexMask;
 	if (transpositionTable[index].zobrist == zobrist) {
 		return transpositionTable[index].eval;
@@ -63,8 +63,8 @@ int getRawTransposition(Uint64 zobrist) {
 }
 
 // Correct the evaluation score for mating, because the depth that the transposition will be read at can change
-int correctMateEvalIn(int eval, int distFromRoot) {
-	if (isMateEval(eval)) {
+int CorrectMateEvalIn(int eval, int distFromRoot) {
+	if (IsMateEval(eval)) {
 		int sign = (eval > 0) ? 1 : -1;
 		return (eval * sign + distFromRoot) * sign;
 	}
@@ -72,8 +72,8 @@ int correctMateEvalIn(int eval, int distFromRoot) {
 }
 
 // Correct the evaluation score for mating, because the depth that the transposition will be read at can change
-int correctMateEvalOut(int eval, int distFromRoot) {
-	if (isMateEval(eval)) {
+int CorrectMateEvalOut(int eval, int distFromRoot) {
+	if (IsMateEval(eval)) {
 
 		int sign = (eval > 0) ? 1 : -1;
 

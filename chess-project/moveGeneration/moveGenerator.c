@@ -15,11 +15,11 @@ bool onlyAttack;
 Board* board;
 
 // Appends a move to the possible moves
-static void addMove(Move move) {
-	Uint8 target = getTarget(move);
-	Uint8 start = getStart(move);
+static void AddMove(Move move) {
+	Uint8 target = GetTarget(move);
+	Uint8 start = GetStart(move);
 	
-	if (isEnPassantCapture(move)) {
+	if (IsEnPassantCapture(move)) {
 		target = target % 8 + (start / 8) * 8;
 	}
 	if (onlyAttack && (board->square[target] == None)) return;
@@ -30,7 +30,7 @@ static void addMove(Move move) {
 
 // Returns the number of possible moves
 // and generates them at the specified address, resultIN
-int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
+int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	onlyAttack = onlyAttackIn;
 	board = boardIn;
 	result = resultIn;
@@ -56,7 +56,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	int colorIndex = turn ? WhiteIndex : BlackIndex;
 	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
 
-	Uint64 underAttack = generateUnderAttackBitmap(board);
+	Uint64 underAttack = GenerateUnderAttackBitmap(board);
 	board->underAttackMap = underAttack;
 
 	Uint8 king = board->kingSquare[colorIndex];
@@ -64,7 +64,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	checkersBitBoard = UINT64_MAX;
 
 	for (int i = 0; i < knightMovesCount[king]; i++) {
-		if (board->square[knightMoves[king][i]] == makePieceIsWhite(Knight, !turn)) {
+		if (board->square[knightMoves[king][i]] == MakePieceIsWhite(Knight, !turn)) {
 			checkersBitBoard &= ((Uint64) 1 << knightMoves[king][i]);
 			break;
 		}
@@ -73,7 +73,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	for (int i = 0; i < (turn ? whitePawnAttacksCount[king] : blackPawnAttacksCount[king]); i++) {
 
 		Uint8 target = turn ? whitePawnAttacks[king][i] : blackPawnAttacks[king][i];
-		if (board->square[target] == makePieceIsWhite(Pawn, !turn)) {
+		if (board->square[target] == MakePieceIsWhite(Pawn, !turn)) {
 			checkersBitBoard &= ((Uint64)1 << target);
 			break;
 		}
@@ -97,7 +97,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			
 			Piece piece = board->square[current];
 			if (piece != None) {
-				if (isWhite(piece) == turn) {
+				if (IsWhite(piece) == turn) {
 					if(pinnedPiece == 255)
 						pinnedPiece = current;
 					else {
@@ -105,7 +105,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 					}
 				}
 				else {
-					PieceType type = getPieceType(piece);
+					PieceType type = GetPieceType(piece);
 					if (type == Queen || type == ((d < 4) ? Rook : Bishop)) {
 						if (pinnedPiece == 255) {
 							checkersBitBoard &= pinMap;
@@ -134,8 +134,8 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		for (int i = 0; i < kingMovesCount[king]; i++) {
 			Uint8 index = kingMoves[king][i];
 
-			if ((board->square[index] == None || isWhite(board->square[index]) != turn) && (((Uint64)1 << index) & underAttack) == 0)
-				result[count++] = getMove(king, index);
+			if ((board->square[index] == None || IsWhite(board->square[index]) != turn) && (((Uint64)1 << index) & underAttack) == 0)
+				result[count++] = GetMove(king, index);
 		}
 	}
 	
@@ -149,8 +149,8 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 
 		for (int j = 0; j < knightMovesCount[index]; j++) {
 			Uint8 target = knightMoves[index][j];
-			if (board->square[target] == None || isWhite(board->square[target]) != turn)
-				addMove(getMove(index, target));
+			if (board->square[target] == None || IsWhite(board->square[target]) != turn)
+				AddMove(GetMove(index, target));
 		}
 	}
 
@@ -166,11 +166,11 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				current += Directions[d];
 
 				if (board->square[current] != None) {
-					if (isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
+					if (IsWhite(board->square[current]) != turn)
+						AddMove(GetMove(index, current));
 					break;
 				}
-				addMove(getMove(index, current));
+				AddMove(GetMove(index, current));
 			}
 		}
 	}
@@ -187,11 +187,11 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				current += Directions[d];
 
 				if (board->square[current] != None) {
-					if (isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
+					if (IsWhite(board->square[current]) != turn)
+						AddMove(GetMove(index, current));
 					break;
 				}
-				addMove(getMove(index, current));
+				AddMove(GetMove(index, current));
 			}
 		}
 	}
@@ -208,11 +208,11 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				current += Directions[d];
 
 				if (board->square[current] != None) {
-					if (isWhite(board->square[current]) != turn)
-						addMove(getMove(index, current));
+					if (IsWhite(board->square[current]) != turn)
+						AddMove(GetMove(index, current));
 					break;
 				}
-				addMove(getMove(index, current));
+				AddMove(GetMove(index, current));
 			}
 		}
 	}
@@ -220,8 +220,8 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	if ((underAttack & ((Uint64)1 << king)) == 0 && !onlyAttack) {
 
 		// Castling
-		bool kingSide = hasKingsideCastleRight(board->currentGameState, turn);
-		bool queenSide = hasQueensideCastleRight(board->currentGameState, turn);
+		bool kingSide = HasKingsideCastleRight(board->currentGameState, turn);
+		bool queenSide = HasQueensideCastleRight(board->currentGameState, turn);
 		if (kingSide) {
 			bool valid = true;
 			for (int j = 1; j <= 2; j++) {
@@ -233,7 +233,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			}
 
 			if (valid)
-				addMove(getMove(king, king + 2) | (CastleFlag << 12));
+				AddMove(GetMove(king, king + 2) | (CastleFlag << 12));
 		}
 
 		if (queenSide) {
@@ -247,7 +247,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 			}
 
 			if (valid)
-				addMove(getMove(king, king - 2) | (CastleFlag << 12));
+				AddMove(GetMove(king, king - 2) | (CastleFlag << 12));
 		}
 
 	}
@@ -256,21 +256,21 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	for (int i = 0; i < Pawns->count; i++) {
 		Uint8 index = Pawns->list[i];
 		Uint8 rank = index / 8;
-		bool isPromotion = (rank == (turn ? 1 : 6));
+		bool IsPromotion = (rank == (turn ? 1 : 6));
 		if (board->square[index + (turn ? -8 : 8)] == None) {
-			Move move = getMove(index, index + (turn ? -8 : 8));
-			if (isPromotion) {
-				addMove(move | (PromoteToQueenFlag << 12));
-				addMove(move | (PromoteToBishopFlag << 12));
-				addMove(move | (PromoteToRookFlag << 12));
-				addMove(move | (PromoteToKnightFlag << 12));
+			Move move = GetMove(index, index + (turn ? -8 : 8));
+			if (IsPromotion) {
+				AddMove(move | (PromoteToQueenFlag << 12));
+				AddMove(move | (PromoteToBishopFlag << 12));
+				AddMove(move | (PromoteToRookFlag << 12));
+				AddMove(move | (PromoteToKnightFlag << 12));
 			}
 			else {
-				addMove(move);
+				AddMove(move);
 			}
 			if ((rank == (turn ? 6 : 1)) && (board->square[index + (turn ? -16 : 16)] == None))
 			{
-				addMove((getMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
+				AddMove((GetMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
 			}
 
 		}
@@ -295,9 +295,9 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 							break;
 						}
 						Piece piece = board->square[current];
-						PieceType type = getPieceType(piece);
+						PieceType type = GetPieceType(piece);
 						if (piece != None) {
-							if (isWhite(piece) != turn && (type == Rook || type == Queen))
+							if (IsWhite(piece) != turn && (type == Rook || type == Queen))
 								isHorizontal = true;
 							break;
 						}					
@@ -309,29 +309,29 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 							break;
 						}
 						Piece piece = board->square[current];
-						PieceType type = getPieceType(piece);
+						PieceType type = GetPieceType(piece);
 						if (piece != None) {
-							if (isWhite(piece) != turn && (type == Rook || type == Queen))
+							if (IsWhite(piece) != turn && (type == Rook || type == Queen))
 								isHorizontal = true;
 							break;
 						}
 					}
 					if(!(isKing && isHorizontal))
-						addMove(getMove(index, target) | EnPassantCaptureFlag << 12);
+						AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
 					
-				}else addMove(getMove(index, target) | EnPassantCaptureFlag << 12);
+				}else AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
 			}
-			else if (board->square[target] != None && isWhite(board->square[target]) != turn) {
+			else if (board->square[target] != None && IsWhite(board->square[target]) != turn) {
 
-				Move move = getMove(index, target);
-				if (isPromotion) {
-					addMove(move | (PromoteToQueenFlag << 12));
-					addMove(move | (PromoteToBishopFlag << 12));
-					addMove(move | (PromoteToRookFlag << 12));
-					addMove(move | (PromoteToKnightFlag << 12));
+				Move move = GetMove(index, target);
+				if (IsPromotion) {
+					AddMove(move | (PromoteToQueenFlag << 12));
+					AddMove(move | (PromoteToBishopFlag << 12));
+					AddMove(move | (PromoteToRookFlag << 12));
+					AddMove(move | (PromoteToKnightFlag << 12));
 				}
 				else {
-					addMove(move);
+					AddMove(move);
 				}
 			}
 		}
@@ -341,7 +341,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 }
 
 // Generate what squares the enemy pieces can see, represented by a 64 bit bitmap
-Uint64 generateUnderAttackBitmap(Board* board) {
+Uint64 GenerateUnderAttackBitmap(Board* board) {
 	Uint64 result = 0;
 
 	bool turn = board->isWhitesMove;

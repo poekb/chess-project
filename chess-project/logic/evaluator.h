@@ -3,4 +3,4 @@
 #include "../core/piece.h"
 #include "../core/pieceList.h"
 
-int evalBoard(Board* board);
+int EvalBoard(Board* board);

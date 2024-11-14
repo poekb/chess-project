@@ -9,6 +9,6 @@ extern Uint64 zobristCastlingRights[16];
 
 extern Uint64 zobristEnpassant[8];
 
-void initZobrist();
+void InitZobrist();
 
-void logUint64(Uint64 num);
+void LogUint64(Uint64 num);

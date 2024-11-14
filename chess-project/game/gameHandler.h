@@ -37,30 +37,30 @@ typedef struct GameData {
 } GameData;
 
 
-void updateLoop();
+void UpdateLoop();
 
-void toggleBot();
+void ToggleBot();
 
-void stashMove(Move move, GameData* gameState);
-void loadFEN(char* fenStr, GameData* gameState);
+void StashMove(Move move, GameData* gameState);
+void LoadFEN(char* fenStr, GameData* gameState);
 
-void updateHasGameEnded(GameData* gameState);
+void UpdateHasGameEnded(GameData* gameState);
 
-void nextMove();
-void prevMove();
-void firstMove();
-void lastMove();
+void NextMove();
+void PrevMove();
+void FirstMove();
+void LastMove();
 
-void pasteFEN();
-void pastePGN();
-void copyFEN();
-void copyPGN();
-void savePGN();
-void loadPGN();
+void PasteFEN();
+void PastePGN();
+void CopyFEN();
+void CopyPGN();
+void SavePGN();
+void LoadPGN();
 
-void resetBoard();
+void ResetBoard();
 
-Move getNextMove(GameData* gameState);
+Move GetNextMove(GameData* gameState);
 
 extern bool* nextEnabled;
 extern bool* prevEnabled;

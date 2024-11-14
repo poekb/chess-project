@@ -17,7 +17,7 @@ typedef struct PieceTex {
 PieceTex piece_tex_data[12];
 
 // Load svg files in textures
-void SVG_init(SDL_Renderer *renderer) {
+void SVG_Init(SDL_Renderer *renderer) {
 	IMG_Init(IMG_INIT_PNG);
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
@@ -37,9 +37,9 @@ void SVG_init(SDL_Renderer *renderer) {
 }
 
 // Copy the texture of a piece to the renderer
-void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
+void SVG_RenderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
 	if (piece == 0) return;
-	if (!isWhite(piece)) piece -= 2;
+	if (!IsWhite(piece)) piece -= 2;
 	SDL_Surface* surface = piece_tex_data[piece-1].surface;
 	SDL_Texture* texture = piece_tex_data[piece-1].texture;
 
@@ -54,7 +54,7 @@ void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
 	SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
 
-void SVG_clear() {
+void SVG_Clear() {
 	for (int i = 0; i < 12; i++) {
 		SDL_FreeSurface(piece_tex_data[i].surface);
 		SDL_DestroyTexture(piece_tex_data[i].texture);

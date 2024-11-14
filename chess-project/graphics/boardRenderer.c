@@ -5,23 +5,23 @@
 
 SDL_Texture* staticImgBuffer; // the background for the board
 
-SDL_Rect getCellRect(int x, int y);
-SDL_Rect getCellRectRaw(int x, int y);
+SDL_Rect GetCellRect(int x, int y);
+SDL_Rect GetCellRectRaw(int x, int y);
 
-void setDrawColor(SDL_Renderer* renderer, SDL_Color color) {
+void SetDrawColor(SDL_Renderer* renderer, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 
-void rendererInit(SDL_Renderer* renderer) {
+void RendererInit(SDL_Renderer* renderer) {
 
-    textRendererInit();
+    TextRendererInit();
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SVG_init(renderer);
+    SVG_Init(renderer);
 }
 
-void redererCleanup() {
-    textRendererCleanup();
-    SVG_clear();
+void RedererCleanup() {
+    TextRendererCleanup();
+    SVG_Clear();
 }
 
 int boardSize = 0;
@@ -30,7 +30,7 @@ int offsetY = 0;
 double cellSize;
 
 // Render the static board background
-void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY) {
+void RenderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY) {
     boardSize = boardSizeNew;
     offsetX = boardOffsetX;
     offsetY = boardOffsetY;
@@ -48,16 +48,16 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
 
     cellSize = (double)boardSize / 8;
 
-    setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
+    SetDrawColor(renderer, HexToRGBA(COLOR_BLACK));
     SDL_RenderClear(renderer);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
-            SDL_Rect rect = getCellRectRaw(i, j);
+            SDL_Rect rect = GetCellRectRaw(i, j);
             if (i % 2 == j % 2)
-                setDrawColor(renderer, HexToRGBA(COLOR_WHITE));
+                SetDrawColor(renderer, HexToRGBA(COLOR_WHITE));
             else
-                setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
+                SetDrawColor(renderer, HexToRGBA(COLOR_BLACK));
 
             SDL_RenderFillRect(renderer, &rect);
         }
@@ -67,7 +67,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
     double fontSize = cellSize / 5;
 
     for (int i = 0; i < 8; i++) {
-        renderChar(
+        RenderChar(
             renderer, '8' - i, 
             (int)fontSize, 
             (int)(fontSize / 4), 
@@ -76,7 +76,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
     }
 
     for (int i = 0; i < 8; i++) {
-        renderChar(renderer, 'a' + i, 
+        RenderChar(renderer, 'a' + i, 
             (int)fontSize, 
             (int)((double)i * cellSize + cellSize - fontSize),
             (int)(boardSize - fontSize - fontSize / 4),
@@ -89,7 +89,7 @@ void renderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int
 
 
 // Get the current cell, that is howered over
-Uint8 getCell(int x, int y) {
+Uint8 GetCell(int x, int y) {
     int cellX = (int)((x - offsetX) / cellSize);
     int cellY = (int)((y - offsetY) / cellSize);
     if (x >= offsetX && cellX < 8 && y >= offsetY && cellY < 8) {
@@ -99,7 +99,7 @@ Uint8 getCell(int x, int y) {
 }
 
 // Get the rectangle of the cell, but only relative to the upper left corner of the board
-SDL_Rect getCellRectRaw(int x, int y) {
+SDL_Rect GetCellRectRaw(int x, int y) {
     return (SDL_Rect) {
         (int)floor(cellSize * x),
         (int)floor(cellSize * y),
@@ -109,7 +109,7 @@ SDL_Rect getCellRectRaw(int x, int y) {
 }
 
 // Get the rectangle of the cell, relative to the upper left corner of the window
-SDL_Rect getCellRect(int x, int y) {
+SDL_Rect GetCellRect(int x, int y) {
     return (SDL_Rect){ 
         offsetX + (int)floor(cellSize * x),
         offsetY + (int)floor(cellSize * y),
@@ -119,60 +119,60 @@ SDL_Rect getCellRect(int x, int y) {
 }
 
 // Render all pieces that are present on the board
-void renderPieces(SDL_Renderer* renderer, Piece board[64]) {
+void RenderPieces(SDL_Renderer* renderer, Piece board[64]) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++)
         {
-            SVG_renderPiece(renderer, board[j * 8 + i], getCellRect(i,j));
+            SVG_RenderPiece(renderer, board[j * 8 + i], GetCellRect(i,j));
         }
     }
 }
 
 // Loading in the static board background
-void renderStatic(SDL_Renderer* renderer) {
+void RenderStatic(SDL_Renderer* renderer) {
     SDL_SetRenderTarget(renderer, NULL);
-    setDrawColor(renderer, HexToRGBA(COLOR_BACKGROUND));
+    SetDrawColor(renderer, HexToRGBA(COLOR_BACKGROUND));
     SDL_RenderClear(renderer);
 
     SDL_RenderCopy(renderer, staticImgBuffer, NULL, &((SDL_Rect) {offsetX,offsetY, boardSize, boardSize}));
 
-    setDrawColor(renderer, HexToRGBA(COLOR_BLACK));
+    SetDrawColor(renderer, HexToRGBA(COLOR_BLACK));
 }
 
 // Highlight a square with set color
-void highlightCell(SDL_Renderer* renderer,Uint8 pos, SDL_Color color) {
+void HighlightCell(SDL_Renderer* renderer,Uint8 pos, SDL_Color color) {
 
-    setDrawColor(renderer, color);
-    SDL_Rect rect = getCellRect(pos % 8, pos / 8);
+    SetDrawColor(renderer, color);
+    SDL_Rect rect = GetCellRect(pos % 8, pos / 8);
     SDL_RenderFillRect(renderer, &rect);
 }
 
 // Highlight multiple cells with set color
-void highlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color) {
+void HighlightCells(SDL_Renderer* renderer, Uint8* positions, Uint8 count, SDL_Color color) {
     for (int i = 0; i < count; i++) {
         Uint8 pos = positions[i];
-        setDrawColor(renderer, color);
-        highlightCell(renderer, pos, color);
+        SetDrawColor(renderer, color);
+        HighlightCell(renderer, pos, color);
     }
 }
 
 // Highlight cells, that are enabled in a bitboard
-void displayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color) {
+void DisplayBitboard(SDL_Renderer* renderer, Uint64 bitboard, SDL_Color color) {
     for (int i = 0; i < 64; i++) {
         if ((bitboard & ((Uint64)1 << i)) != 0)
-            highlightCell(renderer, i, color);
+            HighlightCell(renderer, i, color);
     }
 }
 
-void displayPromotionSelect(SDL_Renderer* renderer, Move move, bool isWhite) {
+void DisplayPromotionSelect(SDL_Renderer* renderer, Move move, bool IsWhite) {
 
-    Uint8 targetSquare = getTarget(move);
+    Uint8 targetSquare = GetTarget(move);
     Uint8 column = targetSquare % 8;
-    setDrawColor(renderer, HexToRGBA(0x707070B0));
+    SetDrawColor(renderer, HexToRGBA(0x707070B0));
 
 
     for (int i = 0; i < 4; i++) {
-        SDL_Rect rect = getCellRect(column, isWhite ? i : 7 - i);
+        SDL_Rect rect = GetCellRect(column, IsWhite ? i : 7 - i);
         SDL_RenderFillRect(renderer, &rect);
         PieceType type;
         switch (i) {
@@ -190,12 +190,12 @@ void displayPromotionSelect(SDL_Renderer* renderer, Move move, bool isWhite) {
             break;
         }
 
-        SVG_renderPiece(renderer, makePieceIsWhite(type, isWhite), rect);
+        SVG_RenderPiece(renderer, MakePieceIsWhite(type, IsWhite), rect);
     }
 }
 
-PieceType getPromotionPieceTypeByCell(Move move,Uint8 cell, bool isWhite) {
-    Uint8 targetSquare = getTarget(move);
+PieceType GetPromotionPieceTypeByCell(Move move,Uint8 cell, bool IsWhite) {
+    Uint8 targetSquare = GetTarget(move);
     Uint8 column = targetSquare % 8;
     Uint8 x = cell % 8;
     Uint8 y = cell / 8;
@@ -204,7 +204,7 @@ PieceType getPromotionPieceTypeByCell(Move move,Uint8 cell, bool isWhite) {
         return None;
 
     PieceType type;
-    switch (isWhite ? y : 7 - y) {
+    switch (IsWhite ? y : 7 - y) {
     case 0:
         type = Queen;
         break;
@@ -225,7 +225,7 @@ PieceType getPromotionPieceTypeByCell(Move move,Uint8 cell, bool isWhite) {
 }
 
 // Initialize SDL
-void sdlInit(int width, int height, SDL_Window** pwindow, SDL_Renderer** prenderer) {
+void InitSDL(int width, int height, SDL_Window** pwindow, SDL_Renderer** prenderer) {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         SDL_Log("SDL could not start: %s", SDL_GetError());
         exit(1);

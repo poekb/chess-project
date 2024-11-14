@@ -35,7 +35,7 @@ Uint8 blackPawnAttacksCount[64];
 Uint8 Uint8Min(Uint8 a, Uint8 b);
 
 // Generate values that are used for the move generation and are static
-void preCompute() {
+void PreCompute() {
 	
 	for (int x = 0; x < 8; x++) {
 		for (int y = 0; y < 8; y++) {

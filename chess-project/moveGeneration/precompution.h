@@ -1,6 +1,6 @@
 #include "../global.h"
 
-void preCompute();
+void PreCompute();
 
 extern int Directions[8];
 

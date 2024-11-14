@@ -3,9 +3,9 @@
 #include "../core/piece.h"
 #include "../core/move.h"
 
-int getPositionValue(Board* board, PieceType type, Uint8 square);
+int GetPositionValue(Board* board, PieceType type, Uint8 square);
 
-int getMapValue(int map[], int rank, int file, bool color);
+int GetMapValue(int map[], int rank, int file, bool color);
 
 #ifndef MAP
 #define MAP

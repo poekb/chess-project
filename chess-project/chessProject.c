@@ -5,17 +5,17 @@
 
 int main(int argc, char* argv[]) {
 
-    sdlInit(1000, 720, &window, &renderer);
+    InitSDL(1000, 720, &window, &renderer);
     SDL_SetWindowMinimumSize(window, 480, 480);
-    rendererInit(renderer);
+    RendererInit(renderer);
 
-    initZobrist();
-    preCompute();
+    InitZobrist();
+    PreCompute();
     
     // Start the main update loop
-    updateLoop();
+    UpdateLoop();
     
-    redererCleanup();
+    RedererCleanup();
     SDL_Quit();
 
     return 0;
