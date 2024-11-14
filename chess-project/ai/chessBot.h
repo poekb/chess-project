@@ -6,8 +6,6 @@
 
 #define MateScore 100000000
 
-void mesureBot(Board* boardIn, int depth);
-
 int search(int depth, int distFromRoot, int alpha, int beta);
 Move findBestMove(Board* board);
 Move startBot(Board* board);

@@ -14,6 +14,9 @@ int searchAttacks(int alpha, int beta);
 
 bool botQuit = true;
 
+Move movesBuffer[5000]; // static move buffer for fewer mallocs
+int movesBufferOffset = 0;
+
 int searchAttacks(int alpha, int beta) {
 	if (botQuit) {
 		return 0;
@@ -23,27 +26,23 @@ int searchAttacks(int alpha, int beta) {
 		return beta;
 	alpha = max(alpha, eval);
 
-	Move* attackMoves = malloc(sizeof(Move) * 100);
-	if (attackMoves == NULL) return 0;
-	int moveCount = generateMoves(board, attackMoves, true);
-
-	orderMoves(board, attackMoves, moveCount);
+	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], true);
+	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
 
 	for (int i = 0; i < moveCount; i++) {
 
-		makeMove(board, attackMoves[i]);
+		makeMove(board, movesBuffer[movesBufferOffset + i]);
 
+		movesBufferOffset += moveCount;
 		int eval = -searchAttacks(-beta, -alpha);
+		movesBufferOffset -= moveCount;
 
-		unmakeMove(board, attackMoves[i]);
+		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
 		if (eval >= beta) {
-			free(attackMoves);
 			return beta;
 		}
 		alpha = max(alpha, eval);
 	}
-	free(attackMoves);
-
 	return alpha;
 }
 
@@ -51,6 +50,8 @@ Move bestMove;
 
 Move bestMoveThisIter;
 int bestEval;
+
+
 
 int search(int depth, int distFromRoot, int alpha, int beta) {
 	if (botQuit) {
@@ -95,12 +96,9 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		return searchAttacks(alpha, beta);
 	}
 
-	Move* moves = malloc(sizeof(Move) * 218);
-	if (moves == NULL) return 0;
-	int moveCount = generateMoves(board, moves, false);
+	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], false);
 
 	if (moveCount == 0) {
-		free(moves);
 
 		if ((((Uint64)1 << board->kingSquare[board->isWhitesMove ? WhiteIndex : BlackIndex]) & board->underAttackMap) != 0)
 		{
@@ -110,42 +108,42 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 		return 0;
 	}
 
-	orderMoves(board, moves, moveCount);
+	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
+
 
 	Move bestMoveThisPos = 0;
 
 	Uint8 transEvalType = TranspositionUpper;
 
 	for (int i = 0; i < moveCount; i++) {
-		makeMove(board, moves[i]);
+		makeMove(board, movesBuffer[movesBufferOffset + i]);
 
+		movesBufferOffset += moveCount;
 		int eval = -search(depth - 1, distFromRoot + 1, -beta, -alpha);
+		movesBufferOffset -= moveCount;
 
-		unmakeMove(board, moves[i]);
+		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
 
 		if (eval >= beta) {
-			insertTransposition(board->zobristHash, beta, distFromRoot, depth, TranspositionLower, moves[i]);
-			free(moves);
+			insertTransposition(board->zobristHash, beta, distFromRoot, depth, TranspositionLower, movesBuffer[movesBufferOffset + i]);
 			return beta;
 		}
 
 		if (botQuit) {
-			free(moves);
 			return 0;
 		}
 
 		if (eval > alpha) {
-			bestMoveThisPos = moves[i];
+			bestMoveThisPos = movesBuffer[movesBufferOffset + i];
 			alpha = eval;
 			transEvalType = TranspositionExact;
 			if (distFromRoot == 0) {
-				bestMoveThisIter = moves[i];
+				bestMoveThisIter = movesBuffer[movesBufferOffset + i];
 			}
 		}
 
 	}
-	free(moves);
-	
+
 	insertTransposition(board->zobristHash, alpha, distFromRoot, depth, transEvalType, bestMoveThisPos);
 
 	return alpha;
@@ -159,7 +157,7 @@ Move findBestMove(Board* boardIn) {
 
 	int depth = 1;
 	int eval = 0;
-	while (!botQuit) {
+	while (!botQuit && depth < 20) {
 		bestMoveThisIter = 0;
 		eval = search(depth, 0, -MateScore, MateScore);
 
@@ -168,7 +166,6 @@ Move findBestMove(Board* boardIn) {
 		depth++;
 
 		bestMove = bestMoveThisIter;
-
 		bestEval = eval;
 		if (isMateEval(eval) && eval > 0)
 			break;

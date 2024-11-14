@@ -2,7 +2,6 @@
 #include "precompution.h"
 #include "../graphics/boardRenderer.h"
 
-// Global variables are for increasing performance, because move generation runs multiple million times per second, when searching for the best move
 Uint64 pinMaps[64];
 Uint64 pinnedPieces;
 
@@ -344,7 +343,7 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 	return count;
 }
 
-// Generate what squares the enemy pieces can see, representet by a 64 bit bitmap
+// Generate what squares the enemy pieces can see, represented by a 64 bit bitmap
 Uint64 generateUnderAttackBitmap(Board* board) {
 	Uint64 result = 0;
 
