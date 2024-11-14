@@ -22,7 +22,7 @@ void initializeState(MtState* state, Uint64 seed)
 {
     Uint64* state_array = &(state->state_array[0]);
 
-    state_array[0] = seed;                          // suggested initial seed = 19650218UL
+    state_array[0] = seed;                            // suggested initial seed = 19650218UL
 
     for (int i = 1; i < transpositionCount; i++)
     {
@@ -37,7 +37,7 @@ Uint64 randomUint64(MtState* state)
 {
     Uint64* state_array = &(state->state_array[0]);
 
-    int k = state->state_index;      // point to current state location
+    int k = state->state_index;                       // point to current state location
 
     int j = k - (transpositionCount - 1);             // point to state transpositionCount-1 iterations before
     if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
@@ -50,13 +50,13 @@ Uint64 randomUint64(MtState* state)
     j = k - (transpositionCount - m);                 // point to state transpositionCount-m iterations before
     if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
 
-    x = state_array[j] ^ xA;         // compute next value in the state
-    state_array[k++] = x;            // update new state value
+    x = state_array[j] ^ xA;                          // compute next value in the state
+    state_array[k++] = x;                             // update new state value
 
     if (k >= transpositionCount) k = 0;               // modulo transpositionCount circular indexing
     state->state_index = k;
 
-    Uint64 y = x ^ (x >> u);         // tempering 
+    Uint64 y = x ^ (x >> u);                          // tempering 
     y = y ^ ((y << s) & b);
     y = y ^ ((y << t) & c);
     Uint64 z = y ^ (y >> l);

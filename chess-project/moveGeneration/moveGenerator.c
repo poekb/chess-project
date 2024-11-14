@@ -333,11 +333,8 @@ int generateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 				else {
 					addMove(move);
 				}
-
 			}
-
 		}
-
 	}
 
 	return count;

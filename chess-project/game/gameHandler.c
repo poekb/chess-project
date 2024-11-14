@@ -26,11 +26,12 @@ Sint32 mouseY;
 
 GameData* displayedGameData;
 
-// Perft test for validating move generation
-// Unused in the final app
 void perftTest(int depth, GameData* gameData);
 
-// The main update loop of the program
+/*
+    The main update loop of the program
+    It handles the interractions with the window
+*/
 void updateLoop() {
 
     GameData* gameData = malloc(sizeof(GameData));
@@ -72,10 +73,7 @@ void updateLoop() {
     loadFEN(gameData->startFEN, gameData);
     initTranspositionTable();
 
-    // ############################
-    // #   Main game event loop   #
-    // ############################
-
+    // Main update loop
     bool quit = false;
     SDL_Event event;
     while (!quit) {
@@ -327,26 +325,33 @@ void freeMoveFuture(GameData* gameData) {
     }
 }
 
+/*
+    Updates the rendering of the board
+    This funcion connects the rendering with the logic
+*/
 void UpdateBoard(Board* board, GameData* gameData) {
 
     renderStatic(renderer);
 
     renderButtons();
 
+    // Display what was the previous move
     if (gameData->prevEnabled) {
         highlightCell(renderer, getStart(gameData->moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
-        highlightCell(renderer, getTarget(gameData->moveHistory->move), (SDL_Color) { 130, 230, 130, 200 });
+        highlightCell(renderer, getTarget(gameData->moveHistory->move), (SDL_Color) { 70, 200, 70, 200 });
     }
 
+    // Highlight the selected squre
     if (gameData->selectedPos != -1) {
         highlightCell(renderer, gameData->selectedPos, (SDL_Color) { 100, 100, 200, 150 });
     }
 
+    // Highlight the squre that is howered ower
     if ((gameData->howerPos != -1))
         highlightCell(renderer, gameData->howerPos, (SDL_Color) { 100, 100, 200, 150 });
 
+    // Display the possible moves
     gameData->moveCount = generateMoves(board, gameData->validMoves, false);
-
     for (int i = 0; i < gameData->moveCount; i++) {
         Uint8 start = getStart(gameData->validMoves[i]);
         Uint8 target = getTarget(gameData->validMoves[i]);
@@ -357,9 +362,7 @@ void UpdateBoard(Board* board, GameData* gameData) {
     }
 
     renderPieces(renderer, board->square);
-
     renderWinner(board);
-
 
     if (gameData->isPromotingPiece)
         displayPromotionSelect(renderer, gameData->promotingPieceMove, board->isWhitesMove);
@@ -450,7 +453,7 @@ void loadFEN(char* fenStr, GameData* gameData) {
     perftTest(5, gameData);
 }
 
-// For move generator validation
+// Test the number of possible moves, for validating the move generator
 void perftTest(int depth, GameData* gameData) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {

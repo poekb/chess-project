@@ -11,6 +11,9 @@ int moveValues[218];
 Move* moves;
 int boardEval;
 
+/*
+	Order possible moves using the transposition table and a move value prediction
+*/
 void orderMoves(Board* board, Move* movesIn, int moveCount) {
 	boardEval = -evalBoard(board);
 	moves = movesIn;
@@ -20,7 +23,9 @@ void orderMoves(Board* board, Move* movesIn, int moveCount) {
 
 	quickSort(0, moveCount - 1);
 }
-
+/*
+	Predicts the value of a move
+*/
 int valueMove(Board* board, Move move) {
 
 	Uint64 zobrist = zobistOfMove(board, move);

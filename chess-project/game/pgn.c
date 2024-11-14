@@ -173,13 +173,11 @@ void loadGameFromPGN(Board* board, char* PGN, GameData* gameState) {
 				
 				if (move != 0) 
 					stashMove(move, gameState);
-				
 			}
 			break;
 		default:
 			break;
 		}
-
 		offset++;
 	}
 }

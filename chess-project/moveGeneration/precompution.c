@@ -2,7 +2,7 @@
 #include "../logic/evaluator.h"
 
 // These values are ofsets in the 1D representation of the board
-// Direction Up, Down, Right, Left, Upper left, Lower right, Upper right, Lower left
+// Directions Up, Down, Right, Left, Upper left, Lower right, Upper right, Lower left
 int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 
 Uint8 NumSquaresFromEdge[64][8];
@@ -23,7 +23,6 @@ Uint64 knightAttackBitBoards[64];
 Uint64 kingAttackBitBoards[64];
 Uint64 pawnAttackBitBoards[64][2];
 
-
 Uint8 pawnAttacks[64][2][2];
 Uint8 pawnAttacksCount[64][2];
 
@@ -32,7 +31,6 @@ Uint8 whitePawnAttacksCount[64];
 
 Uint8 blackPawnAttacks[64][2];
 Uint8 blackPawnAttacksCount[64];
-
 
 Uint8 Uint8Min(Uint8 a, Uint8 b);
 

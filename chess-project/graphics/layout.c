@@ -28,8 +28,7 @@ SDL_Rect toggleBotButtonRect;
 SDL_Rect winnerRect;
 
 
-// Data for every button (the unique colors may be unecassary because they are all the same anyway)
-
+// Data for every button (the unique colors may be unecessary because they are all the same anyway)
 ButtonData nextMoveButton = {
     ">",
     &nextEnabled,
@@ -174,7 +173,7 @@ ButtonData* buttons[ButtonCount] = {
     &toggleBotButton
 };
 
-// Calculate the positions of 
+// Calculate the positions of UI elements
 void recalcUIData() {
     int windowWidth;
     int windowHeight;
@@ -196,8 +195,6 @@ void recalcUIData() {
     renderBoard(renderer, boardSize, gapLeft, boardY);
 
     int moveButtonSize = min((int)(gapTop * MOVE_BUTTON_SIZE), gapRight / 8);
-
-    // Calculating the positions of the buttons ?? Somehow make this cleaner ??
 
     int moveGap = min((gapTop - moveButtonSize) / 2, moveButtonSize / 4);
 
@@ -268,6 +265,7 @@ void recalcUIData() {
 
 }
 
+// Display who won or draw
 void renderWinner(Board* board) {
 
     if (board->hasGameEnded) {

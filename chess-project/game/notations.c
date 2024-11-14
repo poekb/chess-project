@@ -98,7 +98,7 @@ char* getMoveNotation(Board* board, Move move) {
 	string[length++] = '8' - (target / 8);
 
 	if (isPromotion(move)) {
-		string[length++] = '='; //???
+		string[length++] = '='; // Optional some engines don't use this
 
 		if (move >> 12 == PromoteToQueenFlag) {
 			string[length++] = 'Q';
@@ -298,7 +298,6 @@ int getFENFromBoard(Board* board, char* FEN) {
 		
 		FEN[length++] = file;
 	}
-
 
 	int result = sprintf(&FEN[length], " %d %d", board->currentGameState.halfmoveClock, board->fullmoveClock);
 	length += result;

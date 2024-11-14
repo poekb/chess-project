@@ -16,6 +16,7 @@ typedef struct PieceTex {
 
 PieceTex piece_tex_data[12];
 
+// Load svg files in textures
 void SVG_init(SDL_Renderer *renderer) {
 	IMG_Init(IMG_INIT_PNG);
 
@@ -35,6 +36,7 @@ void SVG_init(SDL_Renderer *renderer) {
 	}
 }
 
+// Copy the texture of a piece to the renderer
 void SVG_renderPiece(SDL_Renderer* renderer, Piece piece, SDL_Rect rect) {
 	if (piece == 0) return;
 	if (!isWhite(piece)) piece -= 2;

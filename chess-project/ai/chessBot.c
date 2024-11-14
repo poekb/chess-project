@@ -17,42 +17,15 @@ bool botQuit = true;
 Move movesBuffer[5000]; // static move buffer for fewer mallocs
 int movesBufferOffset = 0;
 
-int searchAttacks(int alpha, int beta) {
-	if (botQuit) {
-		return 0;
-	}
-	int eval = evalBoard(board);
-	if (eval >= beta)
-		return beta;
-	alpha = max(alpha, eval);
-
-	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], true);
-	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
-
-	for (int i = 0; i < moveCount; i++) {
-
-		makeMove(board, movesBuffer[movesBufferOffset + i]);
-
-		movesBufferOffset += moveCount;
-		int eval = -searchAttacks(-beta, -alpha);
-		movesBufferOffset -= moveCount;
-
-		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
-		if (eval >= beta) {
-			return beta;
-		}
-		alpha = max(alpha, eval);
-	}
-	return alpha;
-}
-
 Move bestMove;
 
 Move bestMoveThisIter;
 int bestEval;
 
-
-
+/*
+	Main search function
+	Implements the minimax algorith with alpha-beta pruning
+*/
 int search(int depth, int distFromRoot, int alpha, int beta) {
 	if (botQuit) {
 		return 0;
@@ -149,6 +122,7 @@ int search(int depth, int distFromRoot, int alpha, int beta) {
 	return alpha;
 }
 
+// Search with iterative deepening (can be terminated, by setting the botQuit global value to true)
 Move findBestMove(Board* boardIn) {
 	board = boardIn;
 	transpositionCount = 0;
@@ -176,6 +150,7 @@ Move findBestMove(Board* boardIn) {
 	return bestMove;
 }
 
+//Start the search and terminate it after given time 
 Move startBot(Board* board) {
 	botQuit = false;
 
@@ -189,6 +164,39 @@ Move startBot(Board* board) {
 	free(note);
 
 	return bestMove;
+}
+
+/*
+	Secondary search function
+	Only searches capture moves
+*/
+int searchAttacks(int alpha, int beta) {
+	if (botQuit) {
+		return 0;
+	}
+	int eval = evalBoard(board);
+	if (eval >= beta)
+		return beta;
+	alpha = max(alpha, eval);
+
+	int moveCount = generateMoves(board, &movesBuffer[movesBufferOffset], true);
+	orderMoves(board, &movesBuffer[movesBufferOffset], moveCount);
+
+	for (int i = 0; i < moveCount; i++) {
+
+		makeMove(board, movesBuffer[movesBufferOffset + i]);
+
+		movesBufferOffset += moveCount;
+		int eval = -searchAttacks(-beta, -alpha);
+		movesBufferOffset -= moveCount;
+
+		unmakeMove(board, movesBuffer[movesBufferOffset + i]);
+		if (eval >= beta) {
+			return beta;
+		}
+		alpha = max(alpha, eval);
+	}
+	return alpha;
 }
 
 bool isMateEval(int eval) {

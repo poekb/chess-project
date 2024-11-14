@@ -9,10 +9,12 @@ void removePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 color
 void movePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool turn);
 void promotePiece(Board* board, Uint8 square, PieceType source, PieceType target, Uint8 colorIndex, bool isWhite);
 
-
+/*
+	Make a move on the board
+	Also handle zobrist hash, and gamestate changes
+*/
 void makeMove(Board* board, Move move) {
 
-	//Get data from move
 	Uint8 start = getStart(move);
 	Uint8 target = getTarget(move);
 
@@ -57,11 +59,7 @@ void makeMove(Board* board, Move move) {
 		board->currentGameState.enpassantFile = start % 8;
 		board->zobristHash ^= zobristEnpassant[board->currentGameState.enpassantFile];
 	}
-
-
 	movePiece(board, start, target, type, turn);
-
-
 
 	// Handle castles
 	if (castle) {
@@ -100,7 +98,6 @@ void makeMove(Board* board, Move move) {
 		case PromoteToKnightFlag:
 			promotePiece(board, target, Pawn, Knight, colorIndex, turn);
 			break;
-
 		}
 	}
 	
@@ -111,9 +108,9 @@ void makeMove(Board* board, Move move) {
 		board->fullmoveClock++;
 
 	board->gameStateHistory[board->gameStateHistoryCount++] = prevGameState;
-
 }
 
+// Only get the zobrist hash from the resulting position of a move
 Uint64 zobistOfMove(Board* board, Move move) {
 	//Get data from move
 	Uint8 start = getStart(move);
@@ -167,8 +164,6 @@ Uint64 zobistOfMove(Board* board, Move move) {
 			zobrist ^= zobristPieceHashes[target - 2][(Rook - 1) + colorIndex * 6];
 			zobrist ^= zobristPieceHashes[target + 1][(Rook - 1) + colorIndex * 6];
 		}
-
-		//gamestate.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
 	}
 
 	if(type == King)
@@ -203,17 +198,18 @@ Uint64 zobistOfMove(Board* board, Move move) {
 	}
 
 	zobrist ^= zobristBlacksTurn;
-
 	return zobrist;
 }
 
-
+/*
+	Complete inverse of the makeMove function
+	Calling them one after the other should not make a meaningful change
+*/ 
 void unmakeMove(Board* board, Move move) {
 	if (board->isWhitesMove)
 		board->fullmoveClock--;
 	board->isWhitesMove = !board->isWhitesMove;
 
-	//Get data from move
 	Uint8 start = getStart(move);
 	Uint8 target = getTarget(move);
 
@@ -265,8 +261,6 @@ void unmakeMove(Board* board, Move move) {
 			movePiece(board, target + 1, target - 2, Rook, turn); // Queenside
 		}
 	}
-
-
 	board->currentGameState = board->gameStateHistory[--board->gameStateHistoryCount];
 	board->zobristHash = board->zobristHistory[board->gameStateHistoryCount];
 }
