@@ -1,7 +1,6 @@
 #include "../global.h"
 #include "../core/piece.h"
 #include "../core/move.h"
-
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
@@ -9,7 +8,6 @@
 #define COLOR_WHITE 0xFFF0D0FF
 #define COLOR_HIGH 0x7070F0A0
 #define COLOR_BACKGROUND 0x1A1A20FF
-
 
 void RendererInit(SDL_Renderer* renderer);
 void RedererCleanup();

@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[]) {
 
-    InitSDL(1000, 720, &window, &renderer);
+    InitSDL(1080, 720, &window, &renderer);
     SDL_SetWindowMinimumSize(window, 480, 480);
     RendererInit(renderer);
 
