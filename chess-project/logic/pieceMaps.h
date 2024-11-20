@@ -1,3 +1,4 @@
+#pragma once
 #include "../global.h"
 #include "../core/board.h"
 #include "../core/piece.h"
@@ -6,9 +7,6 @@
 int GetPositionValue(Board* board, PieceType type, Uint8 square);
 
 int GetMapValue(int map[], int rank, int file, bool color);
-
-#ifndef MAP
-#define MAP
 
 // These values are from:
 // https://github.com/SebLague/Chess-Coding-Adventure/blob/Chess-V1-Unity/Assets/Scripts/Core/PieceSquareTable.cs
@@ -103,5 +101,3 @@ static int KING_MAP_LATE[64] = {
 	-30,-30,  0,  0,  0,  0,-30,-30,
 	-50,-30,-30,-30,-30,-30,-30,-50
 };
-
-#endif

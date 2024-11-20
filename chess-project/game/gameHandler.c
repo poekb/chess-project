@@ -1,5 +1,3 @@
-
-
 #include "../ai/chessBot.h"
 #include "../ai/transpositionTable.h"
 #include "../graphics/boardRenderer.h"
@@ -457,7 +455,7 @@ void LoadFEN(char* fenStr, GameData* gameData) {
 void PerftTest(int depth, GameData* gameData) {
     Uint64 oldTick = SDL_GetTicks64();
     for (int i = 1; i <= depth; i++) {
-        printf("Num of possible moves (%d): %10d ", i, CountMoves(gameData->board, i));
+        printf("Perft (%d): %10d ", i, CountMoves(gameData->board, i));
         printf("in %lu ms\n", (int)(SDL_GetTicks64() - oldTick));
     }
 }

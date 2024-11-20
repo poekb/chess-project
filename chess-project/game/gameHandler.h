@@ -1,10 +1,8 @@
+#pragma once
 #include "../global.h"
 #include "../core/move.h"
 #include "../core/board.h"
 #include "../moveGeneration/moveGenerator.h"
-
-#ifndef GAME
-#define GAME
 
 #define DefaultBoardFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
@@ -68,4 +66,4 @@ extern bool* gameLoadEnabled;
 extern Sint32 mouseX;
 extern Sint32 mouseY;
 
-#endif
+

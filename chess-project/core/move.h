@@ -1,7 +1,5 @@
+#pragma once
 #include "../global.h"
-
-#ifndef MOVE
-#define MOVE
 
 typedef Uint16 Move;
 
@@ -14,8 +12,6 @@ typedef Uint16 Move;
 #define PromoteToKnightFlag 0b0101
 #define PromoteToRookFlag 0b0110
 #define PromoteToBishopFlag 0b0111
-
-#endif
 
 Uint8 GetTarget(Move move);
 Uint8 GetStart(Move move);

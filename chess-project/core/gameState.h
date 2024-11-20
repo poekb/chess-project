@@ -1,8 +1,6 @@
+#pragma once
 #include "../global.h"
 #include "piece.h"
-
-#ifndef GAME_STATE
-#define GAME_STATE
 
 #define WhiteKingSide 0b0010
 #define WhiteQueenSide 0b0001
@@ -20,8 +18,6 @@ typedef struct GameState {
 	PieceType capturedPiece;
 	Uint8 halfmoveClock;
 } GameState;
-
-#endif
 
 bool HasKingsideCastleRight(GameState gameState, bool white);
 bool HasQueensideCastleRight(GameState gameState, bool white);

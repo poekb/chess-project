@@ -1,5 +1,6 @@
 #include "../global.h"
 
+#pragma once
 #include "../core/board.h"
 #include "../core/move.h"
 #include "../core/piece.h"

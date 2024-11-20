@@ -1,10 +1,11 @@
+#pragma once
 #include "../global.h"
 
 void PreCompute();
 
 extern int Directions[8];
 
-extern Uint8 NumSquaresFromEdge[64][8];
+extern Uint8 NumOfSquaresFromEdge[64][8];
 
 extern Uint8 knightMoves[64][8];
 extern Uint8 knightMovesCount[64];

@@ -90,7 +90,7 @@ int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 
 		Uint8 current = king;
 		
-		for (int i = 0; i < NumSquaresFromEdge[king][d]; i++) {
+		for (int i = 0; i < NumOfSquaresFromEdge[king][d]; i++) {
 			current += Directions[d];
 			
 			pinMap |= ((Uint64)1 << current);
@@ -161,7 +161,7 @@ int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		for (int d = 4; d < 8; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 
@@ -182,7 +182,7 @@ int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		for (int d = 0; d < 4; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 
@@ -203,7 +203,7 @@ int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
 		for (int d = 0; d < 8; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 
@@ -370,7 +370,7 @@ Uint64 GenerateUnderAttackBitmap(Board* board) {
 		for (int d = 4; d < 8; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 				result |= (Uint64)1 << current;
@@ -386,7 +386,7 @@ Uint64 GenerateUnderAttackBitmap(Board* board) {
 		for (int d = 0; d < 4; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 				result |= (Uint64)1 << current;
@@ -402,7 +402,7 @@ Uint64 GenerateUnderAttackBitmap(Board* board) {
 		for (int d = 0; d < 8; d++) {
 			Uint8 current = index;
 
-			for (int j = 0; j < NumSquaresFromEdge[index][d]; j++)
+			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
 			{
 				current += Directions[d];
 				result |= (Uint64)1 << current;

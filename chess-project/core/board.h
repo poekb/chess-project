@@ -1,11 +1,9 @@
+#pragma once
 #include "../global.h"
 #include "piece.h"
 #include "pieceList.h"
 #include "move.h"
 #include "gameState.h"
-
-#ifndef BOARD
-#define BOARD
 
 extern const int WhiteIndex;
 extern const int BlackIndex;
@@ -48,5 +46,3 @@ void MakePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIn
 Uint64 ZobistOfMove(Board* board, Move move);
 
 bool IsCheckPos(Board* board);
-
-#endif

@@ -5,7 +5,7 @@
 // Directions Up, Down, Right, Left, Upper left, Lower right, Upper right, Lower left
 int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 
-Uint8 NumSquaresFromEdge[64][8];
+Uint8 NumOfSquaresFromEdge[64][8];
 
 int allKnightJumps[8] = { 15, 17, -17, -15, 10, -6, 6, -10 };
 Uint8 knightMoves[64][8];
@@ -44,14 +44,14 @@ void PreCompute() {
 			int E = 7 - x;
 			int W = x;
 			int index = y * 8 + x;
-			NumSquaresFromEdge[index][0] = N;
-			NumSquaresFromEdge[index][1] = S;
-			NumSquaresFromEdge[index][2] = E;
-			NumSquaresFromEdge[index][3] = W;
-			NumSquaresFromEdge[index][4] = Uint8Min(N, W);
-			NumSquaresFromEdge[index][5] = Uint8Min(S, E);
-			NumSquaresFromEdge[index][6] = Uint8Min(N, E);
-			NumSquaresFromEdge[index][7] = Uint8Min(S, W);
+			NumOfSquaresFromEdge[index][0] = N;
+			NumOfSquaresFromEdge[index][1] = S;
+			NumOfSquaresFromEdge[index][2] = E;
+			NumOfSquaresFromEdge[index][3] = W;
+			NumOfSquaresFromEdge[index][4] = Uint8Min(N, W);
+			NumOfSquaresFromEdge[index][5] = Uint8Min(S, E);
+			NumOfSquaresFromEdge[index][6] = Uint8Min(N, E);
+			NumOfSquaresFromEdge[index][7] = Uint8Min(S, W);
 
 			// Knight moves
 			knightMovesCount[index] = 0;
@@ -88,7 +88,7 @@ void PreCompute() {
 			for (int d = 4; d < 8; d++) {
 				int current = index;
 
-				for (int i = 0; i < NumSquaresFromEdge[index][d]; i++) {
+				for (int i = 0; i < NumOfSquaresFromEdge[index][d]; i++) {
 
 					current += Directions[d];
 
@@ -102,7 +102,7 @@ void PreCompute() {
 			for (int d = 0; d < 4; d++) {
 				int current = index;
 
-				for (int i = 0; i < NumSquaresFromEdge[index][d]; i++) {
+				for (int i = 0; i < NumOfSquaresFromEdge[index][d]; i++) {
 
 					current += Directions[d];
 

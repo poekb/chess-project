@@ -1,3 +1,4 @@
+#pragma once
 #include "../global.h"
 #include "../core/board.h"
 

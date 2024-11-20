@@ -1,3 +1,4 @@
+#pragma once
 #include "../global.h"
 #include "../core/piece.h"
 #include "../core/move.h"

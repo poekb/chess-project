@@ -1,13 +1,8 @@
-
+#pragma once
 #include "../global.h"
-
-#ifndef PIECE
-#define PIECE
 
 typedef Uint8 Piece;
 typedef Uint8 PieceType;
-
-#endif
 
 // Piece Types
 #define None 0
