@@ -28,7 +28,7 @@ void OrderMoves(Board* board, Move* movesIn, int moveCount) {
 */
 int ValueMove(Board* board, Move move) {
 
-	Uint64 zobrist = ZobistOfMove(board, move);
+	Uint64 zobrist = GetZobistOfMove(board, move);
 
 	int transposeval = GetRawTransposition(zobrist);
 	if (transposeval != TranspositionNotFound) {

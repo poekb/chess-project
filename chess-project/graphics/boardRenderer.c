@@ -12,14 +12,14 @@ void SetDrawColor(SDL_Renderer* renderer, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 
-void RendererInit(SDL_Renderer* renderer) {
+void InitRenderer(SDL_Renderer* renderer) {
 
     TextRendererInit();
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SVG_Init(renderer);
 }
 
-void RedererCleanup() {
+void CleanupRenderer() {
     TextRendererCleanup();
     SVG_Clear();
 }

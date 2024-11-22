@@ -7,7 +7,7 @@ int Directions[8] = { -8, 8, 1, -1, -9, 9, -7, 7};
 
 Uint8 NumOfSquaresFromEdge[64][8];
 
-int allKnightJumps[8] = { 15, 17, -17, -15, 10, -6, 6, -10 };
+int knightJumpPattern[8] = { 15, 17, -17, -15, 10, -6, 6, -10 };
 Uint8 knightMoves[64][8];
 Uint8 knightMovesCount[64];
 
@@ -22,9 +22,6 @@ Uint64 rookMoves[64];
 Uint64 knightAttackBitBoards[64];
 Uint64 kingAttackBitBoards[64];
 Uint64 pawnAttackBitBoards[64][2];
-
-Uint8 pawnAttacks[64][2][2];
-Uint8 pawnAttacksCount[64][2];
 
 Uint8 whitePawnAttacks[64][2];
 Uint8 whitePawnAttacksCount[64];
@@ -57,11 +54,11 @@ void PreCompute() {
 			knightMovesCount[index] = 0;
 			knightAttackBitBoards[index] = 0;
 			for (int i = 0; i < 8; i++) {
-				int target = index + allKnightJumps[i];
+				int target = index + knightJumpPattern[i];
 
-				int tx = target % 8;
+				int file = target % 8;
 				
-				if (0 <= target && target < 64 && abs(tx - x) <= 2) {
+				if (0 <= target && target < 64 && abs(file - x) <= 2 /*Test if the move wraps around the board*/) {
 					knightMoves[index][knightMovesCount[index]++] = target;
 
 					knightAttackBitBoards[index] |= (Uint64)1 << target;

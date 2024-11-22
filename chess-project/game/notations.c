@@ -278,10 +278,10 @@ int GetFENFromBoard(Board* board, char* FEN) {
 
 	Uint8 castleRights = board->currentGameState.castleRights;
 	if (castleRights > 0) {
-		if ((castleRights & WhiteKingSide) != 0) FEN[length++] = 'K';
-		if ((castleRights & WhiteQueenSide) != 0) FEN[length++] = 'Q';
-		if ((castleRights & BlackKingSide) != 0) FEN[length++] = 'k';
-		if ((castleRights & BlackQueenSide) != 0) FEN[length++] = 'q';
+		if ((castleRights & CastleWhiteKingSide) != 0) FEN[length++] = 'K';
+		if ((castleRights & CastleWhiteQueenSide) != 0) FEN[length++] = 'Q';
+		if ((castleRights & CastleBlackKingSide) != 0) FEN[length++] = 'k';
+		if ((castleRights & CastleBlackQueenSide) != 0) FEN[length++] = 'q';
 	}
 	else {
 		FEN[length++] = '-';
@@ -346,16 +346,16 @@ void LoadBoardFromFEN(Board* board, char* FENString) {
 		while (FENString[++strPointer] != ' ') {
 			switch (FENString[strPointer]) {
 			case 'k':
-				board->currentGameState.castleRights |= BlackKingSide;
+				board->currentGameState.castleRights |= CastleBlackKingSide;
 				break;
 			case 'q':
-				board->currentGameState.castleRights |= BlackQueenSide;
+				board->currentGameState.castleRights |= CastleBlackQueenSide;
 				break;
 			case 'K':
-				board->currentGameState.castleRights |= WhiteKingSide;
+				board->currentGameState.castleRights |= CastleWhiteKingSide;
 				break;
 			case 'Q':
-				board->currentGameState.castleRights |= WhiteQueenSide;
+				board->currentGameState.castleRights |= CastleWhiteQueenSide;
 				break;
 			default: break;
 			}

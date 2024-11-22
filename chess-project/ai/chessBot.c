@@ -19,7 +19,7 @@ int movesBufferOffset = 0;
 
 Move bestMove;
 
-Move bestMoveThisIter;
+Move bestMoveThisIteration;
 int bestEval;
 
 /*
@@ -51,7 +51,7 @@ int Search(int depth, int distFromRoot, int alpha, int beta) {
 		bool isRepetition = false;
 
 		if (board->currentGameState.halfmoveClock >= 3) {
-			Uint64 zobrist = ZobistOfMove(board, transposMove);
+			Uint64 zobrist = GetZobistOfMove(board, transposMove);
 			for (int i = board->gameStateHistoryCount - board->currentGameState.halfmoveClock; i < board->gameStateHistoryCount; i += 2) {
 				if (board->zobristHistory[i] == zobrist)
 					isRepetition = true; // Evaluate as draw if it is a repetition
@@ -59,7 +59,7 @@ int Search(int depth, int distFromRoot, int alpha, int beta) {
 		}
 		if (!isRepetition) {
 			if (distFromRoot == 0) {
-				bestMoveThisIter = transposMove;
+				bestMoveThisIteration = transposMove;
 			}
 			return transposEval;
 		}
@@ -111,7 +111,7 @@ int Search(int depth, int distFromRoot, int alpha, int beta) {
 			alpha = eval;
 			transEvalType = TranspositionExact;
 			if (distFromRoot == 0) {
-				bestMoveThisIter = movesBuffer[movesBufferOffset + i];
+				bestMoveThisIteration = movesBuffer[movesBufferOffset + i];
 			}
 		}
 
@@ -127,19 +127,19 @@ Move FindBestMove(Board* boardIn) {
 	board = boardIn;
 	transpositionCount = 0;
 	bestMove = 0;
-	bestMoveThisIter = 0;
+	bestMoveThisIteration = 0;
 
 	int depth = 1;
 	int eval = 0;
 	while (!botQuit && depth < 20) {
-		bestMoveThisIter = 0;
+		bestMoveThisIteration = 0;
 		eval = Search(depth, 0, -MateScore, MateScore);
 
 		if (botQuit)
 			break;
 		depth++;
 
-		bestMove = bestMoveThisIter;
+		bestMove = bestMoveThisIteration;
 		bestEval = eval;
 		if (IsMateEval(eval) && eval > 0)
 			break;

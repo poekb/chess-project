@@ -70,17 +70,17 @@ void MakeMove(Board* board, Move move) {
 			MovePiece(board, target - 2, target + 1, Rook, turn); // Queenside
 		}
 
-		board->currentGameState.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
+		board->currentGameState.castleRights &= (turn ? ClearCastleWhiteKingSide & ClearCastleWhiteQueenSide : ClearCastleBlackKingSide & ClearCastleBlackQueenSide);
 	}
 
 	if (start == 0 || target == 0)
-		board->currentGameState.castleRights &= ClearBlackQueenSide;
+		board->currentGameState.castleRights &= ClearCastleBlackQueenSide;
 	else if (start == 7 || target == 7)
-		board->currentGameState.castleRights &= ClearBlackKingSide;
+		board->currentGameState.castleRights &= ClearCastleBlackKingSide;
 	else if (start == 56 || target == 56)
-		board->currentGameState.castleRights &= ClearWhiteQueenSide;
+		board->currentGameState.castleRights &= ClearCastleWhiteQueenSide;
 	else if (start == 63 || target == 63)
-		board->currentGameState.castleRights &= ClearWhiteKingSide;
+		board->currentGameState.castleRights &= ClearCastleWhiteKingSide;
 	
 	board->zobristHash ^= zobristCastlingRights[board->currentGameState.castleRights];
 
@@ -111,7 +111,7 @@ void MakeMove(Board* board, Move move) {
 }
 
 // Only get the zobrist hash from the resulting position of a move
-Uint64 ZobistOfMove(Board* board, Move move) {
+Uint64 GetZobistOfMove(Board* board, Move move) {
 	//Get data from move
 	Uint8 start = GetStart(move);
 	Uint8 target = GetTarget(move);
@@ -167,16 +167,16 @@ Uint64 ZobistOfMove(Board* board, Move move) {
 	}
 
 	if(type == King)
-		gamestate.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide);
+		gamestate.castleRights &= (turn ? ClearCastleWhiteKingSide & ClearCastleWhiteQueenSide : ClearCastleBlackKingSide & ClearCastleBlackQueenSide);
 
 	if (start == 0 || target == 0)
-		gamestate.castleRights &= ClearBlackQueenSide;
+		gamestate.castleRights &= ClearCastleBlackQueenSide;
 	else if (start == 7 || target == 7)
-		gamestate.castleRights &= ClearBlackKingSide;
+		gamestate.castleRights &= ClearCastleBlackKingSide;
 	else if (start == 56 || target == 56)
-		gamestate.castleRights &= ClearWhiteQueenSide;
+		gamestate.castleRights &= ClearCastleWhiteQueenSide;
 	else if (start == 63 || target == 63)
-		gamestate.castleRights &= ClearWhiteKingSide;
+		gamestate.castleRights &= ClearCastleWhiteKingSide;
 
 	zobrist ^= zobristCastlingRights[gamestate.castleRights];
 
@@ -344,7 +344,7 @@ void MovePiece(Board* board, Uint8 start, Uint8 target, PieceType type, bool tur
 		break;
 	case King:
 		board->kingSquare[colorIndex] = target;
-		board->currentGameState.castleRights &= (turn ? ClearWhiteKingSide & ClearWhiteQueenSide : ClearBlackKingSide & ClearBlackQueenSide); // Disable castling
+		board->currentGameState.castleRights &= (turn ? ClearCastleWhiteKingSide & ClearCastleWhiteQueenSide : ClearCastleBlackKingSide & ClearCastleBlackQueenSide); // Disable castling
 		break;
 	default:
 		break;

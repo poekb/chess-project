@@ -10,8 +10,8 @@
 #define COLOR_HIGH 0x7070F0A0
 #define COLOR_BACKGROUND 0x1A1A20FF
 
-void RendererInit(SDL_Renderer* renderer);
-void RedererCleanup();
+void InitRenderer(SDL_Renderer* renderer);
+void CleanupRenderer();
 void RenderBoard(SDL_Renderer* renderer, int boardSizeNew, int boardOffsetX, int boardOffsetY);
 void RenderPieces(SDL_Renderer* renderer, Piece board[64]);
 void RenderStatic(SDL_Renderer* renderer);

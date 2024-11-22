@@ -43,6 +43,6 @@ void UnmakeMove(Board* board, Move move);
 
 void MakePieceAtSquare(Board* board, Uint8 square, PieceType type, Uint8 colorIndex);
 
-Uint64 ZobistOfMove(Board* board, Move move);
+Uint64 GetZobistOfMove(Board* board, Move move);
 
 bool IsCheckPos(Board* board);

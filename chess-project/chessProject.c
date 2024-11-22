@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
 
     InitSDL(1080, 720, &window, &renderer);
     SDL_SetWindowMinimumSize(window, 480, 480);
-    RendererInit(renderer);
+    InitRenderer(renderer);
 
     InitZobrist();
     PreCompute();
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     // Start the main update loop
     UpdateLoop();
     
-    RedererCleanup();
+    CleanupRenderer();
     SDL_Quit();
 
     return 0;
