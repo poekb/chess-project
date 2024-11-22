@@ -26,13 +26,20 @@ GameData* displayedGameData;
 
 void PerftTest(int depth, GameData* gameData);
 
+GameData* CreateGameData() {
+    GameData* gameData = malloc(sizeof(GameData));
+    if (!gameData) return NULL;
+    gameData->moveFuture = NULL; // Initialize to NULL.
+    return gameData;
+}
+
 /*
     The main update loop of the program
     It handles the interractions with the window
 */
 void UpdateLoop() {
 
-    GameData* gameData = malloc(sizeof(GameData));
+    GameData* gameData = CreateGameData();
     if (gameData == NULL) {
         printf("Failed memory allocation!\n");
         exit(1);
@@ -308,19 +315,25 @@ void LastMove() {
 }
 
 void FreeMoveHistory(GameData* gameData) {
-    while (gameData->moveHistory != NULL) {
-        MoveList* current = gameData->moveHistory;
-        gameData->moveHistory = gameData->moveHistory->next;
+    if (gameData == NULL) return;
+    MoveList* current = gameData->moveHistory;
+    while (current != NULL) {
+        MoveList* next = current->next;
         free(current);
+        current = next;
     }
+    gameData->moveHistory = NULL;
 }
 
 void FreeMoveFuture(GameData* gameData) {
-    while (gameData->moveFuture != NULL) {
-        MoveList* current = gameData->moveFuture;
-        gameData->moveFuture = gameData->moveFuture->next;
+    if (gameData == NULL) return;
+    MoveList* current = gameData->moveFuture;
+    while (current != NULL) {
+        MoveList* next = current->next;
         free(current);
+        current = next;
     }
+    gameData->moveFuture = NULL;
 }
 
 /*
@@ -429,11 +442,12 @@ void LoadPGN() {
 }
 
 void LoadFEN(char* fenStr, GameData* gameData) {
+    FreeMoveFuture(gameData);
+    FreeMoveHistory(gameData);
+
     memcpy(gameData->startFEN, fenStr, min(strlen(fenStr) + 1,100));
     gameData->startFEN[99] = '\0';
 
-    FreeMoveFuture(gameData);
-    FreeMoveHistory(gameData);
     gameData->prevEnabled = false;
     gameData->nextEnabled = false;
 
@@ -448,7 +462,7 @@ void LoadFEN(char* fenStr, GameData* gameData) {
     LoadBoardFromFEN(gameData->board, fenStr);
 
     // Optional perft test for validating the move generator:
-    PerftTest(5, gameData);
+    //PerftTest(5, gameData);
 }
 
 // Test the number of possible moves, for validating the move generator

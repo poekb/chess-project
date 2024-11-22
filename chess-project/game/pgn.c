@@ -74,7 +74,7 @@ char* GetPGN(Board* board, GameData* gameState) {
 }
 
 // Load game from PGN string
-void LoadGameFromPGN(Board* board, char* PGN, GameData* gameState) {
+void LoadGameFromPGN(Board* board, char* PGN, GameData* gameData) {
 	int offset = 0;
 
 	char tagLine[200] = "";
@@ -91,7 +91,7 @@ void LoadGameFromPGN(Board* board, char* PGN, GameData* gameState) {
 
 	}
 
-	LoadFEN(FENString, gameState);
+	LoadFEN(FENString, gameData);
 
 	int startOffset = offset;
 	// clean up comments:
@@ -172,7 +172,7 @@ void LoadGameFromPGN(Board* board, char* PGN, GameData* gameState) {
 				Move move = GetMoveFromNotation(board, &PGN[noteStart]);
 				
 				if (move != 0) 
-					StashMove(move, gameState);
+					StashMove(move, gameData);
 			}
 			break;
 		default:

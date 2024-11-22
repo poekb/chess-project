@@ -1,0 +1,5 @@
+C:/Users/kissb/CodeWindows/Prog1/NHF/chess-project/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/kissb/CodeWindows/Prog1/NHF/chess-project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/kissb/CodeWindows/Prog1/NHF/chess-project/cmake-build-debug/chess-project/CMakeFiles/chessProject.dir
+C:/Users/kissb/CodeWindows/Prog1/NHF/chess-project/cmake-build-debug/chess-project/CMakeFiles/edit_cache.dir
+C:/Users/kissb/CodeWindows/Prog1/NHF/chess-project/cmake-build-debug/chess-project/CMakeFiles/rebuild_cache.dir
