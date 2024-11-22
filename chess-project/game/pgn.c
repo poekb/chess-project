@@ -169,6 +169,14 @@ void LoadGameFromPGN(Board* board, char* PGN, GameData* gameData) {
 			if (PGN[offset] == ' ' || PGN[offset] == '\n' || PGN[offset] == ';') {
 				state = Start;
 				PGN[offset] = '\0';
+
+				if ((strcmp(&PGN[noteStart], "*") == 0) ||
+					(strcmp(&PGN[noteStart], "1/2-1/2") == 0) ||
+					(strcmp(&PGN[noteStart], "1-0") == 0) ||
+					(strcmp(&PGN[noteStart], "0-1") == 0)) {
+					break;
+				}
+
 				Move move = GetMoveFromNotation(board, &PGN[noteStart]);
 				
 				if (move != 0) 

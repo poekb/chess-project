@@ -1,11 +1,9 @@
 ﻿#include <SDL.h>
+#pragma once
 #include <stdlib.h>
 #include <stdbool.h>
 
 //#include "debugmalloc.h" //memory leak detections
-
-#ifndef GLOBAL
-#define GLOBAL
 
 typedef struct Pos {
 	Uint8 file;
@@ -16,4 +14,3 @@ typedef struct Pos {
 SDL_Window* window;
 SDL_Renderer* renderer;
 
-#endif
