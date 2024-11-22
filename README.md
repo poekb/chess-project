@@ -1,4 +1,4 @@
-# Documentation
+# Chess Project
 
 ## Chess Engine Structure | "core"
 
