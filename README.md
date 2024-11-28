@@ -1,6 +1,6 @@
 # Chess Project
 
->## Build process on Windows with `CMake` and `vcpkg`
+> ## Build process on Windows with `CMake` and `vcpkg`
 >
 >### First install the required libraries
 >
@@ -212,16 +212,14 @@ Game management functions are in the `gameHandler` module, which also includes t
 Games are saved in PGN format with moves recorded in algebraic notation. Initial positions can be specified using FEN
 notation.
 
-## User Documentation
+## Using the program
 
-### Using the Program
-
-The application has a graphical interface that interacts with the user via mouse input.
+The application has a graphical interface that the user can interact with via mouse input.
 
 ### Chessboard
 
-Clicking on a square highlights it, showing possible moves for pieces in blue. Completed moves are shown in green, and a
-set of buttons below the board allows move retraction and navigation to the beginning or end of the game.
+Clicking on a square highlights it, showing possible moves for pieces in blue. The previous move is shown in green.
+A set of buttons below the board allows move retraction and navigation to the beginning or end of the game.
 
 ### Chess Bot
 
@@ -229,4 +227,5 @@ Click the "Start Bot" button to enable the bot, which will think for 2 seconds p
 
 ### Game Save and Load
 
-Buttons on the right side allow game saving and loading.
+Buttons on the right side allow game saving and loading using the `FEN` and `PGN` standards.
+Trying to load in invalid data might result in crashes or unexpected behaviour.
