@@ -1,5 +1,7 @@
-﻿#include <SDL.h>
-#pragma once
+﻿#pragma once
+#include <SDL.h>
+#define min(a,b) a > b ? b : a
+#define max(a,b) a > b ? a : b
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -11,6 +13,6 @@ typedef struct Pos {
 }Pos;
 
 // These are global, because there can only ever be one window
-SDL_Window* window;
-SDL_Renderer* renderer;
+extern SDL_Window* window;
+extern SDL_Renderer* renderer;
 

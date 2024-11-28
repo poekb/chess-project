@@ -154,7 +154,7 @@ Move FindBestMove(Board* boardIn) {
 Move StartBot(Board* board) {
 	botQuit = false;
 
-	SDL_Thread* botThread = SDL_CreateThread(FindBestMove, "bot", board);
+	SDL_Thread* botThread = SDL_CreateThread((int (*)(void *))FindBestMove, "bot", board);
 
 	SDL_Delay(2000);
 	botQuit = true;
