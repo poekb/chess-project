@@ -1,8 +1,8 @@
 # Chess Project
 
-## Build process on Windows with `CMake` and `vcpkg`
-
-> ### First install the required libraries
+>## Build process on Windows with `CMake` and `vcpkg`
+>
+>### First install the required libraries
 >
 > If you don't use vcpkg, then you can skip this part, but make sure that CMake can find the required dependencies.
 >
@@ -12,21 +12,21 @@
 >vcpkg install sdl2-ttf:x64-mingw-dynamic
 >vcpkg install sdl2-gfx:x64-mingw-dynamic
 >```
-
-> ### Then use this command to make a CMake profile
+>
+>### Then use this command to make a CMake profile
 >```commandline
 >cmake -Bbuild-directory-to-be-created -DCMAKE_BUILD_TYPE=<Debug/Release> -G "Ninja" 
 >-DCMAKE_TOOLCHAIN_FILE=<your-vcpkg-directory>\scripts\buildsystems\vcpkg.cmake 
 >-DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic
 >```
 >You should see CMake creating the specified build directory.
-
-> ### Finally, you can build the app with CMake
+>
+>### Finally, you can build the app with CMake
 >```commandline
 >cmake --build build-directory-to-be-created
 >```
 >Cmake should build an executable in chess-project under your build directory.
-
+>
 > This process should be fairly similar on `Linux` and `macOS`, but I haven't tested that yet.
 
 ## Chess Engine Structure | `core`
