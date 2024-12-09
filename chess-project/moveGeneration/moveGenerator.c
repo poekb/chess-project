@@ -16,400 +16,382 @@ Board* currentBoard;
 
 // Appends a move to the possible moves
 static void AddMove(Move move) {
-	Uint8 target = GetTarget(move);
-	Uint8 start = GetStart(move);
+    Uint8 target = GetTarget(move);
+    Uint8 start = GetStart(move);
 
-	if (IsEnPassantCapture(move)) {
-		target = target % 8 + (start / 8) * 8;
-	}
-	if (onlyAttack && (currentBoard->square[target] == None)) return;
+    if (IsEnPassantCapture(move)) {
+        target = target % 8 + (start / 8) * 8;
+    }
+    if (onlyAttack && (currentBoard->square[target] == None)) return;
 
-	if((checkersBitBoard & ((Uint64)1 << target)) != 0 && ((pinnedPieces & ((Uint64)1 << start)) == 0 || (pinMaps[start] & ((Uint64)1 << target)) != 0))
-		result[count++] = move;
+    if ((checkersBitBoard & ((Uint64) 1 << target)) != 0 && (
+            (pinnedPieces & ((Uint64) 1 << start)) == 0 || (pinMaps[start] & ((Uint64) 1 << target)) != 0))
+        result[count++] = move;
 }
 
 // Returns the number of possible moves
 // and generates them at the specified address, resultIN
 int GenerateMoves(Board* boardIn, Move* resultIn, bool onlyAttackIn) {
-	onlyAttack = onlyAttackIn;
-	currentBoard = boardIn;
-	result = resultIn;
-	count = 0;
+    onlyAttack = onlyAttackIn;
+    currentBoard = boardIn;
+    result = resultIn;
+    count = 0;
 
-	if (currentBoard->currentGameState.halfmoveClock >= 6) {
-		if (currentBoard->currentGameState.halfmoveClock >= 100) {
-			return 0; // 50 move rule
-		}
-		int sum = 0;
-		for (int i = currentBoard->gameStateHistoryCount - currentBoard->currentGameState.halfmoveClock; i < currentBoard->gameStateHistoryCount; i+=2) {
+    if (currentBoard->currentGameState.halfmoveClock >= 6) {
+        if (currentBoard->currentGameState.halfmoveClock >= 100) {
+            return 0; // 50 move rule
+        }
+        int sum = 0;
+        for (int i = currentBoard->gameStateHistoryCount - currentBoard->currentGameState.halfmoveClock;
+             i < currentBoard->gameStateHistoryCount; i += 2) {
+            if (currentBoard->zobristHistory[i] == currentBoard->zobristHash)
+                sum++;
+        }
 
-			if (currentBoard->zobristHistory[i] == currentBoard->zobristHash)
-				sum++;
-		}
+        if (sum >= 2) {
+            return 0; // Draw by repetition
+        }
+    }
 
-		if (sum >= 2) {
-			return 0; // Draw by repetition
-		}
-	}
+    bool turn = currentBoard->isWhitesMove;
+    int colorIndex = turn ? WhiteIndex : BlackIndex;
+    int enemyIndex = !turn ? WhiteIndex : BlackIndex;
 
-	bool turn = currentBoard->isWhitesMove;
-	int colorIndex = turn ? WhiteIndex : BlackIndex;
-	int enemyIndex = !turn ? WhiteIndex : BlackIndex;
+    Uint64 underAttack = GenerateUnderAttackBitmap(currentBoard);
+    currentBoard->underAttackMap = underAttack;
 
-	Uint64 underAttack = GenerateUnderAttackBitmap(currentBoard);
-	currentBoard->underAttackMap = underAttack;
+    Uint8 king = currentBoard->kingSquare[colorIndex];
 
-	Uint8 king = currentBoard->kingSquare[colorIndex];
+    checkersBitBoard = UINT64_MAX;
 
-	checkersBitBoard = UINT64_MAX;
+    for (int i = 0; i < knightMovesCount[king]; i++) {
+        if (currentBoard->square[knightMoves[king][i]] == MakePieceIsWhite(Knight, !turn)) {
+            checkersBitBoard &= ((Uint64) 1 << knightMoves[king][i]);
+            break;
+        }
+    }
 
-	for (int i = 0; i < knightMovesCount[king]; i++) {
-		if (currentBoard->square[knightMoves[king][i]] == MakePieceIsWhite(Knight, !turn)) {
-			checkersBitBoard &= ((Uint64) 1 << knightMoves[king][i]);
-			break;
-		}
-	}
+    for (int i = 0; i < (turn ? whitePawnAttacksCount[king] : blackPawnAttacksCount[king]); i++) {
+        Uint8 target = turn ? whitePawnAttacks[king][i] : blackPawnAttacks[king][i];
+        if (currentBoard->square[target] == MakePieceIsWhite(Pawn, !turn)) {
+            checkersBitBoard &= ((Uint64) 1 << target);
+            break;
+        }
+    }
 
-	for (int i = 0; i < (turn ? whitePawnAttacksCount[king] : blackPawnAttacksCount[king]); i++) {
+    // Sliders
+    pinnedPieces = 0;
 
-		Uint8 target = turn ? whitePawnAttacks[king][i] : blackPawnAttacks[king][i];
-		if (currentBoard->square[target] == MakePieceIsWhite(Pawn, !turn)) {
-			checkersBitBoard &= ((Uint64)1 << target);
-			break;
-		}
-	}
+    for (int d = 0; d < 8; d++) {
+        Uint8 pinnedPiece = -1;
+        Uint64 pinMap = 0;
 
-	// Sliders
-	pinnedPieces = 0;
+        bool attacked = false;
 
-	for (int d = 0; d < 8; d++) {
-		Uint8 pinnedPiece = -1;
-		Uint64 pinMap = 0;
+        Uint8 current = king;
 
-		bool attacked = false;
+        for (int i = 0; i < NumOfSquaresFromEdge[king][d]; i++) {
+            current += Directions[d];
 
-		Uint8 current = king;
+            pinMap |= ((Uint64) 1 << current);
 
-		for (int i = 0; i < NumOfSquaresFromEdge[king][d]; i++) {
-			current += Directions[d];
+            Piece piece = currentBoard->square[current];
+            if (piece != None) {
+                if (IsWhite(piece) == turn) {
+                    if (pinnedPiece == 255)
+                        pinnedPiece = current;
+                    else {
+                        break;
+                    }
+                } else {
+                    PieceType type = GetPieceType(piece);
+                    if (type == Queen || type == ((d < 4) ? Rook : Bishop)) {
+                        if (pinnedPiece == 255) {
+                            checkersBitBoard &= pinMap;
+                        } else {
+                            pinnedPieces |= ((Uint64) 1 << pinnedPiece);
+                            pinMaps[pinnedPiece] = pinMap;
+                            attacked = true;
+                        }
+                        break;
+                    } else if (pinnedPiece == 255)
+                        pinnedPiece = current;
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+        if (checkersBitBoard == 0) {
+            break;
+        }
+    }
 
-			pinMap |= ((Uint64)1 << current);
+    // King
+    if (!onlyAttack) {
+        for (int i = 0; i < kingMovesCount[king]; i++) {
+            Uint8 index = kingMoves[king][i];
 
-			Piece piece = currentBoard->square[current];
-			if (piece != None) {
-				if (IsWhite(piece) == turn) {
-					if(pinnedPiece == 255)
-						pinnedPiece = current;
-					else {
-						break;
-					}
-				}
-				else {
-					PieceType type = GetPieceType(piece);
-					if (type == Queen || type == ((d < 4) ? Rook : Bishop)) {
-						if (pinnedPiece == 255) {
-							checkersBitBoard &= pinMap;
-						}
-						else {
-							pinnedPieces |= ((Uint64)1 << pinnedPiece);
-							pinMaps[pinnedPiece] = pinMap;
-							attacked = true;
-						}
-						break;
-					}else if (pinnedPiece == 255)
-						pinnedPiece = current;
-					else {
-						break;
-					}
-				}
-			}
-		}
-		if (checkersBitBoard == 0) {
-			break;
-		}
-	}
-
-	// King
-	if (!onlyAttack) {
-		for (int i = 0; i < kingMovesCount[king]; i++) {
-			Uint8 index = kingMoves[king][i];
-
-			if ((currentBoard->square[index] == None || IsWhite(currentBoard->square[index]) != turn) && (((Uint64)1 << index) & underAttack) == 0)
-				result[count++] = GetMove(king, index);
-		}
-	}
+            if ((currentBoard->square[index] == None || IsWhite(currentBoard->square[index]) != turn) && (
+                    ((Uint64) 1 << index) & underAttack) == 0)
+                result[count++] = GetMove(king, index);
+        }
+    }
 
 
-	if (checkersBitBoard == 0) return count; // there is no moves left
+    if (checkersBitBoard == 0) return count; // there is no moves left
 
-	// Knights
-	PieceList* Knights = &(currentBoard->Knights[colorIndex]);
-	for (int i = 0; i < Knights->count; i++) {
-		Uint8 index = Knights->list[i];
+    // Knights
+    PieceList* Knights = &(currentBoard->Knights[colorIndex]);
+    for (int i = 0; i < Knights->count; i++) {
+        Uint8 index = Knights->list[i];
 
-		for (int j = 0; j < knightMovesCount[index]; j++) {
-			Uint8 target = knightMoves[index][j];
-			if (currentBoard->square[target] == None || IsWhite(currentBoard->square[target]) != turn)
-				AddMove(GetMove(index, target));
-		}
-	}
+        for (int j = 0; j < knightMovesCount[index]; j++) {
+            Uint8 target = knightMoves[index][j];
+            if (currentBoard->square[target] == None || IsWhite(currentBoard->square[target]) != turn)
+                AddMove(GetMove(index, target));
+        }
+    }
 
-	// Bishops
-	PieceList* Bishops = &(currentBoard->Bishops[colorIndex]);
-	for (int i = 0; i < Bishops->count; i++) {
-		Uint8 index = Bishops->list[i];
-		for (int d = 4; d < 8; d++) {
-			Uint8 current = index;
+    // Bishops
+    PieceList* Bishops = &(currentBoard->Bishops[colorIndex]);
+    for (int i = 0; i < Bishops->count; i++) {
+        Uint8 index = Bishops->list[i];
+        for (int d = 4; d < 8; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
 
-				if (currentBoard->square[current] != None) {
-					if (IsWhite(currentBoard->square[current]) != turn)
-						AddMove(GetMove(index, current));
-					break;
-				}
-				AddMove(GetMove(index, current));
-			}
-		}
-	}
+                if (currentBoard->square[current] != None) {
+                    if (IsWhite(currentBoard->square[current]) != turn)
+                        AddMove(GetMove(index, current));
+                    break;
+                }
+                AddMove(GetMove(index, current));
+            }
+        }
+    }
 
-	// Rooks
-	PieceList* Rooks = &(currentBoard->Rooks[colorIndex]);
-	for (int i = 0; i < Rooks->count; i++) {
-		Uint8 index = Rooks->list[i];
-		for (int d = 0; d < 4; d++) {
-			Uint8 current = index;
+    // Rooks
+    PieceList* Rooks = &(currentBoard->Rooks[colorIndex]);
+    for (int i = 0; i < Rooks->count; i++) {
+        Uint8 index = Rooks->list[i];
+        for (int d = 0; d < 4; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
 
-				if (currentBoard->square[current] != None) {
-					if (IsWhite(currentBoard->square[current]) != turn)
-						AddMove(GetMove(index, current));
-					break;
-				}
-				AddMove(GetMove(index, current));
-			}
-		}
-	}
+                if (currentBoard->square[current] != None) {
+                    if (IsWhite(currentBoard->square[current]) != turn)
+                        AddMove(GetMove(index, current));
+                    break;
+                }
+                AddMove(GetMove(index, current));
+            }
+        }
+    }
 
-	// Queens
-	PieceList* Queens = &(currentBoard->Queens[colorIndex]);
-	for (int i = 0; i < Queens->count; i++) {
-		Uint8 index = Queens->list[i];
-		for (int d = 0; d < 8; d++) {
-			Uint8 current = index;
+    // Queens
+    PieceList* Queens = &(currentBoard->Queens[colorIndex]);
+    for (int i = 0; i < Queens->count; i++) {
+        Uint8 index = Queens->list[i];
+        for (int d = 0; d < 8; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
 
-				if (currentBoard->square[current] != None) {
-					if (IsWhite(currentBoard->square[current]) != turn)
-						AddMove(GetMove(index, current));
-					break;
-				}
-				AddMove(GetMove(index, current));
-			}
-		}
-	}
+                if (currentBoard->square[current] != None) {
+                    if (IsWhite(currentBoard->square[current]) != turn)
+                        AddMove(GetMove(index, current));
+                    break;
+                }
+                AddMove(GetMove(index, current));
+            }
+        }
+    }
 
-	if ((underAttack & ((Uint64)1 << king)) == 0 && !onlyAttack) {
+    if ((underAttack & ((Uint64) 1 << king)) == 0 && !onlyAttack) {
+        // Castling
+        bool kingSide = HasKingsideCastleRight(currentBoard->currentGameState, turn);
+        bool queenSide = HasQueensideCastleRight(currentBoard->currentGameState, turn);
+        if (kingSide) {
+            bool valid = true;
+            for (int j = 1; j <= 2; j++) {
+                if (currentBoard->square[king + j] != None || (((Uint64) 1 << (king + j)) & underAttack) != 0) {
+                    valid = false;
+                    break;
+                }
+            }
 
-		// Castling
-		bool kingSide = HasKingsideCastleRight(currentBoard->currentGameState, turn);
-		bool queenSide = HasQueensideCastleRight(currentBoard->currentGameState, turn);
-		if (kingSide) {
-			bool valid = true;
-			for (int j = 1; j <= 2; j++) {
-				if (currentBoard->square[king + j] != None || (((Uint64)1 << (king + j)) & underAttack) != 0)
-				{
-					valid = false;
-					break;
-				}
-			}
+            if (valid)
+                AddMove(GetMove(king, king + 2) | (CastleFlag << 12));
+        }
 
-			if (valid)
-				AddMove(GetMove(king, king + 2) | (CastleFlag << 12));
-		}
+        if (queenSide) {
+            bool valid = true;
+            for (int j = 1; j <= 3; j++) {
+                if (currentBoard->square[king - j] != None || (
+                        (((Uint64) 1 << (king - j)) & underAttack) != 0 && j != 3)) {
+                    valid = false;
+                    break;
+                }
+            }
 
-		if (queenSide) {
-			bool valid = true;
-			for (int j = 1; j <= 3; j++) {
-				if (currentBoard->square[king - j] != None || ((((Uint64)1 << (king - j)) & underAttack) != 0 && j != 3))
-				{
-					valid = false;
-					break;
-				}
-			}
+            if (valid)
+                AddMove(GetMove(king, king - 2) | (CastleFlag << 12));
+        }
+    }
+    // Pawns
+    PieceList* Pawns = &(currentBoard->Pawns[colorIndex]);
+    for (int i = 0; i < Pawns->count; i++) {
+        Uint8 index = Pawns->list[i];
+        Uint8 rank = index / 8;
+        bool IsPromotion = (rank == (turn ? 1 : 6));
+        if (currentBoard->square[index + (turn ? -8 : 8)] == None) {
+            Move move = GetMove(index, index + (turn ? -8 : 8));
+            if (IsPromotion) {
+                AddMove(move | (PromoteToQueenFlag << 12));
+                AddMove(move | (PromoteToBishopFlag << 12));
+                AddMove(move | (PromoteToRookFlag << 12));
+                AddMove(move | (PromoteToKnightFlag << 12));
+            } else {
+                AddMove(move);
+            }
+            if ((rank == (turn ? 6 : 1)) && (currentBoard->square[index + (turn ? -16 : 16)] == None)) {
+                AddMove((GetMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
+            }
+        }
 
-			if (valid)
-				AddMove(GetMove(king, king - 2) | (CastleFlag << 12));
-		}
+        bool enPassant = (currentBoard->currentGameState.enpassantFile != (Uint8) -1) && rank == (turn ? 3 : 4);
 
-	}
-	// Pawns
-	PieceList* Pawns = &(currentBoard->Pawns[colorIndex]);
-	for (int i = 0; i < Pawns->count; i++) {
-		Uint8 index = Pawns->list[i];
-		Uint8 rank = index / 8;
-		bool IsPromotion = (rank == (turn ? 1 : 6));
-		if (currentBoard->square[index + (turn ? -8 : 8)] == None) {
-			Move move = GetMove(index, index + (turn ? -8 : 8));
-			if (IsPromotion) {
-				AddMove(move | (PromoteToQueenFlag << 12));
-				AddMove(move | (PromoteToBishopFlag << 12));
-				AddMove(move | (PromoteToRookFlag << 12));
-				AddMove(move | (PromoteToKnightFlag << 12));
-			}
-			else {
-				AddMove(move);
-			}
-			if ((rank == (turn ? 6 : 1)) && (currentBoard->square[index + (turn ? -16 : 16)] == None))
-			{
-				AddMove((GetMove(index, index + (turn ? -16 : 16)) | (PawnTwoUpFlag << 12)));
-			}
+        for (int i = 0; i < (turn ? whitePawnAttacksCount[index] : blackPawnAttacksCount[index]); i++) {
+            Uint8 target = (turn ? whitePawnAttacks[index][i] : blackPawnAttacks[index][i]);
 
-		}
+            if (enPassant && (currentBoard->currentGameState.enpassantFile == (target % 8))) {
 
-		bool enPassant = (currentBoard->currentGameState.enpassantFile != (Uint8)-1) && rank == (turn ? 3 : 4);
+                if (king / 8 == rank) {
+                    Uint8 left = min(target % 8, index % 8);
 
-		for (int i = 0; i < (turn ? whitePawnAttacksCount[index] : blackPawnAttacksCount[index]); i++) {
-			Uint8 target = (turn ? whitePawnAttacks[index][i] : blackPawnAttacks[index][i]);
+                    bool isKing = false;
+                    bool isHorizontal = false;
+                    for (int x = left - 1; x >= 0; x--) {
+                        Uint8 current = rank * 8 + x;
+                        if (king == current) {
+                            isKing = true;
+                            break;
+                        }
+                        Piece piece = currentBoard->square[current];
+                        PieceType type = GetPieceType(piece);
+                        if (piece != None) {
+                            if (IsWhite(piece) != turn && (type == Rook || type == Queen))
+                                isHorizontal = true;
+                            break;
+                        }
+                    }
+                    for (int x = left + 2; x < 8; x++) {
+                        Uint8 current = rank * 8 + x;
+                        if (king == current) {
+                            isKing = true;
+                            break;
+                        }
+                        Piece piece = currentBoard->square[current];
+                        PieceType type = GetPieceType(piece);
+                        if (piece != None) {
+                            if (IsWhite(piece) != turn && (type == Rook || type == Queen))
+                                isHorizontal = true;
+                            break;
+                        }
+                    }
+                    if (!(isKing && isHorizontal))
+                        AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
+                } else AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
+            } else if (currentBoard->square[target] != None && IsWhite(currentBoard->square[target]) != turn) {
+                Move move = GetMove(index, target);
+                if (IsPromotion) {
+                    AddMove(move | (PromoteToQueenFlag << 12));
+                    AddMove(move | (PromoteToBishopFlag << 12));
+                    AddMove(move | (PromoteToRookFlag << 12));
+                    AddMove(move | (PromoteToKnightFlag << 12));
+                } else {
+                    AddMove(move);
+                }
+            }
+        }
+    }
 
-			if (enPassant && (currentBoard->currentGameState.enpassantFile == (target % 8))) {
-				// TODO: test for checks
-
-				if (king / 8 == rank) {
-					Uint8 left = min(target % 8, index % 8);
-
-					bool isKing = false;
-					bool isHorizontal = false;
-					for (int x = left - 1; x >= 0; x--) {
-						Uint8 current = rank * 8 + x;
-						if (king == current) {
-							isKing = true;
-							break;
-						}
-						Piece piece = currentBoard->square[current];
-						PieceType type = GetPieceType(piece);
-						if (piece != None) {
-							if (IsWhite(piece) != turn && (type == Rook || type == Queen))
-								isHorizontal = true;
-							break;
-						}
-					}
-					for (int x = left + 2; x < 8; x++) {
-						Uint8 current = rank * 8 + x;
-						if (king == current) {
-							isKing = true;
-							break;
-						}
-						Piece piece = currentBoard->square[current];
-						PieceType type = GetPieceType(piece);
-						if (piece != None) {
-							if (IsWhite(piece) != turn && (type == Rook || type == Queen))
-								isHorizontal = true;
-							break;
-						}
-					}
-					if(!(isKing && isHorizontal))
-						AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
-
-				}else AddMove(GetMove(index, target) | EnPassantCaptureFlag << 12);
-			}
-			else if (currentBoard->square[target] != None && IsWhite(currentBoard->square[target]) != turn) {
-
-				Move move = GetMove(index, target);
-				if (IsPromotion) {
-					AddMove(move | (PromoteToQueenFlag << 12));
-					AddMove(move | (PromoteToBishopFlag << 12));
-					AddMove(move | (PromoteToRookFlag << 12));
-					AddMove(move | (PromoteToKnightFlag << 12));
-				}
-				else {
-					AddMove(move);
-				}
-			}
-		}
-	}
-
-	return count;
+    return count;
 }
 
 // Generate what squares the enemy pieces can see, represented by a 64 bit bitmap
 Uint64 GenerateUnderAttackBitmap(Board* board) {
-	Uint64 result = 0;
+    Uint64 result = 0;
 
-	bool turn = board->isWhitesMove;
-	int colorIndex = !turn ? WhiteIndex : BlackIndex;
+    bool turn = board->isWhitesMove;
+    int colorIndex = !turn ? WhiteIndex : BlackIndex;
 
-	// Pawns
-	PieceList* Pawns = &(board->Pawns[colorIndex]);
-	for (int i = 0; i < Pawns->count; i++) {
-		result |= pawnAttackBitBoards[Pawns->list[i]][colorIndex];
-	}
+    // Pawns
+    PieceList* Pawns = &(board->Pawns[colorIndex]);
+    for (int i = 0; i < Pawns->count; i++) {
+        result |= pawnAttackBitBoards[Pawns->list[i]][colorIndex];
+    }
 
-	// Knights
-	PieceList* Knights = &(board->Knights[colorIndex]);
-	for (int i = 0; i < Knights->count; i++) {
-		result |= knightAttackBitBoards[Knights->list[i]];
-	}
+    // Knights
+    PieceList* Knights = &(board->Knights[colorIndex]);
+    for (int i = 0; i < Knights->count; i++) {
+        result |= knightAttackBitBoards[Knights->list[i]];
+    }
 
-	// King
-	Uint8 king = board->kingSquare[colorIndex];
-	result |= kingAttackBitBoards[king];
+    // King
+    Uint8 king = board->kingSquare[colorIndex];
+    result |= kingAttackBitBoards[king];
 
-	// Bishops
-	PieceList* Bishops = &(board->Bishops[colorIndex]);
-	for (int i = 0; i < Bishops->count; i++) {
-		Uint8 index = Bishops->list[i];
-		for (int d = 4; d < 8; d++) {
-			Uint8 current = index;
+    // Bishops
+    PieceList* Bishops = &(board->Bishops[colorIndex]);
+    for (int i = 0; i < Bishops->count; i++) {
+        Uint8 index = Bishops->list[i];
+        for (int d = 4; d < 8; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-				result |= (Uint64)1 << current;
-				if (board->square[current] != None && current != board->kingSquare[1-colorIndex]) break;
-			}
-		}
-	}
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
+                result |= (Uint64) 1 << current;
+                if (board->square[current] != None && current != board->kingSquare[1 - colorIndex]) break;
+            }
+        }
+    }
 
-	// Rooks
-	PieceList* Rooks = &(board->Rooks[colorIndex]);
-	for (int i = 0; i < Rooks->count; i++) {
-		Uint8 index = Rooks->list[i];
-		for (int d = 0; d < 4; d++) {
-			Uint8 current = index;
+    // Rooks
+    PieceList* Rooks = &(board->Rooks[colorIndex]);
+    for (int i = 0; i < Rooks->count; i++) {
+        Uint8 index = Rooks->list[i];
+        for (int d = 0; d < 4; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-				result |= (Uint64)1 << current;
-				if (board->square[current] != None && current != board->kingSquare[1 - colorIndex]) break;
-			}
-		}
-	}
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
+                result |= (Uint64) 1 << current;
+                if (board->square[current] != None && current != board->kingSquare[1 - colorIndex]) break;
+            }
+        }
+    }
 
-	// Queens
-	PieceList* Queens = &(board->Queens[colorIndex]);
-	for (int i = 0; i < Queens->count; i++) {
-		Uint8 index = Queens->list[i];
-		for (int d = 0; d < 8; d++) {
-			Uint8 current = index;
+    // Queens
+    PieceList* Queens = &(board->Queens[colorIndex]);
+    for (int i = 0; i < Queens->count; i++) {
+        Uint8 index = Queens->list[i];
+        for (int d = 0; d < 8; d++) {
+            Uint8 current = index;
 
-			for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++)
-			{
-				current += Directions[d];
-				result |= (Uint64)1 << current;
-				if (board->square[current] != None && current != board->kingSquare[1 - colorIndex]) break;
-			}
-		}
-	}
+            for (int j = 0; j < NumOfSquaresFromEdge[index][d]; j++) {
+                current += Directions[d];
+                result |= (Uint64) 1 << current;
+                if (board->square[current] != None && current != board->kingSquare[1 - colorIndex]) break;
+            }
+        }
+    }
 
-	return result;
+    return result;
 }

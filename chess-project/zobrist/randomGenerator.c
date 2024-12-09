@@ -18,45 +18,42 @@
 #define c 0xFFF7EEE000000000UL
 #define f 6364136223846793005UL
 
-void InitializeState(MtState* state, Uint64 seed)
-{
+void InitializeState(MtState* state, Uint64 seed) {
     Uint64* state_array = &(state->state_array[0]);
 
-    state_array[0] = seed;                            // suggested initial seed = 19650218UL
+    state_array[0] = seed; // suggested initial seed = 19650218UL
 
-    for (int i = 1; i < transpositionCount; i++)
-    {
-        seed = f * (seed ^ (seed >> (w - 2))) + i;    // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
+    for (int i = 1; i < transpositionCount; i++) {
+        seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
         state_array[i] = seed;
     }
 
     state->state_index = 0;
 }
 
-Uint64 RandomUint64(MtState* state)
-{
+Uint64 RandomUint64(MtState* state) {
     Uint64* state_array = &(state->state_array[0]);
 
-    int k = state->state_index;                       // point to current state location
+    int k = state->state_index; // point to current state location
 
-    int j = k - (transpositionCount - 1);             // point to state transpositionCount-1 iterations before
-    if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
+    int j = k - (transpositionCount - 1); // point to state transpositionCount-1 iterations before
+    if (j < 0) j += transpositionCount; // modulo transpositionCount circular indexing
 
     Uint64 x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
 
     Uint64 xA = x >> 1;
     if (x & 0x0000000000000001UL) xA ^= a;
 
-    j = k - (transpositionCount - m);                 // point to state transpositionCount-m iterations before
-    if (j < 0) j += transpositionCount;               // modulo transpositionCount circular indexing
+    j = k - (transpositionCount - m); // point to state transpositionCount-m iterations before
+    if (j < 0) j += transpositionCount; // modulo transpositionCount circular indexing
 
-    x = state_array[j] ^ xA;                          // compute next value in the state
-    state_array[k++] = x;                             // update new state value
+    x = state_array[j] ^ xA; // compute next value in the state
+    state_array[k++] = x; // update new state value
 
-    if (k >= transpositionCount) k = 0;               // modulo transpositionCount circular indexing
+    if (k >= transpositionCount) k = 0; // modulo transpositionCount circular indexing
     state->state_index = k;
 
-    Uint64 y = x ^ (x >> u);                          // tempering 
+    Uint64 y = x ^ (x >> u); // tempering
     y = y ^ ((y << s) & b);
     y = y ^ ((y << t) & c);
     Uint64 z = y ^ (y >> l);

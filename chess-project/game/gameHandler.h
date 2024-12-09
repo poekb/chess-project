@@ -9,7 +9,7 @@
 typedef struct MoveList {
     Move move;
     struct MoveList* next;
-}MoveList;
+} MoveList;
 
 typedef struct GameData {
     Uint8 selectedPos;
@@ -40,20 +40,29 @@ void UpdateLoop();
 void ToggleBot();
 
 void StashMove(Move move, GameData* gameState);
+
 void LoadFEN(char* fenStr, GameData* gameState);
 
 void UpdateHasGameEnded(GameData* gameState);
 
 void NextMove();
+
 void PrevMove();
+
 void FirstMove();
+
 void LastMove();
 
 void PasteFEN();
+
 void PastePGN();
+
 void CopyFEN();
+
 void CopyPGN();
+
 void SavePGN();
+
 void LoadPGN();
 
 void ResetBoard();
@@ -65,5 +74,3 @@ extern bool* prevEnabled;
 extern bool* gameLoadEnabled;
 extern Sint32 mouseX;
 extern Sint32 mouseY;
-
-

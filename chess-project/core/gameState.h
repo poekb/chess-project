@@ -13,11 +13,12 @@
 #define ClearCastleBlackQueenSide 0b1011
 
 typedef struct GameState {
-	Uint8 enpassantFile;
-	Uint8 castleRights;
-	PieceType capturedPiece;
-	Uint8 halfmoveClock;
+    Uint8 enpassantFile;
+    Uint8 castleRights;
+    PieceType capturedPiece;
+    Uint8 halfmoveClock;
 } GameState;
 
 bool HasKingsideCastleRight(GameState gameState, bool white);
+
 bool HasQueensideCastleRight(GameState gameState, bool white);

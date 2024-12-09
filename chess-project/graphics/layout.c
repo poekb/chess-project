@@ -165,10 +165,10 @@ ButtonData toggleBotButton = {
 // The array of button settings
 #define ButtonCount 12
 ButtonData* buttons[ButtonCount] = {
-    &nextMoveButton, &prevMoveButton,&firstMoveButton, &lastMoveButton, 
-    &pasteFENButton, &pastePGNButton, 
-    &copyFENButton, &copyPGNButton, 
-    &resetButton, 
+    &nextMoveButton, &prevMoveButton, &firstMoveButton, &lastMoveButton,
+    &pasteFENButton, &pastePGNButton,
+    &copyFENButton, &copyPGNButton,
+    &resetButton,
     &saveButton, &loadButton,
     &toggleBotButton
 };
@@ -180,10 +180,10 @@ void RecalcUIData() {
 
     SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
-    int gapTop = (int)(windowHeight * GAP_TOP);
-    int gapLeft = (int)(windowWidth * GAP_LEFT);
+    int gapTop = (int) (windowHeight * GAP_TOP);
+    int gapLeft = (int) (windowWidth * GAP_LEFT);
 
-    int gapRight = (int)(windowWidth * GAP_RIGHT);
+    int gapRight = (int) (windowWidth * GAP_RIGHT);
 
     int boardSize = min(
         windowHeight - 2 * gapTop,
@@ -218,7 +218,6 @@ void RecalcUIData() {
     firstMoveRect = defaultMoveButtonRect;
     firstMoveRect.x += moveButtonOffsetValue * 3;
 
-    
 
     toggleBotButtonRect = (SDL_Rect){
         gapLeft + boardSize - moveButtonSize + moveButtonOffsetValue * 3,
@@ -241,10 +240,10 @@ void RecalcUIData() {
     pastePGNRect.y += menuButtonOffsetValue;
 
     copyFENRect = defaultMenuButtonRect;
-    copyFENRect.y += (int)(menuButtonOffsetValue * 2.5);
+    copyFENRect.y += (int) (menuButtonOffsetValue * 2.5);
 
     copyPGNRect = defaultMenuButtonRect;
-    copyPGNRect.y += (int)(menuButtonOffsetValue * 3.5);
+    copyPGNRect.y += (int) (menuButtonOffsetValue * 3.5);
 
     savePGNRect = defaultMenuButtonRect;
     savePGNRect.y += menuButtonOffsetValue * 5;
@@ -262,26 +261,19 @@ void RecalcUIData() {
         gapRight - moveButtonSize,
         gapRight / 6,
     };
-
 }
 
 // Display who won or draw
 void RenderWinner(Board* board) {
-
     if (board->hasGameEnded) {
         if (board->winnerWhite) {
             RenderTextbox(renderer, "White Wins", winnerRect, HexToRGBA(COLOR_WHITE), HexToRGBA(COLOR_BACKGROUND));
-
-        }
-        else if (board->winnerBlack) {
+        } else if (board->winnerBlack) {
             RenderTextbox(renderer, "Black Wins", winnerRect, HexToRGBA(COLOR_BLACK), HexToRGBA(COLOR_BACKGROUND));
-
-        }
-        else {
+        } else {
             RenderTextbox(renderer, "Draw", winnerRect, HexToRGBA(0x101020FF), HexToRGBA(0xF0DADAFF));
         }
-    }
-    else {
+    } else {
         RenderTextbox(renderer, " ", winnerRect, HexToRGBA(COLOR_BACKGROUND), HexToRGBA(COLOR_BACKGROUND));
     }
 }
@@ -295,13 +287,13 @@ void RenderButtons() {
 }
 
 void RenderButton(ButtonData* button) {
-    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
+    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y &&
+                 mouseY < button->rect->y + button->rect->h;
 
     SDL_Color color = HexToRGBA(button->defaultColor);
     if (!((button->enabled == NULL) || **button->enabled)) {
         color = HexToRGBA(button->disabledColor);
-    }
-    else if (hower) {
+    } else if (hower) {
         color = HexToRGBA(button->howerColor);
     }
 
@@ -317,11 +309,12 @@ void TestButonClicks() {
 }
 
 void TestButton(ButtonData* button) {
-    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y && mouseY < button->rect->y + button->rect->h;
+    bool hower = mouseX > button->rect->x && mouseX < button->rect->x + button->rect->w && mouseY > button->rect->y &&
+                 mouseY < button->rect->y + button->rect->h;
     if (hower && ((button->enabled == NULL) || (**button->enabled)))
         (*button->callBack)();
 }
 
 SDL_Color HexToRGBA(Uint32 hex) {
-    return (SDL_Color) { hex >> 24, hex >> 16 & 0xFF, hex >> 8 & 0xFF, hex & 0xFF };
+    return (SDL_Color){hex >> 24, hex >> 16 & 0xFF, hex >> 8 & 0xFF, hex & 0xFF};
 }

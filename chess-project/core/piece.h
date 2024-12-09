@@ -18,9 +18,9 @@ typedef Uint8 PieceType;
 #define Black 8
 
 // White Pieces
-#define WhitePawn 1      
-#define WhiteKnight 2    
-#define WhiteBishop 3   
+#define WhitePawn 1
+#define WhiteKnight 2
+#define WhiteBishop 3
 #define WhiteRook 4
 #define WhiteQueen 5
 #define WhiteKing 6
@@ -34,8 +34,11 @@ typedef Uint8 PieceType;
 #define BlackKing 14
 
 Piece MakePiece(PieceType type, Uint8 color);
+
 Piece MakePieceIsWhite(PieceType type, bool IsWhite);
+
 Piece PieceFromChar(char c);
+
 char CharFromPiece(Piece piece);
 
 bool IsColour(Piece piece, Uint8 color);
@@ -43,5 +46,3 @@ bool IsColour(Piece piece, Uint8 color);
 bool IsWhite(Piece piece);
 
 PieceType GetPieceType(Piece piece);
-
-

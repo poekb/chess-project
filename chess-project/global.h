@@ -8,11 +8,10 @@
 //#include "debugmalloc.h" //memory leak detections
 
 typedef struct Pos {
-	Uint8 file;
-	Uint8 rank;
-}Pos;
+    Uint8 file;
+    Uint8 rank;
+} Pos;
 
 // These are global, because there can only ever be one window
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
-

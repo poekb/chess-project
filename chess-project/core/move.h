@@ -14,6 +14,7 @@ typedef Uint16 Move;
 #define PromoteToBishopFlag 0b0111
 
 Uint8 GetTarget(Move move);
+
 Uint8 GetStart(Move move);
 
 Move GetMove(Uint8 startSquare, Uint8 targetSquare);

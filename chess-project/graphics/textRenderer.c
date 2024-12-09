@@ -18,7 +18,7 @@ void RenderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color 
     SetDrawColor(renderer, bgColor);
     SDL_RenderFillRect(renderer, &rect);
 
-    TTF_SetFontSize(Font, rect.h/3*2);
+    TTF_SetFontSize(Font, rect.h / 3 * 2);
 
     SDL_Surface* text_surface = TTF_RenderText_Blended(Font, text, textColor);
     SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -36,7 +36,6 @@ void RenderTextbox(SDL_Renderer* renderer, char* text, SDL_Rect rect, SDL_Color 
 }
 
 void RenderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos_y, SDL_Color color) {
-
     TTF_SetFontSize(Font, size);
 
     SDL_Surface* text_surface = TTF_RenderText_Blended(Font, text, color);
@@ -57,7 +56,7 @@ void RenderText(SDL_Renderer* renderer, char* text, int size, int pos_x, int pos
 }
 
 void RenderChar(SDL_Renderer* renderer, char c, int size, int pos_x, int pos_y, SDL_Color color) {
-    char text[2] = { c,'\0' };
+    char text[2] = {c, '\0'};
 
     RenderText(renderer, text, size, pos_x, pos_y, color);
 }

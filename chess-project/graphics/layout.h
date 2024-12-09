@@ -5,7 +5,9 @@
 typedef struct ButtonData {
     char text[50];
     bool** enabled;
-    void(*callBack)();
+
+    void (*callBack)();
+
     int textColor;
     int defaultColor;
     int disabledColor;
@@ -16,10 +18,15 @@ typedef struct ButtonData {
 extern ButtonData toggleBotButton;
 
 void RenderButtons();
+
 void RenderButton(ButtonData* button);
+
 void RecalcUIData();
+
 void TestButonClicks();
+
 void TestButton(ButtonData* button);
+
 void RenderWinner(Board* board);
 
 SDL_Color HexToRGBA(Uint32 hex);

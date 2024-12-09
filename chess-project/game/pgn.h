@@ -8,4 +8,5 @@
 
 
 char* GetPGN(Board* board, GameData* gameState);
+
 void LoadGameFromPGN(Board* board, char* PGN, GameData* gameState);
